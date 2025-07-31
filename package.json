@@ -1,0 +1,88 @@
+{
+  "name": "strata-storage",
+  "version": "1.0.0",
+  "description": "Zero-dependency universal storage plugin providing a unified API for all storage operations across web, Android, and iOS platforms",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/",
+    "ios/",
+    "android/",
+    "scripts/"
+  ],
+  "scripts": {
+    "build": "yarn clean && yarn build:web && yarn build:types",
+    "build:web": "node scripts/build.js",
+    "build:types": "tsc --emitDeclarationOnly",
+    "clean": "rm -rf dist/",
+    "lint": "eslint 'src/**/*.{ts,tsx}' --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "prepublishOnly": "yarn build && yarn lint && yarn typecheck",
+    "postinstall": "node scripts/postinstall.js || true"
+  },
+  "keywords": [
+    "storage",
+    "capacitor",
+    "ionic",
+    "react",
+    "vue",
+    "angular",
+    "localStorage",
+    "indexedDB",
+    "sqlite",
+    "keychain",
+    "preferences",
+    "zero-dependencies",
+    "cross-platform",
+    "web",
+    "ios",
+    "android"
+  ],
+  "author": "Ahsan Mahmood",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aoneahsan/strata-storage.git"
+  },
+  "bugs": {
+    "url": "https://github.com/aoneahsan/strata-storage/issues"
+  },
+  "homepage": "https://github.com/aoneahsan/strata-storage#readme",
+  "dependencies": {},
+  "devDependencies": {
+    "@eslint/js": "^9.32.0",
+    "@types/node": "^24.1.0",
+    "@typescript-eslint/eslint-plugin": "^8.38.0",
+    "@typescript-eslint/parser": "^8.38.0",
+    "@vitest/coverage-v8": "^3.2.4",
+    "eslint": "^9.32.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.3",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.38.0",
+    "vitest": "^3.2.4"
+  },
+  "peerDependencies": {
+    "@capacitor/core": "^5.0.0 || ^6.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@capacitor/core": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "capacitor": {
+    "ios": {
+      "src": "ios"
+    },
+    "android": {
+      "src": "android"
+    }
+  }
+}

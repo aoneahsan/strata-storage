@@ -1,0 +1,134 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Build outputs
+dist/
+build/
+out/
+.cache/
+*.tsbuildinfo
+
+# Testing
+coverage/
+.nyc_output/
+test-results/
+junit.xml
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+logs/
+*.log
+lerna-debug.log*
+
+# Editor directories and files
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+*.bak
+*.backup
+*.old
+
+# Private/Secret files
+*.ignore.*
+secrets/
+private/
+.secrets/
+*.key
+*.pem
+*.cert
+*.crt
+
+# Platform specific
+# iOS
+ios/Pods/
+ios/build/
+ios/DerivedData/
+ios/.gradle/
+ios/.idea/
+ios/*.xcworkspace/
+ios/*.xcuserdata/
+ios/*.xcscheme
+ios/*.moved-aside
+ios/*.pbxuser
+ios/*.perspectivev3
+ios/*.xccheckout
+ios/*.hmap
+ios/*.ipa
+ios/*.dSYM.zip
+ios/*.dSYM
+
+# Android
+android/.gradle/
+android/build/
+android/local.properties
+android/.idea/
+android/*.iml
+android/captures/
+android/.externalNativeBuild/
+android/.cxx/
+android/app/build/
+android/app/release/
+
+# Capacitor
+.sourcemaps/
+
+# Documentation build
+docs/.docusaurus/
+docs/build/
+docs/node_modules/
+
+# Misc
+.sass-cache/
+.parcel-cache/
+.next/
+.nuxt/
+.vuepress/dist/
+.serverless/
+.fusebox/
+.dynamodb/
+.tern-port
+.yarn-integrity
+.eslintcache
