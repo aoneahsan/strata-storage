@@ -111,10 +111,10 @@ export class CompressionManager {
     let currentChar: string;
     let phrase = uncompressed.charAt(0);
     let code = 256;
-    
+
     for (let i = 1; i < uncompressed.length; i++) {
       currentChar = uncompressed.charAt(i);
-      
+
       if (context.has(phrase + currentChar)) {
         phrase += currentChar;
       } else {
@@ -123,19 +123,19 @@ export class CompressionManager {
         } else {
           out.push(phrase);
         }
-        
+
         context.set(phrase + currentChar, code);
         code++;
         phrase = currentChar;
       }
     }
-    
+
     if (phrase.length > 1) {
       out.push(String.fromCharCode(context.get(phrase)!));
     } else {
       out.push(phrase);
     }
-    
+
     return this.encodeToBase64(out.join(''));
   }
 
@@ -145,31 +145,31 @@ export class CompressionManager {
   private lzDecompress(compressed: string): string {
     if (compressed == null) return '';
     if (compressed === '') return '';
-    
+
     const decoded = this.decodeFromBase64(compressed);
     const dictionary: Map<number, string> = new Map();
     let currentChar = decoded.charAt(0);
     let oldPhrase = currentChar;
-    let out = [currentChar];
+    const out = [currentChar];
     let code = 256;
     let phrase: string;
-    
+
     for (let i = 1; i < decoded.length; i++) {
       const currentCode = decoded.charCodeAt(i);
-      
+
       if (currentCode < 256) {
         phrase = decoded.charAt(i);
       } else {
-        phrase = dictionary.get(currentCode) || (oldPhrase + currentChar);
+        phrase = dictionary.get(currentCode) || oldPhrase + currentChar;
       }
-      
+
       out.push(phrase);
       currentChar = phrase.charAt(0);
       dictionary.set(code, oldPhrase + currentChar);
       code++;
       oldPhrase = phrase;
     }
-    
+
     return out.join('');
   }
 
@@ -181,25 +181,25 @@ export class CompressionManager {
       // Browser environment
       return btoa(unescape(encodeURIComponent(input)));
     }
-    
+
     // Pure JS implementation for Node.js or other environments
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
     let result = '';
     let i = 0;
-    
+
     while (i < input.length) {
       const a = input.charCodeAt(i++);
       const b = i < input.length ? input.charCodeAt(i++) : 0;
       const c = i < input.length ? input.charCodeAt(i++) : 0;
-      
+
       const bitmap = (a << 16) | (b << 8) | c;
-      
+
       result += chars.charAt((bitmap >> 18) & 63);
       result += chars.charAt((bitmap >> 12) & 63);
       result += i - 2 < input.length ? chars.charAt((bitmap >> 6) & 63) : '=';
       result += i - 1 < input.length ? chars.charAt(bitmap & 63) : '=';
     }
-    
+
     return result;
   }
 
@@ -211,27 +211,27 @@ export class CompressionManager {
       // Browser environment
       return decodeURIComponent(escape(atob(input)));
     }
-    
+
     // Pure JS implementation
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
     let result = '';
     let i = 0;
-    
+
     input = input.replace(/[^A-Za-z0-9+/]/g, '');
-    
+
     while (i < input.length) {
       const encoded1 = chars.indexOf(input.charAt(i++));
       const encoded2 = chars.indexOf(input.charAt(i++));
       const encoded3 = chars.indexOf(input.charAt(i++));
       const encoded4 = chars.indexOf(input.charAt(i++));
-      
+
       const bitmap = (encoded1 << 18) | (encoded2 << 12) | (encoded3 << 6) | encoded4;
-      
+
       result += String.fromCharCode((bitmap >> 16) & 255);
       if (encoded3 !== 64) result += String.fromCharCode((bitmap >> 8) & 255);
       if (encoded4 !== 64) result += String.fromCharCode(bitmap & 255);
     }
-    
+
     return result;
   }
 
@@ -246,6 +246,10 @@ export class CompressionManager {
    * Get savings percentage
    */
   getSavingsPercentage(compressedData: CompressedData): number {
-    return ((compressedData.originalSize - compressedData.compressedSize) / compressedData.originalSize) * 100;
+    return (
+      ((compressedData.originalSize - compressedData.compressedSize) /
+        compressedData.originalSize) *
+      100
+    );
   }
 }

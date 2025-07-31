@@ -76,7 +76,7 @@ export class Strata {
     if (this.config.sync?.enabled) {
       this.syncManager = new SyncManager(this.config.sync);
       await this.syncManager.initialize();
-      
+
       // Subscribe to sync events
       this.syncManager.subscribe((_change) => {
         // Forward sync events to subscribers
@@ -86,7 +86,7 @@ export class Strata {
 
     // Initialize TTL manager
     this.ttlManager = new TTLManager(this.config.ttl);
-    
+
     // Set up TTL cleanup for default adapter
     if (this.defaultAdapter && this.config.ttl?.autoCleanup !== false) {
       this.ttlManager.startAutoCleanup(
@@ -166,7 +166,7 @@ export class Strata {
 
     // Handle compression if needed
     const shouldCompress = options?.compress ?? this.config.compression?.enabled;
-    
+
     if (shouldCompress && this.compressionManager) {
       const compressedResult = await this.compressionManager.compress(value);
       if (this.compressionManager.isCompressedData(compressedResult)) {
@@ -443,10 +443,10 @@ export class Strata {
    */
   async getTTL(key: string, options?: StorageOptions): Promise<number | null> {
     if (!this.ttlManager) return null;
-    
+
     const adapter = await this.selectAdapter(options?.storage);
     const value = await adapter.get(key);
-    
+
     if (!value) return null;
     return this.ttlManager.getTimeToLive(value);
   }
@@ -458,14 +458,14 @@ export class Strata {
     if (!this.ttlManager) {
       throw new StorageError('TTL manager not initialized');
     }
-    
+
     const adapter = await this.selectAdapter(options?.storage);
     const value = await adapter.get(key);
-    
+
     if (!value) {
       throw new StorageError(`Key ${key} not found`);
     }
-    
+
     const updated = this.ttlManager.extendTTL(value, extension);
     await adapter.set(key, updated);
   }
@@ -477,14 +477,14 @@ export class Strata {
     if (!this.ttlManager) {
       throw new StorageError('TTL manager not initialized');
     }
-    
+
     const adapter = await this.selectAdapter(options?.storage);
     const value = await adapter.get(key);
-    
+
     if (!value) {
       throw new StorageError(`Key ${key} not found`);
     }
-    
+
     const persisted = this.ttlManager.persist(value);
     await adapter.set(key, persisted);
   }
@@ -497,7 +497,7 @@ export class Strata {
     options?: StorageOptions,
   ): Promise<Array<{ key: string; expiresIn: number }>> {
     if (!this.ttlManager) return [];
-    
+
     const adapter = await this.selectAdapter(options?.storage);
     return this.ttlManager.getExpiring(
       timeWindow,
@@ -511,14 +511,14 @@ export class Strata {
    */
   async cleanupExpired(options?: StorageOptions): Promise<number> {
     if (!this.ttlManager) return 0;
-    
+
     const adapter = await this.selectAdapter(options?.storage);
     const expired = await this.ttlManager.cleanup(
       () => adapter.keys(),
       (key) => adapter.get(key),
       (key) => adapter.remove(key),
     );
-    
+
     return expired.length;
   }
 
@@ -532,17 +532,17 @@ export class Strata {
       }
     }
     this.adapters.clear();
-    
+
     // Clear encryption cache
     if (this.encryptionManager) {
       this.encryptionManager.clearCache();
     }
-    
+
     // Close sync manager
     if (this.syncManager) {
       this.syncManager.close();
     }
-    
+
     // Clear TTL manager
     if (this.ttlManager) {
       this.ttlManager.clear();

@@ -20,13 +20,13 @@ export class MigrationManager {
 
   async migrate(adapter: StorageAdapter, targetVersion: number): Promise<void> {
     const currentVersion = await this.getCurrentVersion(adapter);
-    
+
     if (currentVersion === targetVersion) return;
 
-    const migrationsToRun = this.migrations.filter(m => 
-      currentVersion < targetVersion 
+    const migrationsToRun = this.migrations.filter((m) =>
+      currentVersion < targetVersion
         ? m.version > currentVersion && m.version <= targetVersion
-        : m.version <= currentVersion && m.version > targetVersion
+        : m.version <= currentVersion && m.version > targetVersion,
     );
 
     if (currentVersion < targetVersion) {
@@ -53,7 +53,7 @@ export class MigrationManager {
     await adapter.set('__strata_version__', {
       value: version,
       created: Date.now(),
-      updated: Date.now()
+      updated: Date.now(),
     });
   }
 }

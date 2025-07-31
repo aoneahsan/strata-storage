@@ -58,7 +58,11 @@ export class QueryEngine {
   /**
    * Match single operator
    */
-  private matchesOperator(value: unknown, operator: keyof QueryOperators, operand: unknown): boolean {
+  private matchesOperator(
+    value: unknown,
+    operator: keyof QueryOperators,
+    operand: unknown,
+  ): boolean {
     switch (operator) {
       case '$eq':
         return this.equals(value, operand);
@@ -176,10 +180,7 @@ export class QueryEngine {
       const bKeys = Object.keys(b as object);
       if (aKeys.length !== bKeys.length) return false;
       return aKeys.every((key) =>
-        this.equals(
-          (a as Record<string, unknown>)[key],
-          (b as Record<string, unknown>)[key],
-        ),
+        this.equals((a as Record<string, unknown>)[key], (b as Record<string, unknown>)[key]),
       );
     }
 

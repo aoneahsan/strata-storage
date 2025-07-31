@@ -16,17 +16,18 @@ const mockPlugin: StrataStoragePlugin = {
   size: async () => ({ total: 0, count: 0 }),
 };
 
-let StrataStorage: StrataStoragePlugin;
+// Export the plugin - will be initialized based on environment
+export let StrataStorage: StrataStoragePlugin = mockPlugin;
 
-// Only register plugin if Capacitor is available
-if (typeof window !== 'undefined' && (window as any).Capacitor) {
-  const { registerPlugin } = require('@capacitor/core');
-  StrataStorage = registerPlugin('StrataStorage', {
-    web: () => import('./web').then((m) => new m.StrataStorageWeb()),
-  }) as StrataStoragePlugin;
-} else {
-  StrataStorage = mockPlugin;
+// Initialize plugin when module loads
+if (typeof window !== 'undefined') {
+  // Check if Capacitor is available
+  const cap = (window as any).Capacitor;
+  if (cap && cap.registerPlugin) {
+    StrataStorage = cap.registerPlugin('StrataStorage', {
+      web: () => import('./web').then((m) => new m.StrataStorageWeb()),
+    });
+  }
 }
 
 export * from './definitions';
-export { StrataStorage };

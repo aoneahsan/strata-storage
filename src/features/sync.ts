@@ -4,7 +4,12 @@
  */
 
 import { EventEmitter } from '@/utils';
-import type { StorageChange, StorageType, SubscriptionCallback, UnsubscribeFunction } from '@/types';
+import type {
+  StorageChange,
+  StorageType,
+  SubscriptionCallback,
+  UnsubscribeFunction,
+} from '@/types';
 
 /**
  * Sync configuration

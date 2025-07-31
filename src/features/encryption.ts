@@ -46,9 +46,7 @@ export class EncryptionManager {
    * Check if encryption is available
    */
   isAvailable(): boolean {
-    return typeof window !== 'undefined' && 
-           window.crypto && 
-           window.crypto.subtle !== undefined;
+    return typeof window !== 'undefined' && window.crypto && window.crypto.subtle !== undefined;
   }
 
   /**
@@ -79,7 +77,7 @@ export class EncryptionManager {
           iv: iv,
         },
         key,
-        dataBuffer
+        dataBuffer,
       );
 
       // Convert to base64 for storage
@@ -119,7 +117,7 @@ export class EncryptionManager {
           iv: iv,
         },
         key,
-        dataBuffer
+        dataBuffer,
       );
 
       // Convert back to original data
@@ -137,7 +135,7 @@ export class EncryptionManager {
   private async deriveKey(
     password: string,
     salt: Uint8Array,
-    iterations: number = this.config.iterations
+    iterations: number = this.config.iterations,
   ): Promise<CryptoKey> {
     // Check cache
     const cacheKey = `${password}-${this.bufferToBase64(salt)}-${iterations}`;
@@ -148,14 +146,11 @@ export class EncryptionManager {
     // Import password as key material
     const encoder = new TextEncoder();
     const passwordBuffer = encoder.encode(password);
-    
-    const keyMaterial = await crypto.subtle.importKey(
-      'raw',
-      passwordBuffer,
-      'PBKDF2',
-      false,
-      ['deriveBits', 'deriveKey']
-    );
+
+    const keyMaterial = await crypto.subtle.importKey('raw', passwordBuffer, 'PBKDF2', false, [
+      'deriveBits',
+      'deriveKey',
+    ]);
 
     // Derive key using PBKDF2
     const key = await crypto.subtle.deriveKey(
@@ -171,7 +166,7 @@ export class EncryptionManager {
         length: this.config.keyLength,
       },
       false,
-      ['encrypt', 'decrypt']
+      ['encrypt', 'decrypt'],
     );
 
     // Cache the key
@@ -214,15 +209,16 @@ export class EncryptionManager {
    * Generate a secure random password
    */
   generatePassword(length: number = 32): string {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?';
+    const chars =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?';
     const array = new Uint8Array(length);
     crypto.getRandomValues(array);
-    
+
     let password = '';
     for (let i = 0; i < length; i++) {
       password += chars[array[i] % chars.length];
     }
-    
+
     return password;
   }
 

@@ -96,8 +96,8 @@ export class TTLManager extends EventEmitter {
 
     // Expire after a certain date
     if (options.expireAfter) {
-      const afterTime = options.expireAfter instanceof Date ? 
-        options.expireAfter.getTime() : options.expireAfter;
+      const afterTime =
+        options.expireAfter instanceof Date ? options.expireAfter.getTime() : options.expireAfter;
       return afterTime;
     }
 
@@ -139,7 +139,11 @@ export class TTLManager extends EventEmitter {
   /**
    * Start automatic cleanup
    */
-  startAutoCleanup(getKeys: () => Promise<string[]>, getItem: (key: string) => Promise<StorageValue | null>, removeItem: (key: string) => Promise<void>): void {
+  startAutoCleanup(
+    getKeys: () => Promise<string[]>,
+    getItem: (key: string) => Promise<StorageValue | null>,
+    removeItem: (key: string) => Promise<void>,
+  ): void {
     if (!this.config.autoCleanup || this.cleanupInterval) {
       return;
     }
