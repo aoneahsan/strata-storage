@@ -9,7 +9,7 @@ import {
   Optional,
   OnDestroy,
   NgModule,
-  ModuleWithProviders
+  ModuleWithProviders,
 } from '@angular/core';
 import {
   Observable,
@@ -18,7 +18,7 @@ import {
   from,
   interval,
   combineLatest,
-  throwError
+  throwError,
 } from 'rxjs';
 import {
   map,
@@ -28,7 +28,7 @@ import {
   distinctUntilChanged,
   shareReplay,
   startWith,
-  filter
+  filter,
 } from 'rxjs/operators';
 import { Strata } from '@/core/Strata';
 import type { StrataConfig, StorageOptions, StorageChange } from '@/types';
@@ -40,7 +40,7 @@ export const STRATA_CONFIG = new InjectionToken<StrataConfig>('strata.config');
  * Strata Service - Main service for storage operations
  */
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class StrataService implements OnDestroy {
   private strata: Strata;
@@ -57,7 +57,7 @@ export class StrataService implements OnDestroy {
     try {
       await this.strata.initialize();
       this.initialized$.next(true);
-      
+
       // Subscribe to all storage changes
       this.strata.subscribe((change) => {
         this.changes$.next(change);
@@ -73,8 +73,8 @@ export class StrataService implements OnDestroy {
    */
   get ready$(): Observable<boolean> {
     return this.initialized$.pipe(
-      filter(initialized => initialized),
-      startWith(false)
+      filter((initialized) => initialized),
+      startWith(false),
     );
   }
 
@@ -91,10 +91,10 @@ export class StrataService implements OnDestroy {
   get<T = unknown>(key: string, options?: StorageOptions): Observable<T | null> {
     return this.ready$.pipe(
       switchMap(() => from(this.strata.get<T>(key, options))),
-      catchError(error => {
+      catchError((error) => {
         console.error(`Failed to get key ${key}:`, error);
         return throwError(() => error);
-      })
+      }),
     );
   }
 
@@ -104,10 +104,10 @@ export class StrataService implements OnDestroy {
   set<T = unknown>(key: string, value: T, options?: StorageOptions): Observable<void> {
     return this.ready$.pipe(
       switchMap(() => from(this.strata.set(key, value, options))),
-      catchError(error => {
+      catchError((error) => {
         console.error(`Failed to set key ${key}:`, error);
         return throwError(() => error);
-      })
+      }),
     );
   }
 
@@ -117,10 +117,10 @@ export class StrataService implements OnDestroy {
   remove(key: string, options?: StorageOptions): Observable<void> {
     return this.ready$.pipe(
       switchMap(() => from(this.strata.remove(key, options))),
-      catchError(error => {
+      catchError((error) => {
         console.error(`Failed to remove key ${key}:`, error);
         return throwError(() => error);
-      })
+      }),
     );
   }
 
@@ -130,7 +130,7 @@ export class StrataService implements OnDestroy {
   has(key: string, options?: StorageOptions): Observable<boolean> {
     return this.ready$.pipe(
       switchMap(() => from(this.strata.has(key, options))),
-      catchError(() => from([false]))
+      catchError(() => from([false])),
     );
   }
 
@@ -140,10 +140,10 @@ export class StrataService implements OnDestroy {
   clear(options?: StorageOptions): Observable<void> {
     return this.ready$.pipe(
       switchMap(() => from(this.strata.clear(options))),
-      catchError(error => {
+      catchError((error) => {
         console.error('Failed to clear storage:', error);
         return throwError(() => error);
-      })
+      }),
     );
   }
 
@@ -153,7 +153,7 @@ export class StrataService implements OnDestroy {
   keys(pattern?: string | RegExp, options?: StorageOptions): Observable<string[]> {
     return this.ready$.pipe(
       switchMap(() => from(this.strata.keys(pattern, options))),
-      catchError(() => from([[]]))
+      catchError(() => from([[]])),
     );
   }
 
@@ -162,11 +162,11 @@ export class StrataService implements OnDestroy {
    */
   query<T = unknown>(
     condition: any,
-    options?: StorageOptions
+    options?: StorageOptions,
   ): Observable<Array<{ key: string; value: T }>> {
     return this.ready$.pipe(
       switchMap(() => from(this.strata.query<T>(condition, options))),
-      catchError(() => from([[]]))
+      catchError(() => from([[]])),
     );
   }
 
@@ -176,7 +176,7 @@ export class StrataService implements OnDestroy {
   size(detailed?: boolean): Observable<{ total: number; count: number }> {
     return this.ready$.pipe(
       switchMap(() => from(this.strata.size(detailed))),
-      catchError(() => from([{ total: 0, count: 0 }]))
+      catchError(() => from([{ total: 0, count: 0 }])),
     );
   }
 
@@ -187,14 +187,14 @@ export class StrataService implements OnDestroy {
     return combineLatest([
       this.get<T>(key, options),
       this.changes.pipe(
-        filter(change => change.key === key),
-        map(change => change.newValue as T)
-      )
+        filter((change) => change.key === key),
+        map((change) => change.newValue as T),
+      ),
     ]).pipe(
       map(([initial]) => initial),
       distinctUntilChanged(),
       shareReplay(1),
-      takeUntil(this.destroy$)
+      takeUntil(this.destroy$),
     );
   }
 
@@ -204,7 +204,7 @@ export class StrataService implements OnDestroy {
   getTTL(key: string, options?: StorageOptions): Observable<number | null> {
     return this.ready$.pipe(
       switchMap(() => from(this.strata.getTTL(key, options))),
-      catchError(() => from([null]))
+      catchError(() => from([null])),
     );
   }
 
@@ -214,10 +214,10 @@ export class StrataService implements OnDestroy {
   extendTTL(key: string, extension: number, options?: StorageOptions): Observable<void> {
     return this.ready$.pipe(
       switchMap(() => from(this.strata.extendTTL(key, extension, options))),
-      catchError(error => {
+      catchError((error) => {
         console.error(`Failed to extend TTL for key ${key}:`, error);
         return throwError(() => error);
-      })
+      }),
     );
   }
 
@@ -227,10 +227,10 @@ export class StrataService implements OnDestroy {
   persist(key: string, options?: StorageOptions): Observable<void> {
     return this.ready$.pipe(
       switchMap(() => from(this.strata.persist(key, options))),
-      catchError(error => {
+      catchError((error) => {
         console.error(`Failed to persist key ${key}:`, error);
         return throwError(() => error);
-      })
+      }),
     );
   }
 
@@ -262,7 +262,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
   name: 'storage',
-  pure: false
+  pure: false,
 })
 export class StoragePipe implements PipeTransform {
   private value: any = null;
@@ -275,9 +275,9 @@ export class StoragePipe implements PipeTransform {
     if (this.key !== key) {
       this.key = key;
       this.dispose();
-      this.subscription = this.strata.watch(key).subscribe(
-        value => this.value = value ?? defaultValue
-      );
+      this.subscription = this.strata
+        .watch(key)
+        .subscribe((value) => (this.value = value ?? defaultValue));
     }
     return this.value;
   }
@@ -299,7 +299,7 @@ export class StoragePipe implements PipeTransform {
  */
 @Pipe({
   name: 'ttl',
-  pure: false
+  pure: false,
 })
 export class TTLPipe implements PipeTransform {
   private ttl: string | null = null;
@@ -312,20 +312,20 @@ export class TTLPipe implements PipeTransform {
     if (this.key !== key) {
       this.key = key;
       this.dispose();
-      
+
       // Update TTL every second
-      this.subscription = interval(1000).pipe(
-        startWith(0),
-        switchMap(() => this.strata.getTTL(key))
-      ).subscribe(
-        milliseconds => {
+      this.subscription = interval(1000)
+        .pipe(
+          startWith(0),
+          switchMap(() => this.strata.getTTL(key)),
+        )
+        .subscribe((milliseconds) => {
           if (milliseconds === null || milliseconds <= 0) {
             this.ttl = null;
           } else {
             this.ttl = this.formatTTL(milliseconds);
           }
-        }
-      );
+        });
     }
     return this.ttl;
   }
@@ -366,30 +366,28 @@ import { Directive, Input, HostListener, OnInit, OnDestroy } from '@angular/core
 import { NgControl } from '@angular/forms';
 
 @Directive({
-  selector: '[strataStorage]'
+  selector: '[strataStorage]',
 })
 export class StorageDirective implements OnInit, OnDestroy {
   @Input('strataStorage') key!: string;
   @Input() strataOptions?: StorageOptions;
   @Input() strataDebounce = 500;
-  
+
   private subscription: any;
   private timeout: any;
 
   constructor(
     private control: NgControl,
-    private strata: StrataService
+    private strata: StrataService,
   ) {}
 
   ngOnInit(): void {
     // Load initial value
-    this.subscription = this.strata.get(this.key, this.strataOptions).subscribe(
-      value => {
-        if (value !== null && this.control.control) {
-          this.control.control.setValue(value, { emitEvent: false });
-        }
+    this.subscription = this.strata.get(this.key, this.strataOptions).subscribe((value) => {
+      if (value !== null && this.control.control) {
+        this.control.control.setValue(value, { emitEvent: false });
       }
-    );
+    });
   }
 
   @HostListener('input', ['$event.target.value'])
@@ -413,25 +411,14 @@ export class StorageDirective implements OnInit, OnDestroy {
  * Strata Module
  */
 @NgModule({
-  declarations: [
-    StoragePipe,
-    TTLPipe,
-    StorageDirective
-  ],
-  exports: [
-    StoragePipe,
-    TTLPipe,
-    StorageDirective
-  ]
+  declarations: [StoragePipe, TTLPipe, StorageDirective],
+  exports: [StoragePipe, TTLPipe, StorageDirective],
 })
 export class StrataModule {
   static forRoot(config?: StrataConfig): ModuleWithProviders<StrataModule> {
     return {
       ngModule: StrataModule,
-      providers: [
-        { provide: STRATA_CONFIG, useValue: config },
-        StrataService
-      ]
+      providers: [{ provide: STRATA_CONFIG, useValue: config }, StrataService],
     };
   }
 }

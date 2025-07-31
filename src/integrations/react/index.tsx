@@ -47,7 +47,7 @@ export function useStrata() {
 export function useStorage<T = unknown>(
   key: string,
   defaultValue?: T,
-  options?: StorageOptions
+  options?: StorageOptions,
 ): [T | null, (value: T | null, options?: StorageOptions) => Promise<void>, boolean] {
   const strata = useStrata();
   const [value, setValue] = useState<T | null>(null);
@@ -82,7 +82,7 @@ export function useStorage<T = unknown>(
       }
       setValue(newValue);
     },
-    [key, strata, options]
+    [key, strata, options],
   );
 
   return [value, updateValue, loading];
@@ -91,7 +91,7 @@ export function useStorage<T = unknown>(
 // Query hook
 export function useStorageQuery<T = unknown>(
   condition: any,
-  options?: StorageOptions
+  options?: StorageOptions,
 ): { data: Array<{ key: string; value: T }>; loading: boolean; refetch: () => Promise<void> } {
   const strata = useStrata();
   const [data, setData] = useState<Array<{ key: string; value: T }>>([]);
@@ -149,7 +149,7 @@ export function useStorageTTL(key: string, options?: StorageOptions) {
       const newTTL = await strata.getTTL(key, options);
       setTTL(newTTL);
     },
-    [key, strata, options]
+    [key, strata, options],
   );
 
   const persist = useCallback(async () => {

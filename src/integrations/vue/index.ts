@@ -2,18 +2,18 @@
  * Vue 3 integration for Strata Storage
  */
 
-import { 
-  ref, 
-  computed, 
-  watch, 
-  onMounted, 
-  onUnmounted, 
-  inject, 
-  provide, 
-  Ref, 
+import {
+  ref,
+  computed,
+  watch,
+  onMounted,
+  onUnmounted,
+  inject,
+  provide,
+  Ref,
   ComputedRef,
   InjectionKey,
-  App
+  App,
 } from 'vue';
 import { Strata } from '@/core/Strata';
 import type { StrataConfig, StorageOptions, StorageChange } from '@/types';
@@ -25,24 +25,24 @@ const StrataKey: InjectionKey<Strata> = Symbol('strata');
 export const StrataPlugin = {
   install(app: App, config?: StrataConfig) {
     const strata = new Strata(config);
-    
+
     // Initialize asynchronously
     strata.initialize().catch(console.error);
-    
+
     // Provide globally
     app.provide(StrataKey, strata);
-    
+
     // Add global properties
     app.config.globalProperties.$strata = strata;
-    
+
     // Clean up on app unmount
     app.unmount = new Proxy(app.unmount, {
       apply(target, thisArg, argList) {
         strata.close();
         return Reflect.apply(target, thisArg, argList);
-      }
+      },
     });
-  }
+  },
 };
 
 // Composition API
@@ -64,7 +64,7 @@ export function useStrata(): Strata {
 export function useStorage<T = unknown>(
   key: string,
   defaultValue?: T,
-  options?: StorageOptions
+  options?: StorageOptions,
 ): {
   value: Ref<T | null>;
   loading: Ref<boolean>;
@@ -120,7 +120,7 @@ export function useStorage<T = unknown>(
   // Subscribe to changes
   onMounted(() => {
     refresh();
-    
+
     const unsubscribe = strata.subscribe((change: StorageChange) => {
       if (change.key === key) {
         value.value = change.newValue as T;
@@ -136,7 +136,7 @@ export function useStorage<T = unknown>(
     error,
     refresh,
     update,
-    remove
+    remove,
   };
 }
 
@@ -145,7 +145,7 @@ export function useStorage<T = unknown>(
  */
 export function useStorageQuery<T = unknown>(
   condition: any,
-  options?: StorageOptions
+  options?: StorageOptions,
 ): {
   data: Ref<Array<{ key: string; value: T }>>;
   loading: Ref<boolean>;
@@ -174,7 +174,7 @@ export function useStorageQuery<T = unknown>(
   watch(
     () => JSON.stringify(condition),
     () => refetch(),
-    { immediate: true }
+    { immediate: true },
   );
 
   // Subscribe to any storage changes
@@ -190,7 +190,7 @@ export function useStorageQuery<T = unknown>(
     data,
     loading,
     error,
-    refetch
+    refetch,
   };
 }
 
@@ -199,7 +199,7 @@ export function useStorageQuery<T = unknown>(
  */
 export function useStorageTTL(
   key: string,
-  options?: StorageOptions
+  options?: StorageOptions,
 ): {
   ttl: ComputedRef<string | null>;
   milliseconds: Ref<number | null>;
@@ -251,7 +251,7 @@ export function useStorageTTL(
     ttl,
     milliseconds,
     extendTTL,
-    persist
+    persist,
   };
 }
 
@@ -260,7 +260,7 @@ export function useStorageTTL(
  */
 export function useStorageSize(
   autoRefresh = false,
-  refreshInterval = 5000
+  refreshInterval = 5000,
 ): {
   size: Ref<number>;
   count: Ref<number>;
@@ -297,7 +297,7 @@ export function useStorageSize(
     size,
     count,
     formatted,
-    refresh
+    refresh,
   };
 }
 
