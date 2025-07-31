@@ -9,7 +9,8 @@
     "dist/",
     "ios/",
     "android/",
-    "scripts/"
+    "scripts/",
+    "StrataStorage.podspec"
   ],
   "bin": {
     "strata-storage": "./scripts/cli.js"
