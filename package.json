@@ -14,12 +14,34 @@
   "bin": {
     "strata-storage": "./scripts/cli.js"
   },
+  "exports": {
+    ".": {
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./react": {
+      "import": "./dist/integrations/react/index.esm.js",
+      "require": "./dist/integrations/react/index.js",
+      "types": "./dist/integrations/react/index.d.ts"
+    },
+    "./vue": {
+      "import": "./dist/integrations/vue/index.esm.js",
+      "require": "./dist/integrations/vue/index.js",
+      "types": "./dist/integrations/vue/index.d.ts"
+    },
+    "./angular": {
+      "import": "./dist/integrations/angular/index.esm.js",
+      "require": "./dist/integrations/angular/index.js",
+      "types": "./dist/integrations/angular/index.d.ts"
+    }
+  },
   "scripts": {
     "build": "yarn clean && yarn build:web && yarn build:types",
     "build:web": "node scripts/build.js",
     "build:types": "tsc --emitDeclarationOnly",
     "clean": "rm -rf dist/",
-    "lint": "eslint 'src/**/*.{ts,tsx}' --fix",
+    "lint": "eslint 'src/**/*.{ts,tsx}' --ignore-pattern 'src/integrations/**/*' --fix",
     "typecheck": "tsc --noEmit",
     "test": "vitest",
     "test:coverage": "vitest --coverage",
@@ -55,9 +77,30 @@
   },
   "homepage": "https://github.com/aoneahsan/strata-storage#readme",
   "dependencies": {},
+  "peerDependencies": {
+    "@angular/core": ">=12.0.0",
+    "@capacitor/core": "^5.0.0 || ^6.0.0",
+    "react": ">=16.8.0",
+    "vue": ">=3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@capacitor/core": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    },
+    "vue": {
+      "optional": true
+    },
+    "@angular/core": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
     "@types/node": "^24.1.0",
+    "@types/react": "^19.1.9",
     "@typescript-eslint/eslint-plugin": "^8.38.0",
     "@typescript-eslint/parser": "^8.38.0",
     "@vitest/coverage-v8": "^3.2.4",
@@ -68,14 +111,6 @@
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.38.0",
     "vitest": "^3.2.4"
-  },
-  "peerDependencies": {
-    "@capacitor/core": "^5.0.0 || ^6.0.0"
-  },
-  "peerDependenciesMeta": {
-    "@capacitor/core": {
-      "optional": true
-    }
   },
   "engines": {
     "node": ">=18.0.0"

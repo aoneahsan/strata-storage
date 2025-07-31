@@ -16,13 +16,14 @@ import type {
   SubscriptionCallback,
   UnsubscribeFunction,
   QueryCondition,
+  StorageCapabilities,
 } from '@/types';
 
 import { AdapterRegistry } from './AdapterRegistry';
 import { isBrowser, isNode, isCapacitor } from '@/utils';
 import { StorageError, EncryptionError } from '@/utils/errors';
-import { EncryptionManager } from '@/features/encryption';
-import { CompressionManager } from '@/features/compression';
+import { EncryptionManager, type EncryptedData } from '@/features/encryption';
+import { CompressionManager, type CompressedData } from '@/features/compression';
 import { SyncManager } from '@/features/sync';
 import { TTLManager } from '@/features/ttl';
 
@@ -128,7 +129,10 @@ export class Strata {
           if (!password) {
             throw new EncryptionError('Encrypted value requires password for decryption');
           }
-          const decrypted = await this.encryptionManager.decrypt<T>(value.value as any, password);
+          const decrypted = await this.encryptionManager.decrypt<T>(
+            value.value as EncryptedData,
+            password,
+          );
           return decrypted;
         }
       } catch (error) {
@@ -143,7 +147,9 @@ export class Strata {
     // Handle decompression if needed
     if (value.compressed && this.compressionManager) {
       try {
-        const decompressed = await this.compressionManager.decompress<T>(value.value as any);
+        const decompressed = await this.compressionManager.decompress<T>(
+          value.value as CompressedData,
+        );
         return decompressed;
       } catch (error) {
         console.warn(`Failed to decompress key ${key}:`, error);
@@ -161,7 +167,7 @@ export class Strata {
     const adapter = await this.selectAdapter(options?.storage);
     const now = Date.now();
 
-    let processedValue: any = value;
+    let processedValue: unknown = value;
     let compressed = false;
 
     // Handle compression if needed
@@ -386,7 +392,10 @@ export class Strata {
         const existing = await this.get(key);
         if (options.merge === 'deep' && typeof existing === 'object' && typeof value === 'object') {
           // Deep merge will be implemented with utils
-          await this.set(key, { ...(existing as any), ...(value as any) });
+          await this.set(key, {
+            ...(existing as Record<string, unknown>),
+            ...(value as Record<string, unknown>),
+          });
         } else {
           await this.set(key, value);
         }
@@ -404,14 +413,14 @@ export class Strata {
   /**
    * Get adapter capabilities
    */
-  getCapabilities(storage?: StorageType): Record<string, any> {
+  getCapabilities(storage?: StorageType): StorageCapabilities | Record<string, StorageCapabilities> {
     if (storage) {
       const adapter = this.adapters.get(storage);
-      return adapter ? adapter.capabilities : {};
+      return adapter ? adapter.capabilities : {} as StorageCapabilities;
     }
 
     // Return capabilities of all adapters
-    const capabilities: Record<string, any> = {};
+    const capabilities: Record<string, StorageCapabilities> = {};
     for (const [type, adapter] of this.adapters.entries()) {
       capabilities[type] = adapter.capabilities;
     }
@@ -629,7 +638,7 @@ export class Strata {
         this.defaultAdapter = adapter;
         this.adapters.set(storage, adapter);
         return;
-      } catch (error) {
+      } catch {
         // Continue to next adapter
       }
     }

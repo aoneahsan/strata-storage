@@ -13,6 +13,6 @@
  * import { StrataModule, StrataService } from 'strata-storage/angular';
  */
 
-export * from './react';
-export * from './vue';
-export * from './angular';
+// Note: Framework integrations are exported via separate entry points
+// This file is kept for backward compatibility but should not re-export
+// to avoid dependency issues

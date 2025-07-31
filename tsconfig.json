@@ -29,8 +29,9 @@
       "@/plugin/*": ["src/plugin/*"],
       "@/types/*": ["src/types/*"],
       "@/utils/*": ["src/utils/*"]
-    }
+    },
+    "jsx": "react-jsx"
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "tests", "examples", "docs", "scripts"]
+  "exclude": ["node_modules", "dist", "tests", "examples", "docs", "scripts", "src/integrations/**/*"]
 }

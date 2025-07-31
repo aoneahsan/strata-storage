@@ -4,7 +4,7 @@
 
 import { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import { Strata } from '@/core/Strata';
-import type { StrataConfig, StorageOptions, StorageChange } from '@/types';
+import type { StrataConfig, StorageOptions, StorageChange, QueryCondition } from '@/types';
 
 // Context
 const StrataContext = createContext<Strata | null>(null);
@@ -90,7 +90,7 @@ export function useStorage<T = unknown>(
 
 // Query hook
 export function useStorageQuery<T = unknown>(
-  condition: any,
+  condition: QueryCondition,
   options?: StorageOptions,
 ): { data: Array<{ key: string; value: T }>; loading: boolean; refetch: () => Promise<void> } {
   const strata = useStrata();

@@ -2,14 +2,16 @@
  * Angular integration for Strata Storage
  */
 
+import type {
+  OnDestroy,
+  ModuleWithProviders,
+} from '@angular/core';
 import {
   Injectable,
   InjectionToken,
   Inject,
   Optional,
-  OnDestroy,
   NgModule,
-  ModuleWithProviders,
 } from '@angular/core';
 import {
   Observable,
@@ -31,7 +33,7 @@ import {
   filter,
 } from 'rxjs/operators';
 import { Strata } from '@/core/Strata';
-import type { StrataConfig, StorageOptions, StorageChange } from '@/types';
+import type { StrataConfig, StorageOptions, StorageChange, QueryCondition } from '@/types';
 
 // Configuration token
 export const STRATA_CONFIG = new InjectionToken<StrataConfig>('strata.config');
@@ -161,7 +163,7 @@ export class StrataService implements OnDestroy {
    * Query storage
    */
   query<T = unknown>(
-    condition: any,
+    condition: QueryCondition,
     options?: StorageOptions,
   ): Observable<Array<{ key: string; value: T }>> {
     return this.ready$.pipe(
@@ -265,13 +267,13 @@ import { Pipe, PipeTransform } from '@angular/core';
   pure: false,
 })
 export class StoragePipe implements PipeTransform {
-  private value: any = null;
+  private value: unknown = null;
   private key: string | null = null;
-  private subscription: any;
+  private subscription: { unsubscribe(): void } | null = null;
 
   constructor(private strata: StrataService) {}
 
-  transform(key: string, defaultValue?: any): any {
+  transform(key: string, defaultValue?: unknown): unknown {
     if (this.key !== key) {
       this.key = key;
       this.dispose();
@@ -304,7 +306,7 @@ export class StoragePipe implements PipeTransform {
 export class TTLPipe implements PipeTransform {
   private ttl: string | null = null;
   private key: string | null = null;
-  private subscription: any;
+  private subscription: { unsubscribe(): void } | null = null;
 
   constructor(private strata: StrataService) {}
 
@@ -362,7 +364,7 @@ export class TTLPipe implements PipeTransform {
 /**
  * Storage directive for form inputs
  */
-import { Directive, Input, HostListener, OnInit, OnDestroy } from '@angular/core';
+import { Directive, Input, HostListener, OnInit } from '@angular/core';
 import { NgControl } from '@angular/forms';
 
 @Directive({
@@ -373,8 +375,8 @@ export class StorageDirective implements OnInit, OnDestroy {
   @Input() strataOptions?: StorageOptions;
   @Input() strataDebounce = 500;
 
-  private subscription: any;
-  private timeout: any;
+  private subscription: { unsubscribe(): void } | null = null;
+  private timeout: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     private control: NgControl,
@@ -392,8 +394,10 @@ export class StorageDirective implements OnInit, OnDestroy {
 
   @HostListener('input', ['$event.target.value'])
   @HostListener('change', ['$event.target.value'])
-  onValueChange(value: any): void {
-    clearTimeout(this.timeout);
+  onValueChange(value: unknown): void {
+    if (this.timeout) {
+      clearTimeout(this.timeout);
+    }
     this.timeout = setTimeout(() => {
       this.strata.set(this.key, value, this.strataOptions).subscribe();
     }, this.strataDebounce);
@@ -403,7 +407,9 @@ export class StorageDirective implements OnInit, OnDestroy {
     if (this.subscription) {
       this.subscription.unsubscribe();
     }
-    clearTimeout(this.timeout);
+    if (this.timeout) {
+      clearTimeout(this.timeout);
+    }
   }
 }
 

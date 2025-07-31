@@ -22,7 +22,11 @@ export let StrataStorage: StrataStoragePlugin = mockPlugin;
 // Initialize plugin when module loads
 if (typeof window !== 'undefined') {
   // Check if Capacitor is available
-  const cap = (window as any).Capacitor;
+  const cap = (
+    window as Window & {
+      Capacitor?: { registerPlugin: (name: string, config: unknown) => StrataStoragePlugin };
+    }
+  ).Capacitor;
   if (cap && cap.registerPlugin) {
     StrataStorage = cap.registerPlugin('StrataStorage', {
       web: () => import('./web').then((m) => new m.StrataStorageWeb()),

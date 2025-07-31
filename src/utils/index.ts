@@ -25,14 +25,17 @@ export function isNode(): boolean {
  * Check if code is running in a Web Worker
  */
 export function isWebWorker(): boolean {
-  return typeof self !== 'undefined' && typeof (self as any).importScripts === 'function';
+  return (
+    typeof self !== 'undefined' &&
+    typeof (self as typeof globalThis & { importScripts?: unknown }).importScripts === 'function'
+  );
 }
 
 /**
  * Check if code is running in Capacitor
  */
 export function isCapacitor(): boolean {
-  return typeof (window as any)?.Capacitor !== 'undefined';
+  return typeof (window as Window & { Capacitor?: unknown })?.Capacitor !== 'undefined';
 }
 
 /**

@@ -279,7 +279,7 @@ export class TTLManager extends EventEmitter {
    * Set item to never expire
    */
   persist(value: StorageValue): StorageValue {
-    const { expires, ...persistedValue } = value;
+    const { expires: _, ...persistedValue } = value;
     return {
       ...persistedValue,
       updated: Date.now(),

@@ -16,7 +16,7 @@ import {
   App,
 } from 'vue';
 import { Strata } from '@/core/Strata';
-import type { StrataConfig, StorageOptions, StorageChange } from '@/types';
+import type { StrataConfig, StorageOptions, StorageChange, QueryCondition } from '@/types';
 
 // Injection key
 const StrataKey: InjectionKey<Strata> = Symbol('strata');
@@ -144,7 +144,7 @@ export function useStorage<T = unknown>(
  * Query composable
  */
 export function useStorageQuery<T = unknown>(
-  condition: any,
+  condition: QueryCondition,
   options?: StorageOptions,
 ): {
   data: Ref<Array<{ key: string; value: T }>>;
