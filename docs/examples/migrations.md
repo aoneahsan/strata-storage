@@ -267,5 +267,5 @@ class SafeMigration {
 ## See Also
 
 - [Migration Guide](../guides/features/migrations.md)
-- [Migration API](../api/features/migration.md)
-- [Backup & Restore](../guides/backup-restore.md)
+- [Data Sync](./data-sync.md)
+- [Configuration](./configuration.md)

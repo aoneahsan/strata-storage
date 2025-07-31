@@ -486,5 +486,5 @@ export class AppModule {}
 ## See Also
 
 - [Angular Integration](./frameworks/angular.md)
-- [Storage Service Guide](../guides/integrations/angular-services.md)
-- [RxJS Patterns](../guides/patterns/rxjs.md)
+- [React Hooks](./react-hooks.md)
+- [Vue Composables](./vue-composables.md)

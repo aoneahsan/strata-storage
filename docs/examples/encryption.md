@@ -191,4 +191,4 @@ class SecureForm {
 
 - [Encryption Guide](../guides/features/encryption.md)
 - [Encryption API](../api/features/encryption.md)
-- [Security Best Practices](../guides/security.md)
+- [User Authentication](./user-auth.md)

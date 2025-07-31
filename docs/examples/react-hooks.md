@@ -430,4 +430,4 @@ const [user, setUser] = useTypedStorage<User>('current_user', {
 
 - [Vue Composables](./vue-composables.md)
 - [Angular Services](./angular-services.md)
-- [API Reference - React](../api/integrations/react.md)
+- [React Integration](./frameworks/react.md)

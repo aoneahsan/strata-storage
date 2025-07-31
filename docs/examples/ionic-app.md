@@ -340,4 +340,4 @@ export class CachedImagePipe implements PipeTransform {
 
 - [Angular Integration](./frameworks/angular.md)
 - [Capacitor App Example](./capacitor-app.md)
-- [Framework Integration Guide](../guides/integrations/framework.md)
+- [Web App Example](./web-app.md)

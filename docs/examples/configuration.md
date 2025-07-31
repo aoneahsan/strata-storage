@@ -181,5 +181,5 @@ const settingsStorage = new Strata({
 ## See Also
 
 - [Configuration Guide](../getting-started/configuration.md)
-- [API Reference](../api/)
-- [Platform Guides](../guides/platforms/)
+- [API Reference](../api/core/strata.md)
+- [Web Platform Guide](../guides/platforms/web.md)

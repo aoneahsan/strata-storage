@@ -225,5 +225,5 @@ const orders = await storage.query({
 ## See Also
 
 - [Query Guide](../guides/features/queries.md)
-- [Query API](../api/features/query.md)
-- [Performance Guide](../guides/performance.md)
+- [API Reference](../api/core/strata.md)
+- [Performance Optimization](./performance.md)

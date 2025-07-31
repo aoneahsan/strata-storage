@@ -474,7 +474,7 @@ describe('useStorageValue', () => {
 
 ## See Also
 
-- [React Hooks API](../../api/integrations/react.md)
+- [React Hooks Example](../react-hooks.md)
 - [Vue Examples](./vue.md)
 - [Angular Examples](./angular.md)
 - [Basic Usage](../basic-usage.md)

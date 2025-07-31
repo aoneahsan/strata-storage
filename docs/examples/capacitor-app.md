@@ -246,5 +246,5 @@ class LocationTracker {
 ## See Also
 
 - [Capacitor Platform Guide](../guides/platforms/capacitor.md)
-- [Mobile Features](../guides/features/mobile.md)
+- [React Native Example](./react-native.md)
 - [Ionic App Example](./ionic-app.md)

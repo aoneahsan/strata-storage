@@ -213,5 +213,5 @@ await storage.set('private', 'data', { syncEnabled: false });
 ## See Also
 
 - [Sync Guide](../guides/features/sync.md)
-- [Multi-Tab Apps](../guides/patterns/multi-tab.md)
-- [Real-time Features](../guides/advanced/realtime.md)
+- [Data Sync](./data-sync.md)
+- [Offline Support](./offline-support.md)

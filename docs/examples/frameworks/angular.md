@@ -152,6 +152,6 @@ export class TodoListComponent {
 
 ## See Also
 
-- [Angular Services API](../../api/integrations/angular.md)
+- [Angular Services Example](../angular-services.md)
 - [React Examples](./react.md)
 - [Vue Examples](./vue.md)

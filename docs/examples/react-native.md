@@ -242,6 +242,6 @@ function App() {
 
 ## See Also
 
-- [Mobile Platform Guide](../guides/platforms/mobile.md)
+- [Capacitor Platform Guide](../guides/platforms/capacitor.md)
 - [React Integration](./frameworks/react.md)
 - [Capacitor App Example](./capacitor-app.md)

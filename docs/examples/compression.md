@@ -153,5 +153,5 @@ async function compressOldData(days = 30) {
 ## See Also
 
 - [Compression Guide](../guides/features/compression.md)
-- [Performance Guide](../guides/performance.md)
+- [Performance Optimization](./performance.md)
 - [Configuration](./configuration.md)

@@ -190,4 +190,4 @@ await storage.set('live-feed', feed, {
 
 - [TTL Guide](../guides/features/ttl.md)
 - [Cache Management](./cache-management.md)
-- [Session Management](../guides/patterns/sessions.md)
+- [Offline Support](./offline-support.md)

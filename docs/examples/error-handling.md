@@ -203,6 +203,6 @@ const storage = new Strata({
 
 ## See Also
 
-- [Error Types API](../api/errors.md)
-- [Best Practices](../guides/best-practices.md)
-- [Debugging Guide](../guides/debugging.md)
+- [Configuration](./configuration.md)
+- [Basic Usage](./basic-usage.md)
+- [TypeScript Types](../api/core/types.md)

@@ -149,6 +149,6 @@ const handleSubmit = async () => {
 
 ## See Also
 
-- [Vue Composables API](../../api/integrations/vue.md)
+- [Vue Composables Example](../vue-composables.md)
 - [React Examples](./react.md)
 - [Angular Examples](./angular.md)

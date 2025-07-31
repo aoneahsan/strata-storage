@@ -366,4 +366,4 @@ export default {
 
 - [Vue Integration](./frameworks/vue.md)
 - [React Hooks](./react-hooks.md)
-- [Composables Guide](../guides/integrations/vue-composables.md)
+- [Angular Services](./angular-services.md)
