@@ -11,6 +11,9 @@
     "android/",
     "scripts/"
   ],
+  "bin": {
+    "strata-storage": "./scripts/cli.js"
+  },
   "scripts": {
     "build": "yarn clean && yarn build:web && yarn build:types",
     "build:web": "node scripts/build.js",
