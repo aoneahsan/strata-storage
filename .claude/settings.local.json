@@ -509,7 +509,11 @@
       "Bash(git commit:*)",
       "WebFetch(domain:www.zakya.com)",
       "WebFetch(domain:www.npmjs.com)",
-      "WebFetch(domain:capawesome.io)"
+      "WebFetch(domain:capawesome.io)",
+      "Bash(do if [ -f \"$file\" ])",
+      "Bash(then echo \"EXISTS: $file\")",
+      "Bash(else echo \"MISSING: $file\")",
+      "Bash(fi)"
     ],
     "deny": []
   }
