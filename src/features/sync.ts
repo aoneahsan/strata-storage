@@ -219,7 +219,7 @@ export class SyncManager extends EventEmitter {
     };
 
     window.addEventListener('storage', listener);
-    
+
     // Create a SubscriptionCallback wrapper for the storage event listener
     const subscriptionCallback: SubscriptionCallback = (_change) => {
       // This is handled by the listener itself

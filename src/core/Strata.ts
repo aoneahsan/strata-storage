@@ -413,10 +413,12 @@ export class Strata {
   /**
    * Get adapter capabilities
    */
-  getCapabilities(storage?: StorageType): StorageCapabilities | Record<string, StorageCapabilities> {
+  getCapabilities(
+    storage?: StorageType,
+  ): StorageCapabilities | Record<string, StorageCapabilities> {
     if (storage) {
       const adapter = this.adapters.get(storage);
-      return adapter ? adapter.capabilities : {} as StorageCapabilities;
+      return adapter ? adapter.capabilities : ({} as StorageCapabilities);
     }
 
     // Return capabilities of all adapters

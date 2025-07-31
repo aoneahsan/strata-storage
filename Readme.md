@@ -2,11 +2,14 @@
 
 ## 📚 Documentation
 
-- **[Full Documentation](https://strata-storage.dev)** *(coming soon)*
-- **[API Reference](https://strata-storage.dev/api)**
-- **[Platform Guides](https://strata-storage.dev/platforms)**
-- **[Examples](https://strata-storage.dev/examples)**
-- **[GitHub](https://github.com/aoneahsan/strata-storage)**
+- **[Getting Started](./docs/getting-started/installation.md)** - Installation and setup
+- **[Quick Start Guide](./docs/getting-started/quick-start.md)** - Get running in minutes
+- **[API Reference](./docs/api/README.md)** - Complete API documentation
+- **[Configuration](./docs/getting-started/configuration.md)** - Configuration options
+- **[Platform Guides](./docs/guides/platforms/web.md)** - Platform-specific guides
+- **[Examples](./docs/examples/README.md)** - Code examples and recipes
+- **[GitHub](https://github.com/aoneahsan/strata-storage)** - Source code
+- **[NPM](https://www.npmjs.com/package/strata-storage)** - Package registry
 
 ---
 
