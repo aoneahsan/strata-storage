@@ -86,10 +86,26 @@ export { QueryEngine, createQueryEngine } from './features/query';
 export { TTLManager, createTTLManager } from './features/ttl';
 export type { TTLConfig, TTLOptions, ExpiredItem } from './features/ttl';
 export { MigrationManager } from './features/migration';
+export type { Migration as MigrationDefinition } from './features/migration';
 
 // Plugin definitions and main plugin
 export * from './plugin/definitions';
 export { StrataStorage } from './plugin';
+
+// Web Storage Adapters (for advanced users who want direct adapter access)
+export { MemoryAdapter } from './adapters/web/MemoryAdapter';
+export { LocalStorageAdapter } from './adapters/web/LocalStorageAdapter';
+export { SessionStorageAdapter } from './adapters/web/SessionStorageAdapter';
+export { IndexedDBAdapter } from './adapters/web/IndexedDBAdapter';
+export { CookieAdapter } from './adapters/web/CookieAdapter';
+export { CacheAdapter } from './adapters/web/CacheAdapter';
+
+// Capacitor Storage Adapters
+export { PreferencesAdapter } from './adapters/capacitor/PreferencesAdapter';
+export { SqliteAdapter } from './adapters/capacitor/SqliteAdapter';
+export type { SqliteConfig } from './adapters/capacitor/SqliteAdapter';
+export { SecureAdapter } from './adapters/capacitor/SecureAdapter';
+export { FilesystemAdapter } from './adapters/capacitor/FilesystemAdapter';
 
 /**
  * Create a new Strata instance with optional configuration
