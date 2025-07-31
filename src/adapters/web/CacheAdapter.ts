@@ -210,7 +210,7 @@ export class CacheAdapter extends BaseAdapter {
       const key = this.urlToKey(request.url);
       const value = await this.get<T>(key);
 
-      if (value && this.matchesCondition(value.value, condition)) {
+      if (value && this.queryEngine.matches(value.value, condition)) {
         results.push({ key, value: value.value });
       }
     }

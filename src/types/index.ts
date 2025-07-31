@@ -48,6 +48,21 @@ export interface StorageOptions {
   encrypt?: boolean;
 
   /**
+   * Password for encryption/decryption
+   */
+  encryptionPassword?: string;
+
+  /**
+   * Skip decryption when reading encrypted values
+   */
+  skipDecryption?: boolean;
+
+  /**
+   * Ignore decryption errors and return null instead
+   */
+  ignoreDecryptionErrors?: boolean;
+
+  /**
    * Enable compression for this operation
    */
   compress?: boolean;
@@ -56,6 +71,21 @@ export interface StorageOptions {
    * Time to live in milliseconds
    */
   ttl?: number;
+
+  /**
+   * Sliding expiration - reset TTL on access
+   */
+  sliding?: boolean;
+
+  /**
+   * Expire at specific time (overrides ttl)
+   */
+  expireAt?: Date | number;
+
+  /**
+   * Expire after a certain date
+   */
+  expireAfter?: Date | number;
 
   /**
    * Tags for grouping and querying
@@ -373,7 +403,41 @@ export interface StrataConfig {
   encryption?: {
     enabled?: boolean;
     algorithm?: 'AES-GCM' | 'AES-CBC';
+    password?: string;
+    keyLength?: 128 | 192 | 256;
+    iterations?: number;
+    saltLength?: number;
     keyDerivation?: 'PBKDF2' | 'scrypt';
+  };
+
+  /**
+   * TTL (Time To Live) configuration
+   */
+  ttl?: {
+    /**
+     * Default TTL in milliseconds
+     */
+    defaultTTL?: number;
+
+    /**
+     * Cleanup interval in milliseconds (default: 60000 - 1 minute)
+     */
+    cleanupInterval?: number;
+
+    /**
+     * Enable automatic cleanup (default: true)
+     */
+    autoCleanup?: boolean;
+
+    /**
+     * Maximum number of items to check per cleanup cycle
+     */
+    batchSize?: number;
+
+    /**
+     * Callback when items expire
+     */
+    onExpire?: (keys: string[]) => void;
   };
 
   /**

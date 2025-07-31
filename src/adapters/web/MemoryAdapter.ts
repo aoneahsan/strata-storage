@@ -166,7 +166,7 @@ export class MemoryAdapter extends BaseAdapter {
     const results: Array<{ key: string; value: T }> = [];
 
     for (const [key, item] of this.storage.entries()) {
-      if (!this.isExpired(item) && this.matchesCondition(item.value, condition)) {
+      if (!this.isExpired(item) && this.queryEngine.matches(item.value, condition)) {
         results.push({
           key,
           value: deepClone(item.value) as T,

@@ -75,6 +75,18 @@ export {
 export { BaseAdapter } from './core/BaseAdapter';
 export { AdapterRegistry } from './core/AdapterRegistry';
 
+// Features
+export { EncryptionManager } from './features/encryption';
+export type { EncryptionConfig, EncryptedData } from './features/encryption';
+export { CompressionManager } from './features/compression';
+export type { CompressionConfig, CompressedData } from './features/compression';
+export { SyncManager, createSyncManager } from './features/sync';
+export type { SyncConfig, SyncMessage } from './features/sync';
+export { QueryEngine, createQueryEngine } from './features/query';
+export { TTLManager, createTTLManager } from './features/ttl';
+export type { TTLConfig, TTLOptions, ExpiredItem } from './features/ttl';
+export { MigrationManager } from './features/migration';
+
 // Plugin definitions and main plugin
 export * from './plugin/definitions';
 export { StrataStorage } from './plugin';

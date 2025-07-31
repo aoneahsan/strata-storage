@@ -20,7 +20,11 @@ import type {
 
 import { AdapterRegistry } from './AdapterRegistry';
 import { isBrowser, isNode, isCapacitor } from '@/utils';
-import { StorageError } from '@/utils/errors';
+import { StorageError, EncryptionError } from '@/utils/errors';
+import { EncryptionManager } from '@/features/encryption';
+import { CompressionManager } from '@/features/compression';
+import { SyncManager } from '@/features/sync';
+import { TTLManager } from '@/features/ttl';
 
 /**
  * Main Strata class - unified storage interface
@@ -31,6 +35,10 @@ export class Strata {
   private defaultAdapter?: StorageAdapter;
   private adapters: Map<StorageType, StorageAdapter> = new Map();
   private platform: Platform;
+  private encryptionManager?: EncryptionManager;
+  private compressionManager?: CompressionManager;
+  private syncManager?: SyncManager;
+  private ttlManager?: TTLManager;
 
   constructor(config: StrataConfig = {}) {
     this.config = this.normalizeConfig(config);
@@ -50,6 +58,43 @@ export class Strata {
 
     // Initialize configured adapters
     await this.initializeAdapters();
+
+    // Initialize encryption if enabled
+    if (this.config.encryption?.enabled) {
+      this.encryptionManager = new EncryptionManager(this.config.encryption);
+      if (!this.encryptionManager.isAvailable()) {
+        console.warn('Encryption enabled but Web Crypto API not available');
+      }
+    }
+
+    // Initialize compression if enabled
+    if (this.config.compression?.enabled) {
+      this.compressionManager = new CompressionManager(this.config.compression);
+    }
+
+    // Initialize sync if enabled
+    if (this.config.sync?.enabled) {
+      this.syncManager = new SyncManager(this.config.sync);
+      await this.syncManager.initialize();
+      
+      // Subscribe to sync events
+      this.syncManager.subscribe((_change) => {
+        // Forward sync events to subscribers
+        // The adapters will handle their own change events
+      });
+    }
+
+    // Initialize TTL manager
+    this.ttlManager = new TTLManager(this.config.ttl);
+    
+    // Set up TTL cleanup for default adapter
+    if (this.defaultAdapter && this.config.ttl?.autoCleanup !== false) {
+      this.ttlManager.startAutoCleanup(
+        () => this.defaultAdapter!.keys(),
+        (key) => this.defaultAdapter!.get(key),
+        (key) => this.defaultAdapter!.remove(key),
+      );
+    }
   }
 
   /**
@@ -62,21 +107,48 @@ export class Strata {
     if (!value) return null;
 
     // Handle TTL
-    if (value.expires && Date.now() > value.expires) {
+    if (this.ttlManager && this.ttlManager.isExpired(value)) {
       await adapter.remove(key);
       return null;
     }
 
+    // Update sliding TTL if configured
+    if (options?.sliding && value.expires && this.ttlManager) {
+      const updatedValue = this.ttlManager.updateExpiration(value, options);
+      if (updatedValue !== value) {
+        await adapter.set(key, updatedValue);
+      }
+    }
+
     // Handle decryption if needed
-    if (value.encrypted && this.config.encryption?.enabled) {
-      // Decryption will be handled by encryption feature
-      // For now, just return the value
+    if (value.encrypted && this.encryptionManager) {
+      try {
+        if (!options?.skipDecryption) {
+          const password = options?.encryptionPassword || this.config.encryption?.password;
+          if (!password) {
+            throw new EncryptionError('Encrypted value requires password for decryption');
+          }
+          const decrypted = await this.encryptionManager.decrypt<T>(value.value as any, password);
+          return decrypted;
+        }
+      } catch (error) {
+        if (options?.ignoreDecryptionErrors) {
+          console.warn(`Failed to decrypt key ${key}:`, error);
+          return null;
+        }
+        throw error;
+      }
     }
 
     // Handle decompression if needed
-    if (value.compressed && this.config.compression?.enabled) {
-      // Decompression will be handled by compression feature
-      // For now, just return the value
+    if (value.compressed && this.compressionManager) {
+      try {
+        const decompressed = await this.compressionManager.decompress<T>(value.value as any);
+        return decompressed;
+      } catch (error) {
+        console.warn(`Failed to decompress key ${key}:`, error);
+        return value.value;
+      }
     }
 
     return value.value;
@@ -89,36 +161,55 @@ export class Strata {
     const adapter = await this.selectAdapter(options?.storage);
     const now = Date.now();
 
-    const processedValue = value;
+    let processedValue: any = value;
+    let compressed = false;
 
     // Handle compression if needed
-    if (options?.compress || this.config.compression?.enabled) {
-      // Compression will be handled by compression feature
-      // For now, just use the value as-is
+    const shouldCompress = options?.compress ?? this.config.compression?.enabled;
+    
+    if (shouldCompress && this.compressionManager) {
+      const compressedResult = await this.compressionManager.compress(value);
+      if (this.compressionManager.isCompressedData(compressedResult)) {
+        processedValue = compressedResult;
+        compressed = true;
+      }
     }
 
     // Handle encryption if needed
-    if (options?.encrypt || this.config.encryption?.enabled) {
-      // Encryption will be handled by encryption feature
-      // For now, just use the value as-is
+    const shouldEncrypt = options?.encrypt ?? this.config.encryption?.enabled;
+    let encrypted = false;
+
+    if (shouldEncrypt && this.encryptionManager) {
+      const password = options?.encryptionPassword || this.config.encryption?.password;
+      if (!password) {
+        throw new EncryptionError('Encryption enabled but no password provided');
+      }
+      processedValue = await this.encryptionManager.encrypt(value, password);
+      encrypted = true;
     }
 
     const storageValue = {
       value: processedValue,
       created: now,
       updated: now,
-      expires: options?.ttl ? now + options.ttl : undefined,
+      expires: this.ttlManager ? this.ttlManager.calculateExpiration(options) : undefined,
       tags: options?.tags,
       metadata: options?.metadata,
-      encrypted: options?.encrypt || false,
-      compressed: options?.compress || false,
+      encrypted: encrypted,
+      compressed: compressed,
     };
 
     await adapter.set(key, storageValue);
 
-    // Handle sync if enabled
-    if (this.config.sync?.enabled) {
-      await this.syncToOtherStorages(key, storageValue, adapter.name);
+    // Broadcast change for sync
+    if (this.syncManager) {
+      this.syncManager.broadcast({
+        type: 'set',
+        key,
+        value: storageValue,
+        storage: adapter.name,
+        timestamp: now,
+      });
     }
   }
 
@@ -129,9 +220,14 @@ export class Strata {
     const adapter = await this.selectAdapter(options?.storage);
     await adapter.remove(key);
 
-    // Handle sync if enabled
-    if (this.config.sync?.enabled) {
-      await this.syncRemovalToOtherStorages(key, adapter.name);
+    // Broadcast removal for sync
+    if (this.syncManager) {
+      this.syncManager.broadcast({
+        type: 'remove',
+        key,
+        storage: adapter.name,
+        timestamp: Date.now(),
+      });
     }
   }
 
@@ -323,6 +419,110 @@ export class Strata {
   }
 
   /**
+   * Generate a secure password for encryption
+   */
+  generatePassword(length?: number): string {
+    if (!this.encryptionManager) {
+      throw new EncryptionError('Encryption not initialized');
+    }
+    return this.encryptionManager.generatePassword(length);
+  }
+
+  /**
+   * Hash data using SHA-256
+   */
+  async hash(data: string): Promise<string> {
+    if (!this.encryptionManager) {
+      throw new EncryptionError('Encryption not initialized');
+    }
+    return this.encryptionManager.hash(data);
+  }
+
+  /**
+   * Get TTL (time to live) for a key
+   */
+  async getTTL(key: string, options?: StorageOptions): Promise<number | null> {
+    if (!this.ttlManager) return null;
+    
+    const adapter = await this.selectAdapter(options?.storage);
+    const value = await adapter.get(key);
+    
+    if (!value) return null;
+    return this.ttlManager.getTimeToLive(value);
+  }
+
+  /**
+   * Extend TTL for a key
+   */
+  async extendTTL(key: string, extension: number, options?: StorageOptions): Promise<void> {
+    if (!this.ttlManager) {
+      throw new StorageError('TTL manager not initialized');
+    }
+    
+    const adapter = await this.selectAdapter(options?.storage);
+    const value = await adapter.get(key);
+    
+    if (!value) {
+      throw new StorageError(`Key ${key} not found`);
+    }
+    
+    const updated = this.ttlManager.extendTTL(value, extension);
+    await adapter.set(key, updated);
+  }
+
+  /**
+   * Make a key persistent (remove TTL)
+   */
+  async persist(key: string, options?: StorageOptions): Promise<void> {
+    if (!this.ttlManager) {
+      throw new StorageError('TTL manager not initialized');
+    }
+    
+    const adapter = await this.selectAdapter(options?.storage);
+    const value = await adapter.get(key);
+    
+    if (!value) {
+      throw new StorageError(`Key ${key} not found`);
+    }
+    
+    const persisted = this.ttlManager.persist(value);
+    await adapter.set(key, persisted);
+  }
+
+  /**
+   * Get items expiring within a time window
+   */
+  async getExpiring(
+    timeWindow: number,
+    options?: StorageOptions,
+  ): Promise<Array<{ key: string; expiresIn: number }>> {
+    if (!this.ttlManager) return [];
+    
+    const adapter = await this.selectAdapter(options?.storage);
+    return this.ttlManager.getExpiring(
+      timeWindow,
+      () => adapter.keys(),
+      (key) => adapter.get(key),
+    );
+  }
+
+  /**
+   * Manually trigger TTL cleanup
+   */
+  async cleanupExpired(options?: StorageOptions): Promise<number> {
+    if (!this.ttlManager) return 0;
+    
+    const adapter = await this.selectAdapter(options?.storage);
+    const expired = await this.ttlManager.cleanup(
+      () => adapter.keys(),
+      (key) => adapter.get(key),
+      (key) => adapter.remove(key),
+    );
+    
+    return expired.length;
+  }
+
+  /**
    * Close all adapters
    */
   async close(): Promise<void> {
@@ -332,6 +532,21 @@ export class Strata {
       }
     }
     this.adapters.clear();
+    
+    // Clear encryption cache
+    if (this.encryptionManager) {
+      this.encryptionManager.clearCache();
+    }
+    
+    // Close sync manager
+    if (this.syncManager) {
+      this.syncManager.close();
+    }
+    
+    // Clear TTL manager
+    if (this.ttlManager) {
+      this.ttlManager.clear();
+    }
   }
 
   // Private methods
@@ -459,35 +674,5 @@ export class Strata {
     }
 
     throw new StorageError(`No available adapter found for storage types: ${storages.join(', ')}`);
-  }
-
-  private async syncToOtherStorages(
-    key: string,
-    value: any,
-    sourceStorage: StorageType,
-  ): Promise<void> {
-    if (!this.config.sync?.storages) return;
-
-    for (const storage of this.config.sync.storages) {
-      if (storage !== sourceStorage) {
-        const adapter = this.adapters.get(storage);
-        if (adapter) {
-          await adapter.set(key, value);
-        }
-      }
-    }
-  }
-
-  private async syncRemovalToOtherStorages(key: string, sourceStorage: StorageType): Promise<void> {
-    if (!this.config.sync?.storages) return;
-
-    for (const storage of this.config.sync.storages) {
-      if (storage !== sourceStorage) {
-        const adapter = this.adapters.get(storage);
-        if (adapter) {
-          await adapter.remove(key);
-        }
-      }
-    }
   }
 }

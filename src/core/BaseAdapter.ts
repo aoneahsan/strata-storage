@@ -16,6 +16,7 @@ import type {
 } from '@/types';
 import { NotSupportedError } from '@/utils/errors';
 import { EventEmitter, matchGlob, getObjectSize } from '@/utils';
+import { QueryEngine } from '@/features/query';
 
 /**
  * Abstract base adapter that implements common functionality
@@ -25,6 +26,7 @@ export abstract class BaseAdapter implements StorageAdapter {
   abstract readonly capabilities: StorageCapabilities;
 
   protected eventEmitter = new EventEmitter();
+  protected queryEngine = new QueryEngine();
   protected ttlCleanupInterval?: ReturnType<typeof setInterval>;
   protected ttlCheckInterval = 60000; // Check every minute
 
@@ -227,138 +229,12 @@ export abstract class BaseAdapter implements StorageAdapter {
 
     for (const key of keys) {
       const item = await this.get<T>(key);
-      if (item && !this.isExpired(item) && this.matchesCondition(item.value, condition)) {
+      if (item && !this.isExpired(item) && this.queryEngine.matches(item.value, condition)) {
         results.push({ key, value: item.value });
       }
     }
 
     return results;
-  }
-
-  /**
-   * Check if value matches query condition
-   */
-  protected matchesCondition(value: unknown, condition: QueryCondition): boolean {
-    for (const [key, criteria] of Object.entries(condition)) {
-      if (key.startsWith('$')) {
-        // Handle operators
-        switch (key) {
-          case '$and':
-            if (!Array.isArray(criteria)) return false;
-            return criteria.every((cond) => this.matchesCondition(value, cond));
-
-          case '$or':
-            if (!Array.isArray(criteria)) return false;
-            return criteria.some((cond) => this.matchesCondition(value, cond));
-
-          case '$not':
-            return !this.matchesCondition(value, criteria as QueryCondition);
-
-          default:
-            return false;
-        }
-      } else {
-        // Handle field matching
-        const fieldValue = this.getFieldValue(value, key);
-        if (!this.matchesCriteria(fieldValue, criteria)) {
-          return false;
-        }
-      }
-    }
-
-    return true;
-  }
-
-  /**
-   * Get nested field value
-   */
-  protected getFieldValue(obj: unknown, path: string): unknown {
-    if (!obj || typeof obj !== 'object') return undefined;
-
-    const keys = path.split('.');
-    let current: unknown = obj;
-
-    for (const key of keys) {
-      if (current && typeof current === 'object' && key in current) {
-        current = (current as Record<string, unknown>)[key];
-      } else {
-        return undefined;
-      }
-    }
-
-    return current;
-  }
-
-  /**
-   * Check if value matches criteria
-   */
-  protected matchesCriteria(value: unknown, criteria: unknown): boolean {
-    if (criteria && typeof criteria === 'object' && !Array.isArray(criteria)) {
-      // Handle operators
-      for (const [op, operand] of Object.entries(criteria)) {
-        switch (op) {
-          case '$eq':
-            if (value !== operand) return false;
-            break;
-
-          case '$ne':
-            if (value === operand) return false;
-            break;
-
-          case '$gt':
-            if (typeof value !== 'number' || typeof operand !== 'number') return false;
-            if (value <= operand) return false;
-            break;
-
-          case '$gte':
-            if (typeof value !== 'number' || typeof operand !== 'number') return false;
-            if (value < operand) return false;
-            break;
-
-          case '$lt':
-            if (typeof value !== 'number' || typeof operand !== 'number') return false;
-            if (value >= operand) return false;
-            break;
-
-          case '$lte':
-            if (typeof value !== 'number' || typeof operand !== 'number') return false;
-            if (value > operand) return false;
-            break;
-
-          case '$in':
-            if (!Array.isArray(operand)) return false;
-            if (!operand.includes(value)) return false;
-            break;
-
-          case '$nin':
-            if (!Array.isArray(operand)) return false;
-            if (operand.includes(value)) return false;
-            break;
-
-          case '$regex': {
-            if (typeof value !== 'string') return false;
-            const regex = operand instanceof RegExp ? operand : new RegExp(operand as string);
-            if (!regex.test(value)) return false;
-            break;
-          }
-
-          case '$exists':
-            if ((value !== undefined) !== operand) return false;
-            break;
-
-          case '$type':
-            if (typeof value !== operand) return false;
-            break;
-
-          default:
-            return false;
-        }
-      }
-      return true;
-    }
-
-    // Direct equality
-    return value === criteria;
   }
 
   /**

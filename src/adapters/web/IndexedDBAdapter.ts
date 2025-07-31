@@ -277,7 +277,7 @@ export class IndexedDBAdapter extends BaseAdapter {
         const record = cursor.value;
         const { key, ...value } = record;
 
-        if (!this.isExpired(value) && this.matchesCondition(value.value, condition)) {
+        if (!this.isExpired(value) && this.queryEngine.matches(value.value, condition)) {
           results.push({ key, value: value.value as T });
         }
 
