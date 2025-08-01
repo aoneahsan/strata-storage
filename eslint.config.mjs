@@ -49,6 +49,6 @@ export default [
     },
   },
   {
-    ignores: ['dist/', 'node_modules/', 'coverage/', '*.js', 'scripts/', 'android/', 'ios/'],
+    ignores: ['dist/', 'node_modules/', 'coverage/', '*.js', 'scripts/', 'android/', 'ios/', 'src/integrations/'],
   },
 ];
