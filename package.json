@@ -2,9 +2,9 @@
   "name": "strata-storage",
   "version": "1.5.0",
   "description": "Zero-dependency universal storage plugin providing a unified API for all storage operations across web, Android, and iOS platforms",
+  "type": "module",
   "main": "dist/index.js",
-  "module": "dist/index.mjs",
-  "types": "dist/types/index.d.ts",
+  "types": "dist/index.d.ts",
   "files": [
     "dist/",
     "ios/",
@@ -17,24 +17,8 @@
   },
   "exports": {
     ".": {
-      "types": "./dist/types/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
-    },
-    "./react": {
-      "types": "./dist/types/integrations/react/index.d.ts",
-      "import": "./dist/integrations/react/index.mjs",
-      "require": "./dist/integrations/react/index.js"
-    },
-    "./vue": {
-      "types": "./dist/types/integrations/vue/index.d.ts",
-      "import": "./dist/integrations/vue/index.mjs",
-      "require": "./dist/integrations/vue/index.js"
-    },
-    "./angular": {
-      "types": "./dist/types/integrations/angular/index.d.ts",
-      "import": "./dist/integrations/angular/index.mjs",
-      "require": "./dist/integrations/angular/index.js"
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     }
   },
   "scripts": {
