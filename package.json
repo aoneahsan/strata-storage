@@ -3,8 +3,8 @@
   "version": "1.5.0",
   "description": "Zero-dependency universal storage plugin providing a unified API for all storage operations across web, Android, and iOS platforms",
   "main": "dist/index.js",
-  "module": "dist/index.esm.js",
-  "types": "dist/index.d.ts",
+  "module": "dist/index.mjs",
+  "types": "dist/types/index.d.ts",
   "files": [
     "dist/",
     "ios/",
@@ -17,32 +17,30 @@
   },
   "exports": {
     ".": {
-      "import": "./dist/index.esm.js",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
     },
     "./react": {
-      "import": "./dist/integrations/react/index.esm.js",
-      "require": "./dist/integrations/react/index.js",
-      "types": "./dist/integrations/react/index.d.ts"
+      "types": "./dist/types/integrations/react/index.d.ts",
+      "import": "./dist/integrations/react/index.mjs",
+      "require": "./dist/integrations/react/index.js"
     },
     "./vue": {
-      "import": "./dist/integrations/vue/index.esm.js",
-      "require": "./dist/integrations/vue/index.js",
-      "types": "./dist/integrations/vue/index.d.ts"
+      "types": "./dist/types/integrations/vue/index.d.ts",
+      "import": "./dist/integrations/vue/index.mjs",
+      "require": "./dist/integrations/vue/index.js"
     },
     "./angular": {
-      "import": "./dist/integrations/angular/index.esm.js",
-      "require": "./dist/integrations/angular/index.js",
-      "types": "./dist/integrations/angular/index.d.ts"
+      "types": "./dist/types/integrations/angular/index.d.ts",
+      "import": "./dist/integrations/angular/index.mjs",
+      "require": "./dist/integrations/angular/index.js"
     }
   },
   "scripts": {
-    "build": "yarn clean && yarn build:web && yarn build:types",
-    "build:web": "node scripts/build.js",
-    "build:types": "tsc --emitDeclarationOnly",
+    "build": "node scripts/build.js",
     "clean": "rm -rf dist/",
-    "lint": "eslint 'src/**/*.{ts,tsx}' --ignore-pattern 'src/integrations/**/*' --fix",
+    "lint": "eslint 'src/**/*.{ts,tsx}' --fix",
     "typecheck": "tsc --noEmit",
     "test": "vitest",
     "test:coverage": "vitest --coverage",
@@ -99,7 +97,7 @@
     }
   },
   "devDependencies": {
-    "@eslint/js": "^9.32.0",
+    "@eslint/js": "^10.0.0",
     "@types/node": "^24.1.0",
     "@types/react": "^19.1.9",
     "@typescript-eslint/eslint-plugin": "^8.38.0",
@@ -109,7 +107,7 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.3",
     "prettier": "^3.6.2",
-    "typescript": "^5.8.3",
+    "typescript": "^5.9.2",
     "typescript-eslint": "^8.38.0",
     "vitest": "^3.2.4"
   },

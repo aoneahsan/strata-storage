@@ -83,8 +83,8 @@ export class EncryptionManager {
       // Convert to base64 for storage
       return {
         data: this.bufferToBase64(encryptedBuffer),
-        salt: this.bufferToBase64(salt),
-        iv: this.bufferToBase64(iv),
+        salt: this.bufferToBase64(salt.buffer.slice(salt.byteOffset, salt.byteOffset + salt.byteLength) as ArrayBuffer),
+        iv: this.bufferToBase64(iv.buffer.slice(iv.byteOffset, iv.byteOffset + iv.byteLength) as ArrayBuffer),
         algorithm: this.config.algorithm,
         iterations: this.config.iterations,
       };
@@ -138,7 +138,8 @@ export class EncryptionManager {
     iterations: number = this.config.iterations,
   ): Promise<CryptoKey> {
     // Check cache
-    const cacheKey = `${password}-${this.bufferToBase64(salt)}-${iterations}`;
+    const saltBuffer = salt.buffer.slice(salt.byteOffset, salt.byteOffset + salt.byteLength) as ArrayBuffer;
+    const cacheKey = `${password}-${this.bufferToBase64(saltBuffer)}-${iterations}`;
     if (this.keyCache.has(cacheKey)) {
       return this.keyCache.get(cacheKey)!;
     }
@@ -156,7 +157,7 @@ export class EncryptionManager {
     const key = await crypto.subtle.deriveKey(
       {
         name: 'PBKDF2',
-        salt: salt,
+        salt: saltBuffer,
         iterations: iterations,
         hash: 'SHA-256',
       },
