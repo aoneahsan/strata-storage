@@ -19,6 +19,14 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./capacitor": {
+      "types": "./dist/capacitor.d.ts",
+      "default": "./dist/capacitor.js"
+    },
+    "./firebase": {
+      "types": "./dist/firebase.d.ts",
+      "default": "./dist/firebase.js"
     }
   },
   "scripts": {

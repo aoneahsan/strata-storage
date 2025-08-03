@@ -133,6 +133,14 @@ const distPackageJson = {
     '.': {
       types: './index.d.ts',
       default: './index.js'
+    },
+    './capacitor': {
+      types: './capacitor.d.ts',
+      default: './capacitor.js'
+    },
+    './firebase': {
+      types: './firebase.d.ts',
+      default: './firebase.js'
     }
   },
   author: packageJson.author,

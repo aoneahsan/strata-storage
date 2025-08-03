@@ -17,7 +17,7 @@ export interface StrataStoragePlugin {
   /**
    * Get a value from native storage
    */
-  get(options: NativeGetOptions): Promise<{ value: StorageValue | null }>;
+  get(options: NativeGetOptions): Promise<{ value: StorageValue<unknown> | null }>;
 
   /**
    * Set a value in native storage
@@ -118,7 +118,7 @@ export interface NativeGetOptions {
  */
 export interface NativeSetOptions {
   key: string;
-  value: StorageValue;
+  value: StorageValue<unknown>;
   storage: NativeStorageType;
   database?: string;
   table?: string;

@@ -9,6 +9,12 @@ const __dirname = path.dirname(__filename);
 
 console.log('\n🚀 Strata Storage - Zero Dependencies, Infinite Possibilities!\n');
 
+console.log('📚 Quick Start:');
+console.log('   import { Strata } from "strata-storage";');
+console.log('   const storage = new Strata();');
+console.log('   await storage.initialize();');
+console.log('   await storage.set("key", "value");\n');
+
 // Check if this is a Capacitor project
 const capacitorConfigPaths = [
   'capacitor.config.json',
@@ -21,17 +27,18 @@ const isCapacitorProject = capacitorConfigPaths.some(configPath =>
 );
 
 if (isCapacitorProject) {
-  console.log('📱 Capacitor project detected!');
+  console.log('📱 Capacitor Support Available (Optional):');
+  console.log('   import { registerCapacitorAdapters } from "strata-storage/capacitor";');
+  console.log('   await registerCapacitorAdapters(storage);');
   console.log('   Run "npx cap sync" to sync native code\n');
-} else {
-  console.log('🌐 Web project detected!');
-  console.log('   Strata works perfectly in web-only projects too!\n');
 }
 
-console.log('📚 Quick Start:');
-console.log('   import { Strata } from "strata-storage";');
-console.log('   const storage = new Strata();');
-console.log('   await storage.set("key", "value");\n');
+console.log('✨ Features:');
+console.log('   • Works everywhere - Web, Node.js, Mobile');
+console.log('   • Zero runtime dependencies');
+console.log('   • Optional Capacitor integration');
+console.log('   • Built-in encryption & compression');
+console.log('   • Cross-tab synchronization\n');
 
 console.log('📖 Documentation: https://github.com/aoneahsan/strata-storage');
 console.log('⭐ Star us on GitHub: https://github.com/aoneahsan/strata-storage\n');

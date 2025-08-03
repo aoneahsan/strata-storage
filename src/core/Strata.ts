@@ -20,7 +20,7 @@ import type {
 } from '@/types';
 
 import { AdapterRegistry } from './AdapterRegistry';
-import { isBrowser, isNode, isCapacitor } from '@/utils';
+import { isBrowser, isNode } from '@/utils';
 import { StorageError, EncryptionError } from '@/utils/errors';
 import { EncryptionManager, type EncryptedData } from '@/features/encryption';
 import { CompressionManager, type CompressedData } from '@/features/compression';
@@ -35,24 +35,40 @@ export class Strata {
   private registry: AdapterRegistry;
   private defaultAdapter?: StorageAdapter;
   private adapters: Map<StorageType, StorageAdapter> = new Map();
-  private platform: Platform;
+  private readonly _platform: Platform;
   private encryptionManager?: EncryptionManager;
   private compressionManager?: CompressionManager;
   private syncManager?: SyncManager;
   private ttlManager?: TTLManager;
+  private _initialized: boolean = false;
 
   constructor(config: StrataConfig = {}) {
     this.config = this.normalizeConfig(config);
-    this.platform = this.detectPlatform();
+    this._platform = this.detectPlatform();
     this.registry = new AdapterRegistry();
+  }
+
+
+  /**
+   * Check if Strata has been initialized
+   */
+  get isInitialized(): boolean {
+    return this._initialized;
+  }
+
+  /**
+   * Get the detected platform
+   */
+  get platform(): Platform {
+    return this._platform;
   }
 
   /**
    * Initialize Strata with available adapters
    */
   async initialize(): Promise<void> {
-    // Register all adapters based on platform
-    await this.registerAdapters();
+    // No automatic adapter registration - adapters should be registered before initialize()
+    // This allows for zero-dependency operation and explicit opt-in for features
 
     // Find and set default adapter
     await this.selectDefaultAdapter();
@@ -96,6 +112,9 @@ export class Strata {
         (key) => this.defaultAdapter!.remove(key),
       );
     }
+
+    // Mark as initialized
+    this._initialized = true;
   }
 
   /**
@@ -534,6 +553,28 @@ export class Strata {
   }
 
   /**
+   * Register a custom storage adapter
+   * This allows external adapters to be registered after initialization
+   * 
+   * @example
+   * ```typescript
+   * import { MyCustomAdapter } from './my-adapter';
+   * storage.registerAdapter(new MyCustomAdapter());
+   * ```
+   */
+  registerAdapter(adapter: StorageAdapter): void {
+    this.registry.register(adapter);
+  }
+
+  /**
+   * Get the adapter registry (for advanced use cases)
+   * @internal
+   */
+  getRegistry(): AdapterRegistry {
+    return this.registry;
+  }
+
+  /**
    * Close all adapters
    */
   async close(): Promise<void> {
@@ -571,62 +612,27 @@ export class Strata {
   }
 
   private detectPlatform(): Platform {
-    if (isCapacitor()) return 'web'; // Capacitor runs in web context
     if (isBrowser()) return 'web';
     if (isNode()) return 'node';
     return 'web'; // Default to web
   }
 
   private getDefaultStorages(): StorageType[] {
-    switch (this.platform) {
-      case 'web':
-        if (isCapacitor()) {
-          return ['preferences', 'sqlite', 'indexedDB', 'localStorage', 'memory'];
-        }
-        return ['indexedDB', 'localStorage', 'memory'];
-      case 'node':
-        return ['filesystem', 'memory'];
-      case 'ios':
-      case 'android':
-        return ['preferences', 'sqlite', 'secure', 'memory'];
-      default:
-        return ['memory'];
+    // Only return adapters that are actually registered
+    const registered = Array.from(this.registry.getAll().keys()).map(key => String(key));
+    
+    // Prefer these storages in order if available
+    const preferredOrder = ['indexedDB', 'localStorage', 'sessionStorage', 'memory'];
+    const available = preferredOrder.filter(storage => registered.includes(storage));
+    
+    // Always include memory as fallback if registered
+    if (available.length === 0 && registered.includes('memory')) {
+      return ['memory'];
     }
+    
+    return (available.length > 0 ? available : registered) as StorageType[];
   }
 
-  private async registerAdapters(): Promise<void> {
-    // Register adapters based on platform
-    if (this.platform === 'web') {
-      // Dynamically import and register web adapters
-      const { MemoryAdapter } = await import('@/adapters/web/MemoryAdapter');
-      const { LocalStorageAdapter } = await import('@/adapters/web/LocalStorageAdapter');
-      const { SessionStorageAdapter } = await import('@/adapters/web/SessionStorageAdapter');
-      const { IndexedDBAdapter } = await import('@/adapters/web/IndexedDBAdapter');
-      const { CookieAdapter } = await import('@/adapters/web/CookieAdapter');
-      const { CacheAdapter } = await import('@/adapters/web/CacheAdapter');
-
-      this.registry.register(new MemoryAdapter());
-      this.registry.register(new LocalStorageAdapter());
-      this.registry.register(new SessionStorageAdapter());
-      this.registry.register(new IndexedDBAdapter());
-      this.registry.register(new CookieAdapter());
-      this.registry.register(new CacheAdapter());
-
-      // If running in Capacitor, also register native adapters
-      if (isCapacitor()) {
-        const { PreferencesAdapter } = await import('@/adapters/capacitor/PreferencesAdapter');
-        const { SqliteAdapter } = await import('@/adapters/capacitor/SqliteAdapter');
-        const { SecureAdapter } = await import('@/adapters/capacitor/SecureAdapter');
-        const { FilesystemAdapter } = await import('@/adapters/capacitor/FilesystemAdapter');
-
-        this.registry.register(new PreferencesAdapter());
-        this.registry.register(new SqliteAdapter());
-        this.registry.register(new SecureAdapter());
-        this.registry.register(new FilesystemAdapter());
-      }
-    }
-    // Additional adapters will be registered as they are implemented
-  }
 
   private async selectDefaultAdapter(): Promise<void> {
     const storages = this.config.defaultStorages || this.getDefaultStorages();

@@ -457,6 +457,17 @@ export interface StrataConfig {
     slowThreshold?: number;
     batchSize?: number;
   };
+
+  /**
+   * Auto-initialize on creation (default: true)
+   * Set to false for manual initialization control
+   */
+  autoInitialize?: boolean;
+
+  /**
+   * Default storage type when none specified
+   */
+  defaultStorage?: StorageType;
 }
 
 /**
@@ -642,4 +653,217 @@ export interface ImportOptions {
    * Merge strategy
    */
   merge?: 'replace' | 'deep' | 'shallow';
+}
+
+/**
+ * Adapter configuration type
+ */
+export interface AdapterConfig {
+  /**
+   * Adapter-specific configuration
+   */
+  [key: string]: unknown;
+}
+
+/**
+ * Query options
+ */
+export interface QueryOptions {
+  /**
+   * Limit number of results
+   */
+  limit?: number;
+
+  /**
+   * Skip number of results
+   */
+  skip?: number;
+
+  /**
+   * Sort by field
+   */
+  sort?: string | { [field: string]: 1 | -1 };
+
+  /**
+   * Select specific fields
+   */
+  select?: string[];
+}
+
+/**
+ * Sync configuration
+ */
+export interface SyncConfig {
+  /**
+   * Enable sync
+   */
+  enabled?: boolean;
+
+  /**
+   * Sync interval in milliseconds
+   */
+  interval?: number;
+
+  /**
+   * Storage types to sync
+   */
+  storages?: StorageType[];
+
+  /**
+   * Conflict resolution strategy
+   */
+  conflictResolution?: 'latest' | 'merge' | ((conflicts: unknown[]) => unknown);
+}
+
+/**
+ * Encryption configuration
+ */
+export interface EncryptionConfig {
+  /**
+   * Enable encryption
+   */
+  enabled?: boolean;
+
+  /**
+   * Encryption algorithm
+   */
+  algorithm?: 'AES-GCM' | 'AES-CBC';
+
+  /**
+   * Default password
+   */
+  password?: string;
+
+  /**
+   * Key derivation settings
+   */
+  keyLength?: 128 | 192 | 256;
+  iterations?: number;
+  saltLength?: number;
+  keyDerivation?: 'PBKDF2' | 'scrypt';
+}
+
+/**
+ * Compression configuration
+ */
+export interface CompressionConfig {
+  /**
+   * Enable compression
+   */
+  enabled?: boolean;
+
+  /**
+   * Minimum size to compress (bytes)
+   */
+  threshold?: number;
+
+  /**
+   * Compression algorithm
+   */
+  algorithm?: 'lz' | 'gzip';
+}
+
+/**
+ * Observer callback type
+ */
+export type ObserverCallback = (event: StorageEvent) => void;
+
+/**
+ * Storage event
+ */
+export interface StorageEvent {
+  /**
+   * Event type
+   */
+  type: 'set' | 'remove' | 'clear' | 'expire';
+
+  /**
+   * Affected key(s)
+   */
+  key?: string | string[];
+
+  /**
+   * New value (for set events)
+   */
+  value?: unknown;
+
+  /**
+   * Storage type
+   */
+  storage: StorageType;
+
+  /**
+   * Event timestamp
+   */
+  timestamp: number;
+}
+
+/**
+ * Storage error class
+ */
+export class StorageError extends Error {
+  constructor(message: string, public code?: string, public details?: unknown) {
+    super(message);
+    this.name = 'StorageError';
+  }
+}
+
+/**
+ * Storage metadata
+ */
+export interface StorageMetadata {
+  /**
+   * Creation timestamp
+   */
+  created?: number;
+
+  /**
+   * Last update timestamp
+   */
+  updated?: number;
+
+  /**
+   * Expiration timestamp
+   */
+  expires?: number;
+
+  /**
+   * Associated tags
+   */
+  tags?: string[];
+
+  /**
+   * Custom metadata
+   */
+  [key: string]: unknown;
+}
+
+/**
+ * TTL configuration
+ */
+export interface TTLConfig {
+  /**
+   * Default TTL in milliseconds
+   */
+  defaultTTL?: number;
+
+  /**
+   * Cleanup interval
+   */
+  cleanupInterval?: number;
+
+  /**
+   * Auto cleanup
+   */
+  autoCleanup?: boolean;
+
+  /**
+   * Batch size for cleanup
+   */
+  batchSize?: number;
+
+  /**
+   * Expiration callback
+   */
+  onExpire?: (keys: string[]) => void;
 }

@@ -389,3 +389,42 @@ export class EventEmitter {
     }
   }
 }
+
+/**
+ * Check if a value is a valid storage key
+ */
+export function isValidKey(key: unknown): key is string {
+  return typeof key === 'string' && key.length > 0;
+}
+
+/**
+ * Check if a value can be stored
+ */
+export function isValidValue(value: unknown): boolean {
+  // Allow all values except undefined
+  return value !== undefined;
+}
+
+/**
+ * Serialize a value for storage
+ */
+export function serializeValue(value: unknown): string {
+  return serialize(value);
+}
+
+/**
+ * Deserialize a value from storage
+ */
+export function deserializeValue(value: string): unknown {
+  return deserialize(value);
+}
+
+/**
+ * Create an error with additional context
+ */
+export function createError(message: string, code?: string, details?: unknown): Error {
+  const error = new Error(message);
+  (error as any).code = code;
+  (error as any).details = details;
+  return error;
+}
