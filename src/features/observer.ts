@@ -19,7 +19,7 @@ export class StorageObserver {
    * Emit a storage event
    */
   emit(event: StorageEvent): void {
-    this.observers.forEach(callback => {
+    this.observers.forEach((callback) => {
       try {
         callback(event);
       } catch (error) {

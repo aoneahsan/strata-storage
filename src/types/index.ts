@@ -802,7 +802,11 @@ export interface StorageEvent {
  * Storage error class
  */
 export class StorageError extends Error {
-  constructor(message: string, public code?: string, public details?: unknown) {
+  constructor(
+    message: string,
+    public code?: string,
+    public details?: unknown,
+  ) {
     super(message);
     this.name = 'StorageError';
   }

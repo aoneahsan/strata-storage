@@ -35,7 +35,7 @@ export type {
   StorageError,
   StorageCapabilities,
   StorageMetadata,
-  TTLConfig
+  TTLConfig,
 } from './types';
 
 // Utils
@@ -48,7 +48,7 @@ export {
   createError,
   retry,
   debounce,
-  throttle
+  throttle,
 } from './utils';
 
 // Create and export a default storage instance that works immediately
@@ -63,7 +63,7 @@ import { MemoryAdapter } from './adapters/web/MemoryAdapter';
 // Create a singleton instance with web adapters pre-registered
 const storage = new Strata({
   defaultStorage: 'memory', // Always available fallback
-  autoInitialize: false // We'll initialize it ourselves
+  autoInitialize: false, // We'll initialize it ourselves
 });
 
 // Register only web adapters by default

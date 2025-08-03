@@ -4,8 +4,8 @@
  * This is now optional and only loaded when Capacitor adapters are used
  */
 
-import type { 
-  StrataStoragePlugin, 
+import type {
+  StrataStoragePlugin,
   NativeStorageType,
   NativeGetOptions,
   NativeSetOptions,
@@ -13,7 +13,7 @@ import type {
   NativeClearOptions,
   NativeKeysOptions,
   NativeSizeOptions,
-  NativeSizeResult
+  NativeSizeResult,
 } from './definitions';
 import type { StorageValue } from '@/types';
 
@@ -46,7 +46,7 @@ class LazyStrataStoragePlugin implements StrataStoragePlugin {
           Capacitor?: { registerPlugin: (name: string, config: unknown) => StrataStoragePlugin };
         }
       ).Capacitor;
-      
+
       if (cap && cap.registerPlugin) {
         try {
           this.plugin = cap.registerPlugin('StrataStorage', {
@@ -98,27 +98,27 @@ class LazyStrataStoragePlugin implements StrataStoragePlugin {
   get setKeychain() {
     return this.getPlugin().setKeychain;
   }
-  
+
   get getKeychain() {
     return this.getPlugin().getKeychain;
   }
-  
+
   get setEncryptedPreference() {
     return this.getPlugin().setEncryptedPreference;
   }
-  
+
   get getEncryptedPreference() {
     return this.getPlugin().getEncryptedPreference;
   }
-  
+
   get query() {
     return this.getPlugin().query;
   }
-  
+
   get getUserDefaults() {
     return this.getPlugin().getUserDefaults;
   }
-  
+
   get setUserDefaults() {
     return this.getPlugin().setUserDefaults;
   }

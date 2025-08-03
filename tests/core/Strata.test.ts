@@ -1,14 +1,10 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { Strata } from '@/core/Strata';
+import { storage } from '@/index';
 
 describe('Strata', () => {
-  let storage: Strata;
-
   beforeEach(async () => {
-    storage = new Strata({
-      defaultStorages: ['memory'],
-    });
-    await storage.initialize();
+    // Clear storage before each test
+    await storage.clear();
   });
 
   describe('Basic Operations', () => {
@@ -114,27 +110,27 @@ describe('Strata', () => {
     });
 
     it('should query with $eq operator', async () => {
-      const results = await storage.query({ name: 'Alice' });
+      const results = await storage.query({ 'value.name': 'Alice' });
       expect(results).toHaveLength(1);
       expect(results[0].value).toEqual({ name: 'Alice', age: 25 });
     });
 
     it('should query with $gt operator', async () => {
-      const results = await storage.query({ age: { $gt: 30 } });
+      const results = await storage.query({ 'value.age': { $gt: 30 } });
       expect(results).toHaveLength(1);
       expect(results[0].value).toEqual({ name: 'Charlie', age: 35 });
     });
 
     it('should query with $in operator', async () => {
       const results = await storage.query({ 
-        name: { $in: ['Alice', 'Charlie'] } 
+        'value.name': { $in: ['Alice', 'Charlie'] } 
       });
       expect(results).toHaveLength(2);
     });
 
     it('should query with $regex operator', async () => {
       const results = await storage.query({ 
-        name: { $regex: '^[AC]' } 
+        'value.name': { $regex: '^[AC]' } 
       });
       expect(results).toHaveLength(2);
     });

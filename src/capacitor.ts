@@ -20,8 +20,9 @@ export { StrataStorage } from './plugin';
  */
 export async function registerCapacitorAdapters(storage: Strata): Promise<void> {
   // Check if Capacitor is available
-  const hasCapacitor = typeof window !== 'undefined' && 
-    (window as any).Capacitor && 
+  const hasCapacitor =
+    typeof window !== 'undefined' &&
+    (window as any).Capacitor &&
     (window as any).Capacitor.isNativePlatform();
 
   if (!hasCapacitor) {
@@ -45,9 +46,11 @@ export async function registerCapacitorAdapters(storage: Strata): Promise<void> 
  * Helper to check if running in Capacitor environment
  */
 export function isCapacitorEnvironment(): boolean {
-  return typeof window !== 'undefined' && 
-    (window as any).Capacitor && 
-    (window as any).Capacitor.isNativePlatform();
+  return (
+    typeof window !== 'undefined' &&
+    (window as any).Capacitor &&
+    (window as any).Capacitor.isNativePlatform()
+  );
 }
 
 /**

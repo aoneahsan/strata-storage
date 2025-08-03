@@ -83,7 +83,13 @@ export class QueryEngine {
         return this.compare(value, operand as number | string) <= 0;
 
       case '$in':
-        return Array.isArray(operand) && operand.some((v) => this.equals(value, v));
+        if (!Array.isArray(operand)) return false;
+        // If value is an array, check if any operand value is in the array
+        if (Array.isArray(value)) {
+          return operand.some((v) => value.some((item) => this.equals(item, v)));
+        }
+        // Otherwise check if value equals any operand value
+        return operand.some((v) => this.equals(value, v));
 
       case '$nin':
         return Array.isArray(operand) && !operand.some((v) => this.equals(value, v));

@@ -23,12 +23,12 @@ export interface FirebaseSyncConfig {
  */
 export async function enableFirebaseSync(
   storage: Strata,
-  config: FirebaseSyncConfig
+  config: FirebaseSyncConfig,
 ): Promise<void> {
   // Dynamically import Firebase only when this function is called
   try {
     const { initializeApp, getApps } = await import('firebase/app');
-    
+
     // Initialize Firebase if not already initialized
     if (!getApps().length) {
       initializeApp({
@@ -159,7 +159,9 @@ export async function enableFirebaseSync(
 
     console.log('Firebase sync enabled successfully');
   } catch (error) {
-    throw new Error(`Failed to enable Firebase sync: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw new Error(
+      `Failed to enable Firebase sync: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    );
   }
 }
 

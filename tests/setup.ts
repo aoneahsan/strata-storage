@@ -1,16 +1,27 @@
 // Test setup file
-import { beforeEach, afterEach } from 'vitest';
+import { beforeEach, afterEach, vi } from 'vitest';
 
-// Mock browser APIs
-global.crypto = {
-  getRandomValues: (arr: Uint8Array) => {
-    for (let i = 0; i < arr.length; i++) {
-      arr[i] = Math.floor(Math.random() * 256);
-    }
-    return arr;
-  },
-  subtle: {} as SubtleCrypto,
-} as Crypto;
+// Mock browser APIs if not available
+if (typeof crypto === 'undefined' || !crypto.subtle) {
+  Object.defineProperty(globalThis, 'crypto', {
+    value: {
+      getRandomValues: (arr: Uint8Array) => {
+        for (let i = 0; i < arr.length; i++) {
+          arr[i] = Math.floor(Math.random() * 256);
+        }
+        return arr;
+      },
+      subtle: {
+        encrypt: vi.fn(),
+        decrypt: vi.fn(),
+        generateKey: vi.fn(),
+        digest: vi.fn(),
+      },
+    },
+    writable: true,
+    configurable: true,
+  });
+}
 
 // Mock localStorage
 const localStorageMock = (() => {
@@ -38,10 +49,14 @@ const localStorageMock = (() => {
 
 Object.defineProperty(window, 'localStorage', {
   value: localStorageMock,
+  writable: true,
+  configurable: true,
 });
 
 Object.defineProperty(window, 'sessionStorage', {
   value: localStorageMock,
+  writable: true,
+  configurable: true,
 });
 
 // Clean up between tests

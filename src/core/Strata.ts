@@ -48,7 +48,6 @@ export class Strata {
     this.registry = new AdapterRegistry();
   }
 
-
   /**
    * Check if Strata has been initialized
    */
@@ -555,7 +554,7 @@ export class Strata {
   /**
    * Register a custom storage adapter
    * This allows external adapters to be registered after initialization
-   * 
+   *
    * @example
    * ```typescript
    * import { MyCustomAdapter } from './my-adapter';
@@ -606,7 +605,7 @@ export class Strata {
   private normalizeConfig(config: StrataConfig): StrataConfig {
     return {
       platform: config.platform || this.detectPlatform(),
-      defaultStorages: config.defaultStorages || this.getDefaultStorages(),
+      defaultStorages: config.defaultStorages || ['memory'], // Default to memory adapter
       ...config,
     };
   }
@@ -619,20 +618,19 @@ export class Strata {
 
   private getDefaultStorages(): StorageType[] {
     // Only return adapters that are actually registered
-    const registered = Array.from(this.registry.getAll().keys()).map(key => String(key));
-    
+    const registered = Array.from(this.registry.getAll().keys()).map((key) => String(key));
+
     // Prefer these storages in order if available
     const preferredOrder = ['indexedDB', 'localStorage', 'sessionStorage', 'memory'];
-    const available = preferredOrder.filter(storage => registered.includes(storage));
-    
+    const available = preferredOrder.filter((storage) => registered.includes(storage));
+
     // Always include memory as fallback if registered
     if (available.length === 0 && registered.includes('memory')) {
       return ['memory'];
     }
-    
+
     return (available.length > 0 ? available : registered) as StorageType[];
   }
-
 
   private async selectDefaultAdapter(): Promise<void> {
     const storages = this.config.defaultStorages || this.getDefaultStorages();
