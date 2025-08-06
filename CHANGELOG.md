@@ -3,6 +3,12 @@
 ## [2.0.2] - 2025-08-06
 
 ### Fixed
+- Added missing LICENSE file
+- Added .npmignore file to exclude unnecessary files from npm package
+
+## [2.0.1] - 2025-08-06
+
+### Fixed
 - Fixed BaseAdapter and StorageAdapter interface mismatch where `subscribe` and `close` methods were incorrectly marked as optional
 - Fixed adapter initialization flow to prevent double initialization
 - Fixed "No available storage adapters found" error by improving adapter detection and initialization
