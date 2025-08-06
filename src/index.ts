@@ -62,30 +62,43 @@ import { MemoryAdapter } from './adapters/web/MemoryAdapter';
 
 // Create a singleton instance with web adapters pre-registered
 const storage = new Strata({
-  defaultStorage: 'memory', // Always available fallback
+  defaultStorages: ['memory', 'localStorage', 'sessionStorage', 'indexedDB'], // Order of preference
   autoInitialize: false, // We'll initialize it ourselves
 });
 
 // Register only web adapters by default
-storage.registerAdapter(new MemoryAdapter());
-storage.registerAdapter(new LocalStorageAdapter());
-storage.registerAdapter(new SessionStorageAdapter());
-storage.registerAdapter(new IndexedDBAdapter());
-storage.registerAdapter(new CookieAdapter());
-storage.registerAdapter(new CacheAdapter());
+try {
+  // Memory adapter should always be available as fallback
+  storage.registerAdapter(new MemoryAdapter());
+
+  // Browser storage adapters
+  storage.registerAdapter(new LocalStorageAdapter());
+  storage.registerAdapter(new SessionStorageAdapter());
+  storage.registerAdapter(new IndexedDBAdapter());
+  storage.registerAdapter(new CookieAdapter());
+  storage.registerAdapter(new CacheAdapter());
+} catch (error) {
+  console.warn('Strata Storage adapter registration warning:', error);
+}
 
 // Initialize the storage instance
-(async () => {
-  try {
-    await storage.initialize();
-  } catch (error) {
-    console.warn('Strata Storage initialization warning:', error);
-    // Continue working even if some adapters fail
+let initializationPromise: Promise<void> | null = null;
+
+const ensureInitialized = async () => {
+  if (!initializationPromise) {
+    initializationPromise = storage.initialize().catch((error) => {
+      console.warn('Strata Storage initialization warning:', error);
+      // Continue working even if some adapters fail
+    });
   }
-})();
+  return initializationPromise;
+};
+
+// Start initialization immediately but don't block module loading
+ensureInitialized();
 
 // Export the ready-to-use storage instance
-export { storage };
+export { storage, ensureInitialized };
 
 // Default export for convenience
 export default storage;

@@ -191,9 +191,7 @@ export class MemoryAdapter extends BaseAdapter {
    * Close the adapter
    */
   async close(): Promise<void> {
-    if (super.close) {
-      await super.close();
-    }
+    await super.close();
     this.storage.clear();
     this.currentSize = 0;
   }

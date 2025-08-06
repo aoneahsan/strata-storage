@@ -532,7 +532,7 @@ export interface StorageAdapter {
   /**
    * Subscribe to changes
    */
-  subscribe?(callback: SubscriptionCallback): UnsubscribeFunction;
+  subscribe(callback: SubscriptionCallback): UnsubscribeFunction;
 
   /**
    * Query values (if supported)
@@ -547,7 +547,7 @@ export interface StorageAdapter {
   /**
    * Close/cleanup adapter
    */
-  close?(): Promise<void>;
+  close(): Promise<void>;
 }
 
 /**

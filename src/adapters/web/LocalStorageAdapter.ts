@@ -260,9 +260,7 @@ export class LocalStorageAdapter extends BaseAdapter {
     });
     this.listeners.clear();
 
-    if (super.close) {
-      await super.close();
-    }
+    await super.close();
   }
 
   /**

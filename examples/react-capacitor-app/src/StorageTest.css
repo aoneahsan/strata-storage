@@ -1,0 +1,135 @@
+.storage-test {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.storage-test h1 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 30px;
+}
+
+.storage-test.error {
+  text-align: center;
+  padding: 40px;
+}
+
+.storage-test.error pre {
+  background: #f5f5f5;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: left;
+  max-width: 600px;
+  margin: 20px auto;
+  overflow-x: auto;
+}
+
+.storage-test.loading {
+  text-align: center;
+  padding: 40px;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+.actions button {
+  padding: 10px 20px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.3s;
+}
+
+.actions button:hover {
+  background: #0056b3;
+}
+
+.adapters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.adapter-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  background: #f9f9f9;
+}
+
+.adapter-card h3 {
+  margin-top: 0;
+  color: #333;
+  text-transform: capitalize;
+}
+
+.adapter-card button {
+  padding: 8px 16px;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-bottom: 15px;
+}
+
+.adapter-card button:hover {
+  background: #218838;
+}
+
+.result {
+  margin-top: 15px;
+  padding: 15px;
+  border-radius: 5px;
+  background: white;
+  border: 1px solid #ddd;
+}
+
+.result.testing {
+  border-color: #ffc107;
+  background: #fff3cd;
+}
+
+.result.success {
+  border-color: #28a745;
+  background: #d4edda;
+}
+
+.result.error {
+  border-color: #dc3545;
+  background: #f8d7da;
+}
+
+.result ul {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0;
+}
+
+.result li {
+  padding: 5px 0;
+  font-family: monospace;
+}
+
+.result li.success {
+  color: #155724;
+}
+
+.result li.error {
+  color: #721c24;
+}
+
+.result .message {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #666;
+  word-wrap: break-word;
+}

@@ -32,6 +32,23 @@ await storage.set('user', { name: 'John', age: 30 });
 const user = await storage.get('user');
 ```
 
+### Complete Example App
+
+Check out our [React + Capacitor example app](./examples/react-capacitor-app) that demonstrates all features:
+- All storage adapters working correctly
+- Web, Android, and iOS platform support
+- Real-time testing interface
+- Complete error handling
+
+Run the example:
+```bash
+cd examples/react-capacitor-app
+yarn install
+yarn start  # For web
+npx cap run android  # For Android
+npx cap run ios  # For iOS
+```
+
 ### With Capacitor (Optional)
 ```typescript
 import { storage } from 'strata-storage';

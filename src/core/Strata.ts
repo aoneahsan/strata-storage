@@ -635,32 +635,44 @@ export class Strata {
   private async selectDefaultAdapter(): Promise<void> {
     const storages = this.config.defaultStorages || this.getDefaultStorages();
 
+    if (storages.length === 0) {
+      throw new StorageError('No storage adapters registered or configured');
+    }
+
     for (const storage of storages) {
       try {
-        const adapter = await this.registry.getInitialized(
-          storage,
-          this.config.adapters?.[storage as keyof typeof this.config.adapters],
-        );
+        const adapter = this.registry.get(storage);
+        if (!adapter) {
+          continue;
+        }
+
+        const isAvailable = await adapter.isAvailable();
+        if (!isAvailable) {
+          continue;
+        }
+
+        // Initialize adapter with config if provided
+        const config = this.config.adapters?.[storage as keyof typeof this.config.adapters];
+        await adapter.initialize(config);
+
         this.defaultAdapter = adapter;
         this.adapters.set(storage, adapter);
         return;
-      } catch {
+      } catch (error) {
+        console.warn(`Failed to initialize ${storage} adapter:`, error);
         // Continue to next adapter
       }
     }
 
-    throw new StorageError('No available storage adapters found');
+    throw new StorageError(
+      `No available storage adapters found. Tried: ${storages.join(', ')}. ` +
+        `Registered adapters: ${Array.from(this.registry.getAll().keys()).join(', ')}`,
+    );
   }
 
   private async initializeAdapters(): Promise<void> {
-    for (const [type, adapter] of this.adapters.entries()) {
-      const config = this.config.adapters?.[type as keyof typeof this.config.adapters];
-      if (config && typeof config === 'object') {
-        await adapter.initialize(config);
-      } else {
-        await adapter.initialize();
-      }
-    }
+    // Adapters are already initialized in selectDefaultAdapter
+    // This method is kept for compatibility but doesn't re-initialize
   }
 
   private async selectAdapter(storage?: StorageType | StorageType[]): Promise<StorageAdapter> {

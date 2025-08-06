@@ -46,8 +46,14 @@ export class AdapterRegistry {
 
     // Initialize if not already done
     if (!this.initialized.has(name)) {
-      await adapter.initialize(config);
-      this.initialized.add(name);
+      try {
+        await adapter.initialize(config);
+        this.initialized.add(name);
+      } catch (error) {
+        throw new AdapterNotAvailableError(name, {
+          reason: `Initialization failed: ${error instanceof Error ? error.message : String(error)}`,
+        });
+      }
     }
 
     return adapter;
@@ -70,8 +76,8 @@ export class AdapterRegistry {
   /**
    * Get all registered adapters
    */
-  getAll(): StorageAdapter[] {
-    return Array.from(this.adapters.values());
+  getAll(): Map<StorageType, StorageAdapter> {
+    return this.adapters;
   }
 
   /**

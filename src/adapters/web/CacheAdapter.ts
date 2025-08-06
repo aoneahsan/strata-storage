@@ -333,9 +333,7 @@ export class CacheAdapter extends BaseAdapter {
   async close(): Promise<void> {
     this.cache = undefined;
 
-    if (super.close) {
-      await super.close();
-    }
+    await super.close();
   }
 
   /**

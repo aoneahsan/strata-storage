@@ -371,9 +371,7 @@ export class IndexedDBAdapter extends BaseAdapter {
       this.db = undefined;
     }
 
-    if (super.close) {
-      await super.close();
-    }
+    await super.close();
   }
 
   /**

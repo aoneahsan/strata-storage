@@ -180,7 +180,7 @@ export abstract class BaseAdapter implements StorageAdapter {
   /**
    * Subscribe to changes (if supported)
    */
-  subscribe?(callback: SubscriptionCallback): UnsubscribeFunction {
+  subscribe(callback: SubscriptionCallback): UnsubscribeFunction {
     if (!this.capabilities.observable) {
       throw new NotSupportedError('subscribe', this.name);
     }
@@ -240,7 +240,7 @@ export abstract class BaseAdapter implements StorageAdapter {
   /**
    * Close adapter (cleanup)
    */
-  async close?(): Promise<void> {
+  async close(): Promise<void> {
     this.stopTTLCleanup();
     this.eventEmitter.removeAllListeners();
   }
