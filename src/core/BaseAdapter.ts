@@ -88,6 +88,11 @@ export abstract class BaseAdapter implements StorageAdapter {
       return keys.filter((key) => pattern.test(key));
     }
 
+    // If pattern doesn't contain glob characters, treat it as a prefix
+    if (!pattern.includes('*') && !pattern.includes('?')) {
+      return keys.filter((key) => key.startsWith(pattern));
+    }
+
     return keys.filter((key) => matchGlob(pattern, key));
   }
 
@@ -115,8 +120,10 @@ export abstract class BaseAdapter implements StorageAdapter {
     for (const key of keys) {
       let shouldDelete = true;
 
-      if (options?.pattern) {
-        shouldDelete = this.filterKeys([key], options.pattern).length > 0;
+      // Support both pattern and prefix options
+      const pattern = options?.pattern || options?.prefix;
+      if (pattern) {
+        shouldDelete = this.filterKeys([key], pattern).length > 0;
       }
 
       if (shouldDelete && options?.tags) {
@@ -148,9 +155,11 @@ export abstract class BaseAdapter implements StorageAdapter {
     let keySize = 0;
     let valueSize = 0;
     let metadataSize = 0;
+    const byKey: Record<string, number> = {};
 
     for (const key of keys) {
-      keySize += key.length * 2; // UTF-16
+      const keyLength = key.length * 2; // UTF-16
+      keySize += keyLength;
 
       const item = await this.get(key);
       if (item) {
@@ -158,6 +167,10 @@ export abstract class BaseAdapter implements StorageAdapter {
         valueSize += getObjectSize(item.value);
         metadataSize += size - getObjectSize(item.value);
         total += size;
+        
+        if (detailed) {
+          byKey[key] = size + keyLength;
+        }
       }
     }
 
@@ -167,6 +180,7 @@ export abstract class BaseAdapter implements StorageAdapter {
     };
 
     if (detailed) {
+      result.byKey = byKey;
       result.detailed = {
         keys: keySize,
         values: valueSize,

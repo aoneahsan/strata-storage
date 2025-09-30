@@ -61,11 +61,19 @@ Object.defineProperty(window, 'sessionStorage', {
 
 // Clean up between tests
 beforeEach(() => {
-  localStorage.clear();
-  sessionStorage.clear();
+  if (typeof localStorage !== 'undefined' && localStorage?.clear) {
+    localStorage.clear();
+  }
+  if (typeof sessionStorage !== 'undefined' && sessionStorage?.clear) {
+    sessionStorage.clear();
+  }
 });
 
 afterEach(() => {
-  localStorage.clear();
-  sessionStorage.clear();
+  if (typeof localStorage !== 'undefined' && localStorage?.clear) {
+    localStorage.clear();
+  }
+  if (typeof sessionStorage !== 'undefined' && sessionStorage?.clear) {
+    sessionStorage.clear();
+  }
 });

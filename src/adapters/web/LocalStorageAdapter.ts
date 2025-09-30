@@ -36,7 +36,7 @@ export class LocalStorageAdapter extends BaseAdapter {
   protected prefix: string;
   protected listeners: Map<SubscriptionCallback, (event: StorageEvent) => void> = new Map();
 
-  constructor(prefix = 'strata:') {
+  constructor(prefix = '') {
     super();
     this.prefix = prefix;
   }
@@ -133,7 +133,7 @@ export class LocalStorageAdapter extends BaseAdapter {
    * Clear localStorage
    */
   async clear(options?: ClearOptions): Promise<void> {
-    if (!options || (!options.pattern && !options.tags && !options.expiredOnly)) {
+    if (!options || (!options.pattern && !options.prefix && !options.tags && !options.expiredOnly)) {
       // Clear all with our prefix
       const keysToRemove: string[] = [];
       for (let i = 0; i < window.localStorage.length; i++) {
@@ -182,6 +182,7 @@ export class LocalStorageAdapter extends BaseAdapter {
     let count = 0;
     let keySize = 0;
     let valueSize = 0;
+    const byKey: Record<string, number> = {};
 
     for (let i = 0; i < window.localStorage.length; i++) {
       const fullKey = window.localStorage.key(i);
@@ -189,12 +190,14 @@ export class LocalStorageAdapter extends BaseAdapter {
         const item = window.localStorage.getItem(fullKey);
         if (item) {
           count++;
+          const key = fullKey.substring(this.prefix.length);
           const itemSize = (fullKey.length + item.length) * 2; // UTF-16
           total += itemSize;
 
           if (detailed) {
             keySize += fullKey.length * 2;
             valueSize += item.length * 2;
+            byKey[key] = itemSize;
           }
         }
       }
@@ -203,6 +206,7 @@ export class LocalStorageAdapter extends BaseAdapter {
     const result: SizeInfo = { total, count };
 
     if (detailed) {
+      result.byKey = byKey;
       result.detailed = {
         keys: keySize,
         values: valueSize,
@@ -217,6 +221,10 @@ export class LocalStorageAdapter extends BaseAdapter {
    * Subscribe to storage changes
    */
   subscribe(callback: SubscriptionCallback): UnsubscribeFunction {
+    // Subscribe to local changes from this adapter
+    const unsubscribeLocal = super.subscribe(callback);
+    
+    // Also subscribe to remote changes via storage events
     const listener = (event: StorageEvent) => {
       // Only process events from other windows/tabs
       if (event.storageArea !== window.localStorage) return;
@@ -242,6 +250,7 @@ export class LocalStorageAdapter extends BaseAdapter {
     this.listeners.set(callback, listener);
 
     return () => {
+      unsubscribeLocal();
       const storedListener = this.listeners.get(callback);
       if (storedListener) {
         window.removeEventListener('storage', storedListener);

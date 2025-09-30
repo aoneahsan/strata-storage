@@ -118,7 +118,7 @@ export class MemoryAdapter extends BaseAdapter {
    * Clear memory storage
    */
   async clear(options?: ClearOptions): Promise<void> {
-    if (!options || (!options.pattern && !options.tags && !options.expiredOnly)) {
+    if (!options || (!options.pattern && !options.prefix && !options.tags && !options.expiredOnly)) {
       // Clear everything
       this.storage.clear();
       this.currentSize = 0;
@@ -128,6 +128,12 @@ export class MemoryAdapter extends BaseAdapter {
 
     // Use base implementation for filtered clear
     await super.clear(options);
+    
+    // Recalculate size after filtered clear
+    this.currentSize = 0;
+    for (const value of this.storage.values()) {
+      this.currentSize += this.calculateSize(value);
+    }
   }
 
   /**

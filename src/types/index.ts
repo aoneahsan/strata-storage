@@ -230,6 +230,11 @@ export interface ClearOptions {
   pattern?: string | RegExp;
 
   /**
+   * Prefix to match keys (simple string prefix)
+   */
+  prefix?: string;
+
+  /**
    * Tags to filter by
    */
   tags?: string[];
@@ -258,6 +263,11 @@ export interface SizeInfo {
    * Size by storage type
    */
   byStorage?: Record<StorageType, number>;
+
+  /**
+   * Size by individual key
+   */
+  byKey?: Record<string, number>;
 
   /**
    * Number of items

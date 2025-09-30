@@ -24,7 +24,7 @@ export class SessionStorageAdapter extends LocalStorageAdapter {
     crossTab: false, // Session storage is per-tab
   };
 
-  constructor(prefix = 'strata:session:') {
+  constructor(prefix = '') {
     super(prefix);
   }
 
@@ -114,7 +114,7 @@ export class SessionStorageAdapter extends LocalStorageAdapter {
    * Clear sessionStorage
    */
   async clear(options?: import('@/types').ClearOptions): Promise<void> {
-    if (!options || (!options.pattern && !options.tags && !options.expiredOnly)) {
+    if (!options || (!options.pattern && !options.prefix && !options.tags && !options.expiredOnly)) {
       // Clear all with our prefix
       const keysToRemove: string[] = [];
       for (let i = 0; i < window.sessionStorage.length; i++) {
@@ -163,6 +163,7 @@ export class SessionStorageAdapter extends LocalStorageAdapter {
     let count = 0;
     let keySize = 0;
     let valueSize = 0;
+    const byKey: Record<string, number> = {};
 
     for (let i = 0; i < window.sessionStorage.length; i++) {
       const fullKey = window.sessionStorage.key(i);
@@ -170,12 +171,14 @@ export class SessionStorageAdapter extends LocalStorageAdapter {
         const item = window.sessionStorage.getItem(fullKey);
         if (item) {
           count++;
+          const key = fullKey.substring(this.prefix.length);
           const itemSize = (fullKey.length + item.length) * 2; // UTF-16
           total += itemSize;
 
           if (detailed) {
             keySize += fullKey.length * 2;
             valueSize += item.length * 2;
+            byKey[key] = itemSize;
           }
         }
       }
@@ -184,6 +187,7 @@ export class SessionStorageAdapter extends LocalStorageAdapter {
     const result: import('@/types').SizeInfo = { total, count };
 
     if (detailed) {
+      result.byKey = byKey;
       result.detailed = {
         keys: keySize,
         values: valueSize,
@@ -199,10 +203,10 @@ export class SessionStorageAdapter extends LocalStorageAdapter {
    * Note: sessionStorage doesn't fire storage events in the same tab
    */
   subscribe(
-    _callback: import('@/types').SubscriptionCallback,
+    callback: import('@/types').SubscriptionCallback,
   ): import('@/types').UnsubscribeFunction {
     // For sessionStorage, we only get local changes, not cross-tab
-    // So we'll just return a no-op unsubscribe function
-    return () => {};
+    // Use the base class subscription for local changes
+    return super.subscribe(callback);
   }
 }
