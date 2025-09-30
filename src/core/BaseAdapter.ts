@@ -167,7 +167,7 @@ export abstract class BaseAdapter implements StorageAdapter {
         valueSize += getObjectSize(item.value);
         metadataSize += size - getObjectSize(item.value);
         total += size;
-        
+
         if (detailed) {
           byKey[key] = size + keyLength;
         }
@@ -246,11 +246,11 @@ export abstract class BaseAdapter implements StorageAdapter {
       if (item && !this.isExpired(item)) {
         // Check if querying storage metadata (tags, metadata, etc) or the actual value
         let matches = false;
-        
+
         // Check for storage-level properties
         const storageProps = ['tags', 'metadata', 'created', 'updated', 'expires'];
-        const isStorageQuery = Object.keys(condition).some(k => storageProps.includes(k));
-        
+        const isStorageQuery = Object.keys(condition).some((k) => storageProps.includes(k));
+
         if (isStorageQuery) {
           // Query against the storage wrapper
           matches = this.queryEngine.matches(item, condition);
@@ -258,7 +258,7 @@ export abstract class BaseAdapter implements StorageAdapter {
           // Query against the stored value
           matches = this.queryEngine.matches(item.value, condition);
         }
-        
+
         if (matches) {
           results.push({ key, value: item.value });
         }

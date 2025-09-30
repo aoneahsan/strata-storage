@@ -133,7 +133,10 @@ export class LocalStorageAdapter extends BaseAdapter {
    * Clear localStorage
    */
   async clear(options?: ClearOptions): Promise<void> {
-    if (!options || (!options.pattern && !options.prefix && !options.tags && !options.expiredOnly)) {
+    if (
+      !options ||
+      (!options.pattern && !options.prefix && !options.tags && !options.expiredOnly)
+    ) {
       // Clear all with our prefix
       const keysToRemove: string[] = [];
       for (let i = 0; i < window.localStorage.length; i++) {
@@ -223,7 +226,7 @@ export class LocalStorageAdapter extends BaseAdapter {
   subscribe(callback: SubscriptionCallback): UnsubscribeFunction {
     // Subscribe to local changes from this adapter
     const unsubscribeLocal = super.subscribe(callback);
-    
+
     // Also subscribe to remote changes via storage events
     const listener = (event: StorageEvent) => {
       // Only process events from other windows/tabs

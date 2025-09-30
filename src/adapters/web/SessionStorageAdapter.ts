@@ -114,7 +114,10 @@ export class SessionStorageAdapter extends LocalStorageAdapter {
    * Clear sessionStorage
    */
   async clear(options?: import('@/types').ClearOptions): Promise<void> {
-    if (!options || (!options.pattern && !options.prefix && !options.tags && !options.expiredOnly)) {
+    if (
+      !options ||
+      (!options.pattern && !options.prefix && !options.tags && !options.expiredOnly)
+    ) {
       // Clear all with our prefix
       const keysToRemove: string[] = [];
       for (let i = 0; i < window.sessionStorage.length; i++) {
