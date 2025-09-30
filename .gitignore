@@ -132,3 +132,8 @@ docs/node_modules/
 .tern-port
 .yarn-integrity
 .eslintcache
+
+
+
+strata-storage*.tgz
+strata-storage*.zip
