@@ -58,7 +58,7 @@
     "android"
   ],
   "author": "Ahsan Mahmood",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/aoneahsan/strata-storage.git"

@@ -254,7 +254,14 @@ Automatically selects the best available storage based on:
 
 ## 📄 License
 
-MIT
+**Apache 2.0** - See [LICENSE.md](./LICENSE.md) for details
+
+### Quick Summary:
+- ✅ **Free for commercial use**
+- ✅ **Modify and distribute**
+- ✅ **Patent protection included**
+- ⚠️ **Must keep attribution**
+- ❌ **No warranty provided**
 
 ---
 
