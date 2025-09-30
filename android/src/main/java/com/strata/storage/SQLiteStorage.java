@@ -13,6 +13,7 @@ import java.util.Map;
 public class SQLiteStorage extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
     private static final String TABLE_NAME = "strata_storage";
+    private static final String DEFAULT_DB_NAME = "strata.db";
     
     private static final String KEY_ID = "key";
     private static final String KEY_VALUE = "value";
@@ -22,8 +23,12 @@ public class SQLiteStorage extends SQLiteOpenHelper {
     private static final String KEY_TAGS = "tags";
     private static final String KEY_METADATA = "metadata";
     
+    public SQLiteStorage(Context context) {
+        this(context, DEFAULT_DB_NAME);
+    }
+    
     public SQLiteStorage(Context context, String dbName) {
-        super(context, dbName != null ? dbName : "strata.db", null, DATABASE_VERSION);
+        super(context, dbName != null ? dbName : DEFAULT_DB_NAME, null, DATABASE_VERSION);
     }
     
     @Override
@@ -112,18 +117,43 @@ public class SQLiteStorage extends SQLiteOpenHelper {
     }
     
     public boolean clear() {
+        return clear(null);
+    }
+    
+    public boolean clear(String prefix) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_NAME, null, null);
+        int result;
+        
+        if (prefix != null) {
+            // Clear only keys with the given prefix
+            result = db.delete(TABLE_NAME, KEY_ID + " LIKE ?", new String[]{prefix + "%"});
+        } else {
+            // Clear all keys
+            result = db.delete(TABLE_NAME, null, null);
+        }
+        
         db.close();
-        return true;
+        return result >= 0;
     }
     
     public List<String> keys() {
+        return keys(null);
+    }
+    
+    public List<String> keys(String pattern) {
         List<String> keys = new ArrayList<>();
-        String selectQuery = "SELECT " + KEY_ID + " FROM " + TABLE_NAME;
+        String selectQuery;
+        String[] selectionArgs = null;
+        
+        if (pattern != null) {
+            selectQuery = "SELECT " + KEY_ID + " FROM " + TABLE_NAME + " WHERE " + KEY_ID + " LIKE ?";
+            selectionArgs = new String[]{"% " + pattern + "%"};
+        } else {
+            selectQuery = "SELECT " + KEY_ID + " FROM " + TABLE_NAME;
+        }
         
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery(selectQuery, null);
+        Cursor cursor = db.rawQuery(selectQuery, selectionArgs);
         
         if (cursor.moveToFirst()) {
             do {

@@ -11,9 +11,14 @@ import org.json.JSONArray;
 public class SharedPreferencesStorage {
     private final SharedPreferences prefs;
     private final SharedPreferences.Editor editor;
+    private static final String DEFAULT_NAME = "StrataStorage";
+    
+    public SharedPreferencesStorage(Context context) {
+        this(context, DEFAULT_NAME);
+    }
     
     public SharedPreferencesStorage(Context context, String name) {
-        this.prefs = context.getSharedPreferences(name != null ? name : "StrataStorage", Context.MODE_PRIVATE);
+        this.prefs = context.getSharedPreferences(name != null ? name : DEFAULT_NAME, Context.MODE_PRIVATE);
         this.editor = prefs.edit();
     }
     
@@ -56,12 +61,47 @@ public class SharedPreferencesStorage {
     }
     
     public boolean clear() {
-        editor.clear();
+        return clear(null);
+    }
+    
+    public boolean clear(String prefix) {
+        if (prefix != null) {
+            // Clear only keys with the given prefix
+            Set<String> keysToRemove = new HashSet<>();
+            for (String key : prefs.getAll().keySet()) {
+                if (key.startsWith(prefix) || key.contains(prefix)) {
+                    keysToRemove.add(key);
+                }
+            }
+            for (String key : keysToRemove) {
+                editor.remove(key);
+            }
+        } else {
+            // Clear all keys
+            editor.clear();
+        }
         return editor.commit();
     }
     
     public Set<String> keys() {
-        return prefs.getAll().keySet();
+        return keys(null);
+    }
+    
+    public Set<String> keys(String pattern) {
+        Set<String> allKeys = prefs.getAll().keySet();
+        
+        if (pattern == null) {
+            return allKeys;
+        }
+        
+        // Filter keys by pattern
+        Set<String> filteredKeys = new HashSet<>();
+        for (String key : allKeys) {
+            if (key.startsWith(pattern) || key.contains(pattern)) {
+                filteredKeys.add(key);
+            }
+        }
+        return filteredKeys;
     }
     
     public boolean has(String key) {

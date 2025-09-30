@@ -24,18 +24,36 @@ import Foundation
         return userDefaults.synchronize()
     }
     
-    @objc public func clear() -> Bool {
-        if let suiteName = suiteName {
-            UserDefaults(suiteName: suiteName)?.removePersistentDomain(forName: suiteName)
+    @objc public func clear(prefix: String? = nil) -> Bool {
+        if let prefix = prefix {
+            // Clear only keys with the given prefix
+            let keysToRemove = keys(pattern: prefix)
+            for key in keysToRemove {
+                userDefaults.removeObject(forKey: key)
+            }
         } else {
-            let domain = Bundle.main.bundleIdentifier!
-            userDefaults.removePersistentDomain(forName: domain)
+            // Clear all keys
+            if let suiteName = suiteName {
+                UserDefaults(suiteName: suiteName)?.removePersistentDomain(forName: suiteName)
+            } else {
+                let domain = Bundle.main.bundleIdentifier!
+                userDefaults.removePersistentDomain(forName: domain)
+            }
         }
         return userDefaults.synchronize()
     }
     
-    @objc public func keys() -> [String] {
-        return Array(userDefaults.dictionaryRepresentation().keys)
+    @objc public func keys(pattern: String? = nil) -> [String] {
+        let allKeys = Array(userDefaults.dictionaryRepresentation().keys)
+        
+        guard let pattern = pattern else {
+            return allKeys
+        }
+        
+        // Filter keys by pattern (simple prefix matching)
+        return allKeys.filter { key in
+            key.hasPrefix(pattern) || key.contains(pattern)
+        }
     }
     
     @objc public func has(key: String) -> Bool {

@@ -118,6 +118,29 @@ export class Strata {
 
   /**
    * Get a value from storage
+   *
+   * @param key - The key to retrieve
+   * @param options - Storage options
+   * @param options.storage - Specific storage type to use (e.g., 'localStorage', 'indexedDB')
+   * @param options.decrypt - Whether to decrypt the value (default: auto-detect)
+   * @param options.decryptionPassword - Password for decryption (uses config password if not provided)
+   * @returns The stored value or null if not found
+   * @throws {StorageError} If the storage adapter is not available
+   * @throws {EncryptionError} If decryption fails
+   *
+   * @example
+   * ```typescript
+   * // Simple get
+   * const value = await storage.get('myKey');
+   *
+   * // Get from specific storage
+   * const value = await storage.get('myKey', { storage: 'indexedDB' });
+   *
+   * // Get encrypted value
+   * const value = await storage.get('secure-key', {
+   *   decryptionPassword: 'myPassword'
+   * });
+   * ```
    */
   async get<T = unknown>(key: string, options?: StorageOptions): Promise<T | null> {
     const adapter = await this.selectAdapter(options?.storage);
@@ -180,6 +203,41 @@ export class Strata {
 
   /**
    * Set a value in storage
+   *
+   * @param key - The key to store under
+   * @param value - The value to store (can be any serializable type)
+   * @param options - Storage options
+   * @param options.storage - Specific storage type to use
+   * @param options.encrypt - Whether to encrypt the value
+   * @param options.encryptionPassword - Password for encryption
+   * @param options.compress - Whether to compress the value
+   * @param options.ttl - Time-to-live in milliseconds
+   * @param options.tags - Tags for categorization
+   * @param options.metadata - Additional metadata to store
+   * @throws {StorageError} If the storage adapter is not available
+   * @throws {EncryptionError} If encryption fails
+   *
+   * @example
+   * ```typescript
+   * // Simple set
+   * await storage.set('myKey', 'myValue');
+   *
+   * // Set with TTL (expires in 1 hour)
+   * await storage.set('tempKey', data, { ttl: 3600000 });
+   *
+   * // Set with encryption and compression
+   * await storage.set('secure-key', sensitiveData, {
+   *   encrypt: true,
+   *   compress: true,
+   *   encryptionPassword: 'myPassword'
+   * });
+   *
+   * // Set with metadata
+   * await storage.set('user-123', userData, {
+   *   tags: ['user', 'active'],
+   *   metadata: { version: 2, source: 'api' }
+   * });
+   * ```
    */
   async set<T = unknown>(key: string, value: T, options?: StorageOptions): Promise<void> {
     const adapter = await this.selectAdapter(options?.storage);
@@ -239,6 +297,20 @@ export class Strata {
 
   /**
    * Remove a value from storage
+   *
+   * @param key - The key to remove
+   * @param options - Storage options
+   * @param options.storage - Specific storage type to use
+   * @throws {StorageError} If the storage adapter is not available
+   *
+   * @example
+   * ```typescript
+   * // Remove from default storage
+   * await storage.remove('myKey');
+   *
+   * // Remove from specific storage
+   * await storage.remove('myKey', { storage: 'cookies' });
+   * ```
    */
   async remove(key: string, options?: StorageOptions): Promise<void> {
     const adapter = await this.selectAdapter(options?.storage);
@@ -256,7 +328,22 @@ export class Strata {
   }
 
   /**
-   * Check if a key exists
+   * Check if a key exists in storage
+   *
+   * @param key - The key to check
+   * @param options - Storage options
+   * @param options.storage - Specific storage type to check
+   * @returns True if the key exists, false otherwise
+   * @throws {StorageError} If the storage adapter is not available
+   *
+   * @example
+   * ```typescript
+   * // Check in default storage
+   * const exists = await storage.has('myKey');
+   *
+   * // Check in specific storage
+   * const exists = await storage.has('myKey', { storage: 'sessionStorage' });
+   * ```
    */
   async has(key: string, options?: StorageOptions): Promise<boolean> {
     const adapter = await this.selectAdapter(options?.storage);
@@ -265,6 +352,29 @@ export class Strata {
 
   /**
    * Clear storage
+   *
+   * @param options - Clear options
+   * @param options.storage - Specific storage to clear (clears all if not specified)
+   * @param options.prefix - Only clear keys with this prefix
+   * @param options.tags - Only clear items with these tags
+   * @param options.olderThan - Only clear items older than this date
+   * @throws {StorageError} If the storage adapter is not available
+   *
+   * @example
+   * ```typescript
+   * // Clear all storage
+   * await storage.clear();
+   *
+   * // Clear specific storage
+   * await storage.clear({ storage: 'localStorage' });
+   *
+   * // Clear by prefix
+   * await storage.clear({ prefix: 'temp-' });
+   *
+   * // Clear old items
+   * const yesterday = Date.now() - 86400000;
+   * await storage.clear({ olderThan: yesterday });
+   * ```
    */
   async clear(options?: ClearOptions & StorageOptions): Promise<void> {
     if (options?.storage) {
@@ -279,7 +389,28 @@ export class Strata {
   }
 
   /**
-   * Get all keys
+   * Get all keys from storage
+   *
+   * @param pattern - Optional pattern to filter keys (string prefix or RegExp)
+   * @param options - Storage options
+   * @param options.storage - Specific storage to get keys from (gets from all if not specified)
+   * @returns Array of matching keys
+   * @throws {StorageError} If the storage adapter is not available
+   *
+   * @example
+   * ```typescript
+   * // Get all keys
+   * const keys = await storage.keys();
+   *
+   * // Get keys with prefix
+   * const userKeys = await storage.keys('user-');
+   *
+   * // Get keys with regex pattern
+   * const tempKeys = await storage.keys(/^temp-.*$/);
+   *
+   * // Get keys from specific storage
+   * const localKeys = await storage.keys(null, { storage: 'localStorage' });
+   * ```
    */
   async keys(pattern?: string | RegExp, options?: StorageOptions): Promise<string[]> {
     if (options?.storage) {

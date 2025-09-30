@@ -5,9 +5,13 @@ import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
+import com.strata.storage.SharedPreferencesStorage;
+import com.strata.storage.EncryptedStorage;
+import com.strata.storage.SQLiteStorage;
 import org.json.JSONArray;
 import org.json.JSONException;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Main Capacitor plugin for Strata Storage
@@ -21,9 +25,14 @@ public class StrataStoragePlugin extends Plugin {
 
     @Override
     public void load() {
-        sharedPrefsStorage = new SharedPreferencesStorage(getContext());
-        encryptedStorage = new EncryptedStorage(getContext());
-        sqliteStorage = new SQLiteStorage(getContext());
+        try {
+            sharedPrefsStorage = new SharedPreferencesStorage(getContext());
+            encryptedStorage = new EncryptedStorage(getContext());
+            sqliteStorage = new SQLiteStorage(getContext());
+        } catch (Exception e) {
+            // Log error but don't crash - some storage types may not be available
+            e.printStackTrace();
+        }
     }
 
     /**

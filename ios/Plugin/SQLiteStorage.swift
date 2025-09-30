@@ -137,23 +137,46 @@ import SQLite3
         return result
     }
     
-    @objc public func clear() -> Bool {
-        let deleteSQL = "DELETE FROM \(tableName)"
-        var statement: OpaquePointer?
+    @objc public func clear(prefix: String? = nil) -> Bool {
+        let deleteSQL: String
+        if let prefix = prefix {
+            deleteSQL = "DELETE FROM \(tableName) WHERE key LIKE ?"
+        } else {
+            deleteSQL = "DELETE FROM \(tableName)"
+        }
         
-        let result = sqlite3_prepare_v2(db, deleteSQL, -1, &statement, nil) == SQLITE_OK &&
-            sqlite3_step(statement) == SQLITE_DONE
+        var statement: OpaquePointer?
+        var result = sqlite3_prepare_v2(db, deleteSQL, -1, &statement, nil) == SQLITE_OK
+        
+        if result && prefix != nil {
+            result = sqlite3_bind_text(statement, 1, "\(prefix!)%", -1, nil) == SQLITE_OK
+        }
+        
+        if result {
+            result = sqlite3_step(statement) == SQLITE_DONE
+        }
         
         sqlite3_finalize(statement)
         return result
     }
     
-    @objc public func keys() -> [String] {
-        let querySQL = "SELECT key FROM \(tableName)"
+    @objc public func keys(pattern: String? = nil) -> [String] {
+        let querySQL: String
+        if let pattern = pattern {
+            querySQL = "SELECT key FROM \(tableName) WHERE key LIKE ?"
+        } else {
+            querySQL = "SELECT key FROM \(tableName)"
+        }
+        
         var statement: OpaquePointer?
         var keys: [String] = []
         
         if sqlite3_prepare_v2(db, querySQL, -1, &statement, nil) == SQLITE_OK {
+            if let pattern = pattern {
+                // Use % wildcard for SQL LIKE pattern matching
+                sqlite3_bind_text(statement, 1, "%\(pattern)%", -1, nil)
+            }
+            
             while sqlite3_step(statement) == SQLITE_ROW {
                 if let key = sqlite3_column_text(statement, 0) {
                     keys.append(String(cString: key))

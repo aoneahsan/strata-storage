@@ -6,14 +6,20 @@ import android.os.Build;
 import androidx.security.crypto.EncryptedSharedPreferences;
 import androidx.security.crypto.MasterKey;
 import java.util.Set;
+import java.util.HashSet;
 import java.util.Map;
 
 public class EncryptedStorage {
     private SharedPreferences encryptedPrefs;
     private SharedPreferences.Editor editor;
+    private static final String DEFAULT_NAME = "StrataSecureStorage";
+    
+    public EncryptedStorage(Context context) throws Exception {
+        this(context, DEFAULT_NAME);
+    }
     
     public EncryptedStorage(Context context, String name) throws Exception {
-        String fileName = name != null ? name : "StrataSecureStorage";
+        String fileName = name != null ? name : DEFAULT_NAME;
         
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             MasterKey masterKey = new MasterKey.Builder(context)
@@ -51,12 +57,47 @@ public class EncryptedStorage {
     }
     
     public boolean clear() {
-        editor.clear();
+        return clear(null);
+    }
+    
+    public boolean clear(String prefix) {
+        if (prefix != null) {
+            // Clear only keys with the given prefix
+            Set<String> keysToRemove = new HashSet<>();
+            for (String key : encryptedPrefs.getAll().keySet()) {
+                if (key.startsWith(prefix) || key.contains(prefix)) {
+                    keysToRemove.add(key);
+                }
+            }
+            for (String key : keysToRemove) {
+                editor.remove(key);
+            }
+        } else {
+            // Clear all keys
+            editor.clear();
+        }
         return editor.commit();
     }
     
     public Set<String> keys() {
-        return encryptedPrefs.getAll().keySet();
+        return keys(null);
+    }
+    
+    public Set<String> keys(String pattern) {
+        Set<String> allKeys = encryptedPrefs.getAll().keySet();
+        
+        if (pattern == null) {
+            return allKeys;
+        }
+        
+        // Filter keys by pattern
+        Set<String> filteredKeys = new HashSet<>();
+        for (String key : allKeys) {
+            if (key.startsWith(pattern) || key.contains(pattern)) {
+                filteredKeys.add(key);
+            }
+        }
+        return filteredKeys;
     }
     
     public boolean has(String key) {

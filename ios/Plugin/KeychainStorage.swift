@@ -40,16 +40,29 @@ import Security
         return status == errSecSuccess
     }
     
-    @objc public func clear() -> Bool {
-        let query: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: service
-        ]
-        let status = SecItemDelete(query as CFDictionary)
-        return status == errSecSuccess || status == errSecItemNotFound
+    @objc public func clear(prefix: String? = nil) -> Bool {
+        if let prefix = prefix {
+            // Clear only keys with the given prefix
+            let keysToRemove = keys(pattern: prefix)
+            var allSuccess = true
+            for key in keysToRemove {
+                if !remove(key: key) {
+                    allSuccess = false
+                }
+            }
+            return allSuccess
+        } else {
+            // Clear all keys
+            let query: [String: Any] = [
+                kSecClass as String: kSecClassGenericPassword,
+                kSecAttrService as String: service
+            ]
+            let status = SecItemDelete(query as CFDictionary)
+            return status == errSecSuccess || status == errSecItemNotFound
+        }
     }
     
-    @objc public func keys() -> [String] {
+    @objc public func keys(pattern: String? = nil) -> [String] {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
@@ -67,7 +80,16 @@ import Security
         guard status == errSecSuccess,
               let items = result as? [[String: Any]] else { return [] }
         
-        return items.compactMap { $0[kSecAttrAccount as String] as? String }
+        let allKeys = items.compactMap { $0[kSecAttrAccount as String] as? String }
+        
+        guard let pattern = pattern else {
+            return allKeys
+        }
+        
+        // Filter keys by pattern (simple prefix matching)
+        return allKeys.filter { key in
+            key.hasPrefix(pattern) || key.contains(pattern)
+        }
     }
     
     private func createQuery(key: String) -> [String: Any] {
