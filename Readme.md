@@ -60,6 +60,9 @@
 - **[GitHub](https://github.com/aoneahsan/strata-storage)** - Source code
 - **[NPM](https://www.npmjs.com/package/strata-storage)** - Package registry
 - **[Example App](./examples/react-capacitor-app)** - Full demo application
+- **[Contributing](./.github/CONTRIBUTING.md)** - How to contribute
+- **[Support](./.github/SUPPORT.md)** - Get help
+- **[Security](./.github/SECURITY.md)** - Report vulnerabilities
 
 ---
 
@@ -254,7 +257,7 @@ Automatically selects the best available storage based on:
 
 ## 📄 License
 
-**Apache 2.0** - See [LICENSE.md](./LICENSE.md) for details
+**Apache 2.0** - See [LICENSE](./LICENSE) and [License Details](./docs/LICENSE.md)
 
 ### Quick Summary:
 - ✅ **Free for commercial use**
