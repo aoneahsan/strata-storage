@@ -1,5 +1,6 @@
 // Optional Firebase integration - only import this if you need Firebase sync
 import type { Strata } from './core/Strata';
+import type { StorageAdapter } from './types';
 
 /**
  * Firebase sync configuration
@@ -27,6 +28,7 @@ export async function enableFirebaseSync(
 ): Promise<void> {
   // Dynamically import Firebase only when this function is called
   try {
+    // @ts-expect-error - Firebase is an optional peer dependency
     const { initializeApp, getApps } = await import('firebase/app');
 
     // Initialize Firebase if not already initialized
@@ -42,6 +44,7 @@ export async function enableFirebaseSync(
     }
 
     if (config.firestore) {
+      // @ts-expect-error - Firebase is an optional peer dependency
       const { getFirestore, doc, setDoc, getDoc, deleteDoc } = await import('firebase/firestore');
       const db = getFirestore();
       const collectionName = config.collectionName || 'strata-storage';
@@ -95,13 +98,22 @@ export async function enableFirebaseSync(
         async isAvailable() {
           return true;
         },
+        subscribe() {
+          // Not implemented for Firebase adapter
+          return () => {};
+        },
+        async close() {
+          // No cleanup needed
+        },
       };
 
       // Register the Firestore adapter
-      storage.registerAdapter(firestoreAdapter as any);
+      // Cast to unknown first to bypass type checking for custom adapter
+      storage.registerAdapter(firestoreAdapter as unknown as StorageAdapter);
     }
 
     if (config.realtimeDatabase) {
+      // @ts-expect-error - Firebase is an optional peer dependency
       const { getDatabase, ref, set, get, remove } = await import('firebase/database');
       const db = getDatabase();
 
@@ -151,13 +163,21 @@ export async function enableFirebaseSync(
         async isAvailable() {
           return true;
         },
+        subscribe() {
+          // Not implemented for Firebase adapter
+          return () => {};
+        },
+        async close() {
+          // No cleanup needed
+        },
       };
 
       // Register the Realtime Database adapter
-      storage.registerAdapter(realtimeAdapter as any);
+      // Cast to unknown first to bypass type checking for custom adapter
+      storage.registerAdapter(realtimeAdapter as unknown as StorageAdapter);
     }
 
-    console.log('Firebase sync enabled successfully');
+    // Firebase sync enabled successfully
   } catch (error) {
     throw new Error(
       `Failed to enable Firebase sync: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -170,6 +190,7 @@ export async function enableFirebaseSync(
  */
 export async function isFirebaseAvailable(): Promise<boolean> {
   try {
+    // @ts-expect-error - Firebase is an optional peer dependency
     await import('firebase/app');
     return true;
   } catch {

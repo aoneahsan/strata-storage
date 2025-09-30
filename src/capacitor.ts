@@ -22,8 +22,10 @@ export async function registerCapacitorAdapters(storage: Strata): Promise<void> 
   // Check if Capacitor is available
   const hasCapacitor =
     typeof window !== 'undefined' &&
-    (window as any).Capacitor &&
-    (window as any).Capacitor.isNativePlatform();
+    (window as Window & { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor &&
+    (
+      window as Window & { Capacitor?: { isNativePlatform?: () => boolean } }
+    ).Capacitor?.isNativePlatform?.();
 
   if (!hasCapacitor) {
     console.warn('Capacitor not detected. Capacitor adapters will not be registered.');
@@ -47,9 +49,12 @@ export async function registerCapacitorAdapters(storage: Strata): Promise<void> 
  */
 export function isCapacitorEnvironment(): boolean {
   return (
-    typeof window !== 'undefined' &&
-    (window as any).Capacitor &&
-    (window as any).Capacitor.isNativePlatform()
+    (typeof window !== 'undefined' &&
+      (window as Window & { Capacitor?: { isNativePlatform?: () => boolean } }).Capacitor &&
+      (
+        window as Window & { Capacitor?: { isNativePlatform?: () => boolean } }
+      ).Capacitor?.isNativePlatform?.()) ??
+    false
   );
 }
 

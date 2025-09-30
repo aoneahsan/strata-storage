@@ -422,9 +422,14 @@ export function deserializeValue(value: string): unknown {
 /**
  * Create an error with additional context
  */
+interface ExtendedError extends Error {
+  code?: string;
+  details?: unknown;
+}
+
 export function createError(message: string, code?: string, details?: unknown): Error {
-  const error = new Error(message);
-  (error as any).code = code;
-  (error as any).details = details;
+  const error = new Error(message) as ExtendedError;
+  error.code = code;
+  error.details = details;
   return error;
 }
