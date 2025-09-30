@@ -243,8 +243,25 @@ export abstract class BaseAdapter implements StorageAdapter {
 
     for (const key of keys) {
       const item = await this.get<T>(key);
-      if (item && !this.isExpired(item) && this.queryEngine.matches(item.value, condition)) {
-        results.push({ key, value: item.value });
+      if (item && !this.isExpired(item)) {
+        // Check if querying storage metadata (tags, metadata, etc) or the actual value
+        let matches = false;
+        
+        // Check for storage-level properties
+        const storageProps = ['tags', 'metadata', 'created', 'updated', 'expires'];
+        const isStorageQuery = Object.keys(condition).some(k => storageProps.includes(k));
+        
+        if (isStorageQuery) {
+          // Query against the storage wrapper
+          matches = this.queryEngine.matches(item, condition);
+        } else {
+          // Query against the stored value
+          matches = this.queryEngine.matches(item.value, condition);
+        }
+        
+        if (matches) {
+          results.push({ key, value: item.value });
+        }
       }
     }
 

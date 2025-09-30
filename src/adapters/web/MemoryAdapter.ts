@@ -172,11 +172,28 @@ export class MemoryAdapter extends BaseAdapter {
     const results: Array<{ key: string; value: T }> = [];
 
     for (const [key, item] of this.storage.entries()) {
-      if (!this.isExpired(item) && this.queryEngine.matches(item, condition)) {
-        results.push({
-          key,
-          value: deepClone(item.value) as T,
-        });
+      if (!this.isExpired(item)) {
+        // Check if querying storage metadata (tags, metadata, etc) or the actual value
+        let matches = false;
+        
+        // Check for storage-level properties
+        const storageProps = ['tags', 'metadata', 'created', 'updated', 'expires'];
+        const isStorageQuery = Object.keys(condition).some(k => storageProps.includes(k));
+        
+        if (isStorageQuery) {
+          // Query against the storage wrapper
+          matches = this.queryEngine.matches(item, condition);
+        } else {
+          // Query against the stored value
+          matches = this.queryEngine.matches(item.value, condition);
+        }
+        
+        if (matches) {
+          results.push({
+            key,
+            value: deepClone(item.value) as T,
+          });
+        }
       }
     }
 

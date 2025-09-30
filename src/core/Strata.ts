@@ -435,19 +435,33 @@ export class Strata {
     let total = 0;
     let count = 0;
     const byStorage: Record<string, number> = {};
+    const allByKey: Record<string, number> = {};
 
     for (const [type, adapter] of this.adapters.entries()) {
       const sizeInfo = await adapter.size(detailed);
       total += sizeInfo.total;
       count += sizeInfo.count;
       byStorage[type] = sizeInfo.total;
+      
+      // Aggregate byKey data if detailed
+      if (detailed && sizeInfo.byKey) {
+        for (const [key, size] of Object.entries(sizeInfo.byKey)) {
+          allByKey[key] = (allByKey[key] || 0) + size;
+        }
+      }
     }
 
-    return {
+    const result: SizeInfo = {
       total,
       count,
       byStorage: byStorage as Record<StorageType, number>,
     };
+    
+    if (detailed) {
+      result.byKey = allByKey;
+    }
+    
+    return result;
   }
 
   /**
