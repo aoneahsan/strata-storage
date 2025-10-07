@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
 import org.json.JSONObject;
+import org.json.JSONArray;
 
 public class EncryptedStorage {
     private SharedPreferences encryptedPrefs;
@@ -52,9 +53,17 @@ public class EncryptedStorage {
                 stringValue = (String) value;
             } else {
                 // Convert complex objects to JSON
-                stringValue = value instanceof JSONObject ? 
-                    ((JSONObject) value).toString() : 
-                    new JSONObject(value).toString();
+                if (value instanceof JSONObject) {
+                    stringValue = ((JSONObject) value).toString();
+                } else {
+                    // Use helper method to convert object to JSON string
+                    try {
+                        stringValue = objectToJsonString(value);
+                    } catch (Exception e) {
+                        // Fallback to string representation
+                        stringValue = value.toString();
+                    }
+                }
             }
             editor.putString(key, stringValue);
             return editor.commit();
@@ -138,6 +147,51 @@ public class EncryptedStorage {
         }
         
         return new SizeInfo(totalSize, count);
+    }
+    
+    /**
+     * Convert an object to JSON string using reflection
+     */
+    private String objectToJsonString(Object obj) throws Exception {
+        if (obj == null) {
+            return "null";
+        }
+        
+        if (obj instanceof String || obj instanceof Number || obj instanceof Boolean) {
+            return obj.toString();
+        }
+        
+        if (obj instanceof Map) {
+            JSONObject jsonObj = new JSONObject();
+            Map<?, ?> map = (Map<?, ?>) obj;
+            for (Map.Entry<?, ?> entry : map.entrySet()) {
+                String key = entry.getKey().toString();
+                jsonObj.put(key, entry.getValue());
+            }
+            return jsonObj.toString();
+        }
+        
+        if (obj instanceof List || obj.getClass().isArray()) {
+            JSONArray jsonArray = new JSONArray();
+            if (obj instanceof List) {
+                List<?> list = (List<?>) obj;
+                for (Object item : list) {
+                    jsonArray.put(item);
+                }
+            } else {
+                Object[] array = (Object[]) obj;
+                for (Object item : array) {
+                    jsonArray.put(item);
+                }
+            }
+            return jsonArray.toString();
+        }
+        
+        // For other objects, create a simple JSON object with their string representation
+        JSONObject jsonObj = new JSONObject();
+        jsonObj.put("value", obj.toString());
+        jsonObj.put("type", obj.getClass().getSimpleName());
+        return jsonObj.toString();
     }
     
     /**
