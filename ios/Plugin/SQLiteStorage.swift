@@ -53,7 +53,18 @@ import SQLite3
         sqlite3_finalize(createTableStatement)
     }
     
-    @objc public func set(key: String, value: Data, expires: Int64? = nil, tags: [String]? = nil, metadata: [String: Any]? = nil) -> Bool {
+    @objc public func set(key: String, value: Any, expires: Int64? = nil, tags: [String]? = nil, metadata: [String: Any]? = nil) throws -> Bool {
+        let data: Data
+        
+        if let dataValue = value as? Data {
+            data = dataValue
+        } else if let stringValue = value as? String {
+            data = stringValue.data(using: .utf8) ?? Data()
+        } else {
+            // Convert to JSON for complex objects
+            data = try JSONSerialization.data(withJSONObject: value, options: [])
+        }
+        
         let now = Int64(Date().timeIntervalSince1970 * 1000)
         let tagsJson = tags != nil ? try? JSONSerialization.data(withJSONObject: tags!, options: []) : nil
         let metadataJson = metadata != nil ? try? JSONSerialization.data(withJSONObject: metadata!, options: []) : nil
@@ -67,7 +78,7 @@ import SQLite3
         var statement: OpaquePointer?
         let result = sqlite3_prepare_v2(db, insertSQL, -1, &statement, nil) == SQLITE_OK &&
             sqlite3_bind_text(statement, 1, key, -1, nil) == SQLITE_OK &&
-            sqlite3_bind_blob(statement, 2, (value as NSData).bytes, Int32(value.count), nil) == SQLITE_OK &&
+            sqlite3_bind_blob(statement, 2, (data as NSData).bytes, Int32(data.count), nil) == SQLITE_OK &&
             sqlite3_bind_int64(statement, 3, now) == SQLITE_OK &&
             sqlite3_bind_int64(statement, 4, now) == SQLITE_OK &&
             (expires != nil ? sqlite3_bind_int64(statement, 5, expires!) : sqlite3_bind_null(statement, 5)) == SQLITE_OK &&
@@ -77,6 +88,11 @@ import SQLite3
         
         sqlite3_finalize(statement)
         return result
+    }
+    
+    // Convenience method for simple values
+    @objc public func set(key: String, value: Any) throws -> Bool {
+        return try set(key: key, value: value, expires: nil, tags: nil, metadata: nil)
     }
     
     @objc public func get(key: String) -> [String: Any]? {
@@ -186,5 +202,23 @@ import SQLite3
         
         sqlite3_finalize(statement)
         return keys
+    }
+    
+    @objc public func size() throws -> (total: Int, count: Int) {
+        let querySQL = "SELECT COUNT(*), SUM(LENGTH(value)) FROM \(tableName)"
+        var statement: OpaquePointer?
+        
+        var totalSize = 0
+        var count = 0
+        
+        if sqlite3_prepare_v2(db, querySQL, -1, &statement, nil) == SQLITE_OK {
+            if sqlite3_step(statement) == SQLITE_ROW {
+                count = Int(sqlite3_column_int(statement, 0))
+                totalSize = Int(sqlite3_column_int64(statement, 1))
+            }
+        }
+        
+        sqlite3_finalize(statement)
+        return (total: totalSize, count: count)
     }
 }

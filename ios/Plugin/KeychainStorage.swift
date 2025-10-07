@@ -11,18 +11,30 @@ import Security
         super.init()
     }
     
-    @objc public func set(key: String, value: Data) -> Bool {
+    @objc public func set(key: String, value: Any) throws -> Bool {
+        let data: Data
+        
+        if let dataValue = value as? Data {
+            data = dataValue
+        } else if let stringValue = value as? String {
+            data = stringValue.data(using: .utf8) ?? Data()
+        } else {
+            // Convert to JSON for complex objects
+            let jsonData = try JSONSerialization.data(withJSONObject: value, options: [])
+            data = jsonData
+        }
+        
         let query = createQuery(key: key)
         SecItemDelete(query as CFDictionary)
         
         var newItem = query
-        newItem[kSecValueData as String] = value
+        newItem[kSecValueData as String] = data
         
         let status = SecItemAdd(newItem as CFDictionary, nil)
         return status == errSecSuccess
     }
     
-    @objc public func get(key: String) -> Data? {
+    @objc public func get(key: String) throws -> Any? {
         var query = createQuery(key: key)
         query[kSecReturnData as String] = true
         query[kSecMatchLimit as String] = kSecMatchLimitOne
@@ -31,22 +43,29 @@ import Security
         let status = SecItemCopyMatching(query as CFDictionary, &result)
         
         guard status == errSecSuccess else { return nil }
-        return result as? Data
+        guard let data = result as? Data else { return nil }
+        
+        // Try to parse as JSON first, fallback to string
+        if let jsonObject = try? JSONSerialization.jsonObject(with: data, options: []) {
+            return jsonObject
+        } else {
+            return String(data: data, encoding: .utf8)
+        }
     }
     
-    @objc public func remove(key: String) -> Bool {
+    @objc public func remove(key: String) throws -> Bool {
         let query = createQuery(key: key)
         let status = SecItemDelete(query as CFDictionary)
         return status == errSecSuccess
     }
     
-    @objc public func clear(prefix: String? = nil) -> Bool {
+    @objc public func clear(prefix: String? = nil) throws -> Bool {
         if let prefix = prefix {
             // Clear only keys with the given prefix
-            let keysToRemove = keys(pattern: prefix)
+            let keysToRemove = try keys(pattern: prefix)
             var allSuccess = true
             for key in keysToRemove {
-                if !remove(key: key) {
+                if !(try remove(key: key)) {
                     allSuccess = false
                 }
             }
@@ -62,7 +81,7 @@ import Security
         }
     }
     
-    @objc public func keys(pattern: String? = nil) -> [String] {
+    @objc public func keys(pattern: String? = nil) throws -> [String] {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
@@ -105,5 +124,21 @@ import Security
         }
         
         return query
+    }
+    
+    @objc public func size() throws -> (total: Int, count: Int) {
+        let allKeys = try keys()
+        var totalSize = 0
+        
+        for key in allKeys {
+            if let data = try get(key: key) as? Data {
+                totalSize += data.count
+            } else if let string = try get(key: key) as? String {
+                totalSize += string.data(using: .utf8)?.count ?? 0
+            }
+            totalSize += key.data(using: .utf8)?.count ?? 0
+        }
+        
+        return (total: totalSize, count: allKeys.count)
     }
 }

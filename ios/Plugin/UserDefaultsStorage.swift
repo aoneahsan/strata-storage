@@ -59,4 +59,18 @@ import Foundation
     @objc public func has(key: String) -> Bool {
         return userDefaults.object(forKey: key) != nil
     }
+    
+    @objc public func size() -> (total: Int, count: Int) {
+        let all = userDefaults.dictionaryRepresentation()
+        var totalSize = 0
+        let count = all.count
+        
+        for (key, value) in all {
+            // Estimate size (key + value in bytes)
+            totalSize += key.data(using: .utf8)?.count ?? 0
+            totalSize += "\(value)".data(using: .utf8)?.count ?? 0
+        }
+        
+        return (total: totalSize, count: count)
+    }
 }
