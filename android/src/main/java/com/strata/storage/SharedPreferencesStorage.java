@@ -5,6 +5,8 @@ import android.content.SharedPreferences;
 import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.List;
+import java.util.ArrayList;
 import org.json.JSONObject;
 import org.json.JSONArray;
 
@@ -83,19 +85,19 @@ public class SharedPreferencesStorage {
         return editor.commit();
     }
     
-    public Set<String> keys() {
+    public List<String> keys() {
         return keys(null);
     }
     
-    public Set<String> keys(String pattern) {
+    public List<String> keys(String pattern) {
         Set<String> allKeys = prefs.getAll().keySet();
         
         if (pattern == null) {
-            return allKeys;
+            return new ArrayList<>(allKeys);
         }
         
         // Filter keys by pattern
-        Set<String> filteredKeys = new HashSet<>();
+        List<String> filteredKeys = new ArrayList<>();
         for (String key : allKeys) {
             if (key.startsWith(pattern) || key.contains(pattern)) {
                 filteredKeys.add(key);
@@ -110,5 +112,37 @@ public class SharedPreferencesStorage {
     
     public Map<String, ?> getAll() {
         return prefs.getAll();
+    }
+    
+    public SizeInfo size() {
+        Map<String, ?> all = prefs.getAll();
+        long totalSize = 0;
+        int count = all.size();
+        
+        for (Map.Entry<String, ?> entry : all.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            
+            // Estimate size (key + value in bytes)
+            totalSize += key.getBytes().length;
+            if (value != null) {
+                totalSize += value.toString().getBytes().length;
+            }
+        }
+        
+        return new SizeInfo(totalSize, count);
+    }
+    
+    /**
+     * Size information class
+     */
+    public static class SizeInfo {
+        public final long total;
+        public final int count;
+        
+        public SizeInfo(long total, int count) {
+            this.total = total;
+            this.count = count;
+        }
     }
 }

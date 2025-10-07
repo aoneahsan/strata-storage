@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
+import org.json.JSONObject;
+import java.nio.charset.StandardCharsets;
 
 public class SQLiteStorage extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
@@ -50,13 +52,31 @@ public class SQLiteStorage extends SQLiteOpenHelper {
         onCreate(db);
     }
     
-    public boolean set(String key, byte[] value, Long expires, String tags, String metadata) {
+    public boolean set(String key, Object value, Long expires, String tags, String metadata) {
+        byte[] valueBytes;
+        
+        try {
+            if (value instanceof byte[]) {
+                valueBytes = (byte[]) value;
+            } else if (value instanceof String) {
+                valueBytes = ((String) value).getBytes(StandardCharsets.UTF_8);
+            } else {
+                // Convert complex objects to JSON then to bytes
+                String json = value instanceof JSONObject ? 
+                    ((JSONObject) value).toString() : 
+                    new JSONObject(value).toString();
+                valueBytes = json.getBytes(StandardCharsets.UTF_8);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         
         long now = System.currentTimeMillis();
         values.put(KEY_ID, key);
-        values.put(KEY_VALUE, value);
+        values.put(KEY_VALUE, valueBytes);
         values.put(KEY_CREATED, now);
         values.put(KEY_UPDATED, now);
         
@@ -73,6 +93,11 @@ public class SQLiteStorage extends SQLiteOpenHelper {
         long result = db.insertWithOnConflict(TABLE_NAME, null, values, SQLiteDatabase.CONFLICT_REPLACE);
         db.close();
         return result != -1;
+    }
+    
+    // Convenience method for simple Object values
+    public boolean set(String key, Object value) {
+        return set(key, value, null, null, null);
     }
     
     public Map<String, Object> get(String key) {
@@ -173,5 +198,35 @@ public class SQLiteStorage extends SQLiteOpenHelper {
         cursor.close();
         db.close();
         return exists;
+    }
+    
+    public SizeInfo size() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT COUNT(*), SUM(LENGTH(" + KEY_VALUE + ")) FROM " + TABLE_NAME, null);
+        
+        long totalSize = 0;
+        int count = 0;
+        
+        if (cursor != null && cursor.moveToFirst()) {
+            count = cursor.getInt(0);
+            totalSize = cursor.getLong(1);
+            cursor.close();
+        }
+        
+        db.close();
+        return new SizeInfo(totalSize, count);
+    }
+    
+    /**
+     * Size information class
+     */
+    public static class SizeInfo {
+        public final long total;
+        public final int count;
+        
+        public SizeInfo(long total, int count) {
+            this.total = total;
+            this.count = count;
+        }
     }
 }

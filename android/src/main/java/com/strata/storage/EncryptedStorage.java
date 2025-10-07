@@ -8,6 +8,9 @@ import androidx.security.crypto.MasterKey;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
+import org.json.JSONObject;
 
 public class EncryptedStorage {
     private SharedPreferences encryptedPrefs;
@@ -42,9 +45,23 @@ public class EncryptedStorage {
         }
     }
     
-    public boolean set(String key, String value) {
-        editor.putString(key, value);
-        return editor.commit();
+    public boolean set(String key, Object value) {
+        try {
+            String stringValue;
+            if (value instanceof String) {
+                stringValue = (String) value;
+            } else {
+                // Convert complex objects to JSON
+                stringValue = value instanceof JSONObject ? 
+                    ((JSONObject) value).toString() : 
+                    new JSONObject(value).toString();
+            }
+            editor.putString(key, stringValue);
+            return editor.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
     
     public String get(String key) {
@@ -79,19 +96,19 @@ public class EncryptedStorage {
         return editor.commit();
     }
     
-    public Set<String> keys() {
+    public List<String> keys() {
         return keys(null);
     }
     
-    public Set<String> keys(String pattern) {
+    public List<String> keys(String pattern) {
         Set<String> allKeys = encryptedPrefs.getAll().keySet();
         
         if (pattern == null) {
-            return allKeys;
+            return new ArrayList<>(allKeys);
         }
         
         // Filter keys by pattern
-        Set<String> filteredKeys = new HashSet<>();
+        List<String> filteredKeys = new ArrayList<>();
         for (String key : allKeys) {
             if (key.startsWith(pattern) || key.contains(pattern)) {
                 filteredKeys.add(key);
@@ -102,5 +119,37 @@ public class EncryptedStorage {
     
     public boolean has(String key) {
         return encryptedPrefs.contains(key);
+    }
+    
+    public SizeInfo size() {
+        Map<String, ?> all = encryptedPrefs.getAll();
+        long totalSize = 0;
+        int count = all.size();
+        
+        for (Map.Entry<String, ?> entry : all.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            
+            // Estimate size (key + value in bytes)
+            totalSize += key.getBytes().length;
+            if (value != null) {
+                totalSize += value.toString().getBytes().length;
+            }
+        }
+        
+        return new SizeInfo(totalSize, count);
+    }
+    
+    /**
+     * Size information class
+     */
+    public static class SizeInfo {
+        public final long total;
+        public final int count;
+        
+        public SizeInfo(long total, int count) {
+            this.total = total;
+            this.count = count;
+        }
     }
 }

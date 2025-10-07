@@ -11,7 +11,6 @@ import com.strata.storage.SQLiteStorage;
 import org.json.JSONArray;
 import org.json.JSONException;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Main Capacitor plugin for Strata Storage
@@ -226,40 +225,31 @@ public class StrataStoragePlugin extends Plugin {
         String storage = call.getString("storage", "preferences");
         
         try {
-            SizeInfo sizeInfo = null;
+            JSObject result = new JSObject();
             
             switch (storage) {
                 case "secure":
-                    sizeInfo = encryptedStorage.size();
+                    EncryptedStorage.SizeInfo encryptedSizeInfo = encryptedStorage.size();
+                    result.put("total", encryptedSizeInfo.total);
+                    result.put("count", encryptedSizeInfo.count);
                     break;
                 case "sqlite":
-                    sizeInfo = sqliteStorage.size();
+                    SQLiteStorage.SizeInfo sqliteSizeInfo = sqliteStorage.size();
+                    result.put("total", sqliteSizeInfo.total);
+                    result.put("count", sqliteSizeInfo.count);
                     break;
                 case "preferences":
                 default:
-                    sizeInfo = sharedPrefsStorage.size();
+                    SharedPreferencesStorage.SizeInfo prefsSizeInfo = sharedPrefsStorage.size();
+                    result.put("total", prefsSizeInfo.total);
+                    result.put("count", prefsSizeInfo.count);
                     break;
             }
             
-            JSObject result = new JSObject();
-            result.put("total", sizeInfo.total);
-            result.put("count", sizeInfo.count);
             call.resolve(result);
         } catch (Exception e) {
             call.reject("Failed to get size", e);
         }
     }
     
-    /**
-     * Size information class
-     */
-    static class SizeInfo {
-        public final long total;
-        public final int count;
-        
-        public SizeInfo(long total, int count) {
-            this.total = total;
-            this.count = count;
-        }
-    }
 }
