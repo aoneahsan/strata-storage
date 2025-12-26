@@ -8,6 +8,7 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 import com.strata.storage.SharedPreferencesStorage;
 import com.strata.storage.EncryptedStorage;
 import com.strata.storage.SQLiteStorage;
+import android.util.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import java.util.List;
@@ -30,7 +31,7 @@ public class StrataStoragePlugin extends Plugin {
             sqliteStorage = new SQLiteStorage(getContext());
         } catch (Exception e) {
             // Log error but don't crash - some storage types may not be available
-            e.printStackTrace();
+            Log.e("StrataStorage", "Failed to initialize storage", e);
         }
     }
 
@@ -68,20 +69,32 @@ public class StrataStoragePlugin extends Plugin {
         
         try {
             Object value = null;
-            
+
             switch (storage) {
                 case "secure":
+                    if (encryptedStorage == null) {
+                        call.reject("Encrypted storage not available");
+                        return;
+                    }
                     value = encryptedStorage.get(key);
                     break;
                 case "sqlite":
+                    if (sqliteStorage == null) {
+                        call.reject("SQLite storage not available");
+                        return;
+                    }
                     value = sqliteStorage.get(key);
                     break;
                 case "preferences":
                 default:
+                    if (sharedPrefsStorage == null) {
+                        call.reject("Preferences storage not available");
+                        return;
+                    }
                     value = sharedPrefsStorage.get(key);
                     break;
             }
-            
+
             JSObject result = new JSObject();
             result.put("value", value);
             call.resolve(result);
@@ -107,17 +120,29 @@ public class StrataStoragePlugin extends Plugin {
         try {
             switch (storage) {
                 case "secure":
+                    if (encryptedStorage == null) {
+                        call.reject("Encrypted storage not available");
+                        return;
+                    }
                     encryptedStorage.set(key, value);
                     break;
                 case "sqlite":
+                    if (sqliteStorage == null) {
+                        call.reject("SQLite storage not available");
+                        return;
+                    }
                     sqliteStorage.set(key, value);
                     break;
                 case "preferences":
                 default:
+                    if (sharedPrefsStorage == null) {
+                        call.reject("Preferences storage not available");
+                        return;
+                    }
                     sharedPrefsStorage.set(key, value);
                     break;
             }
-            
+
             call.resolve();
         } catch (Exception e) {
             call.reject("Failed to set value", e);
@@ -140,17 +165,29 @@ public class StrataStoragePlugin extends Plugin {
         try {
             switch (storage) {
                 case "secure":
+                    if (encryptedStorage == null) {
+                        call.reject("Encrypted storage not available");
+                        return;
+                    }
                     encryptedStorage.remove(key);
                     break;
                 case "sqlite":
+                    if (sqliteStorage == null) {
+                        call.reject("SQLite storage not available");
+                        return;
+                    }
                     sqliteStorage.remove(key);
                     break;
                 case "preferences":
                 default:
+                    if (sharedPrefsStorage == null) {
+                        call.reject("Preferences storage not available");
+                        return;
+                    }
                     sharedPrefsStorage.remove(key);
                     break;
             }
-            
+
             call.resolve();
         } catch (Exception e) {
             call.reject("Failed to remove value", e);
@@ -168,17 +205,29 @@ public class StrataStoragePlugin extends Plugin {
         try {
             switch (storage) {
                 case "secure":
+                    if (encryptedStorage == null) {
+                        call.reject("Encrypted storage not available");
+                        return;
+                    }
                     encryptedStorage.clear(prefix);
                     break;
                 case "sqlite":
+                    if (sqliteStorage == null) {
+                        call.reject("SQLite storage not available");
+                        return;
+                    }
                     sqliteStorage.clear(prefix);
                     break;
                 case "preferences":
                 default:
+                    if (sharedPrefsStorage == null) {
+                        call.reject("Preferences storage not available");
+                        return;
+                    }
                     sharedPrefsStorage.clear(prefix);
                     break;
             }
-            
+
             call.resolve();
         } catch (Exception e) {
             call.reject("Failed to clear storage", e);
@@ -195,20 +244,32 @@ public class StrataStoragePlugin extends Plugin {
         
         try {
             List<String> keys = null;
-            
+
             switch (storage) {
                 case "secure":
+                    if (encryptedStorage == null) {
+                        call.reject("Encrypted storage not available");
+                        return;
+                    }
                     keys = encryptedStorage.keys(pattern);
                     break;
                 case "sqlite":
+                    if (sqliteStorage == null) {
+                        call.reject("SQLite storage not available");
+                        return;
+                    }
                     keys = sqliteStorage.keys(pattern);
                     break;
                 case "preferences":
                 default:
+                    if (sharedPrefsStorage == null) {
+                        call.reject("Preferences storage not available");
+                        return;
+                    }
                     keys = sharedPrefsStorage.keys(pattern);
                     break;
             }
-            
+
             JSObject result = new JSObject();
             result.put("keys", new JSONArray(keys));
             call.resolve(result);
@@ -226,26 +287,38 @@ public class StrataStoragePlugin extends Plugin {
         
         try {
             JSObject result = new JSObject();
-            
+
             switch (storage) {
                 case "secure":
+                    if (encryptedStorage == null) {
+                        call.reject("Encrypted storage not available");
+                        return;
+                    }
                     EncryptedStorage.SizeInfo encryptedSizeInfo = encryptedStorage.size();
                     result.put("total", encryptedSizeInfo.total);
                     result.put("count", encryptedSizeInfo.count);
                     break;
                 case "sqlite":
+                    if (sqliteStorage == null) {
+                        call.reject("SQLite storage not available");
+                        return;
+                    }
                     SQLiteStorage.SizeInfo sqliteSizeInfo = sqliteStorage.size();
                     result.put("total", sqliteSizeInfo.total);
                     result.put("count", sqliteSizeInfo.count);
                     break;
                 case "preferences":
                 default:
+                    if (sharedPrefsStorage == null) {
+                        call.reject("Preferences storage not available");
+                        return;
+                    }
                     SharedPreferencesStorage.SizeInfo prefsSizeInfo = sharedPrefsStorage.size();
                     result.put("total", prefsSizeInfo.total);
                     result.put("count", prefsSizeInfo.count);
                     break;
             }
-            
+
             call.resolve(result);
         } catch (Exception e) {
             call.reject("Failed to get size", e);

@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.content.ContentValues;
+import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
@@ -78,7 +79,7 @@ public class SQLiteStorage extends SQLiteOpenHelper {
                 valueBytes = json.getBytes(StandardCharsets.UTF_8);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e("StrataStorage", "Failed to set value in SQLite", e);
             return false;
         }
         SQLiteDatabase db = this.getWritableDatabase();
@@ -112,36 +113,41 @@ public class SQLiteStorage extends SQLiteOpenHelper {
     
     public Map<String, Object> get(String key) {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.query(TABLE_NAME, null, KEY_ID + "=?",
-                new String[]{key}, null, null, null, null);
-                
-        Map<String, Object> result = null;
-        if (cursor != null && cursor.moveToFirst()) {
-            result = new HashMap<>();
-            result.put("key", key);
-            result.put("value", cursor.getBlob(cursor.getColumnIndex(KEY_VALUE)));
-            result.put("created", cursor.getLong(cursor.getColumnIndex(KEY_CREATED)));
-            result.put("updated", cursor.getLong(cursor.getColumnIndex(KEY_UPDATED)));
-            
-            int expiresIndex = cursor.getColumnIndex(KEY_EXPIRES);
-            if (!cursor.isNull(expiresIndex)) {
-                result.put("expires", cursor.getLong(expiresIndex));
+        Cursor cursor = null;
+        try {
+            cursor = db.query(TABLE_NAME, null, KEY_ID + "=?",
+                    new String[]{key}, null, null, null, null);
+
+            Map<String, Object> result = null;
+            if (cursor != null && cursor.moveToFirst()) {
+                result = new HashMap<>();
+                result.put("key", key);
+                result.put("value", cursor.getBlob(cursor.getColumnIndex(KEY_VALUE)));
+                result.put("created", cursor.getLong(cursor.getColumnIndex(KEY_CREATED)));
+                result.put("updated", cursor.getLong(cursor.getColumnIndex(KEY_UPDATED)));
+
+                int expiresIndex = cursor.getColumnIndex(KEY_EXPIRES);
+                if (!cursor.isNull(expiresIndex)) {
+                    result.put("expires", cursor.getLong(expiresIndex));
+                }
+
+                int tagsIndex = cursor.getColumnIndex(KEY_TAGS);
+                if (!cursor.isNull(tagsIndex)) {
+                    result.put("tags", cursor.getString(tagsIndex));
+                }
+
+                int metadataIndex = cursor.getColumnIndex(KEY_METADATA);
+                if (!cursor.isNull(metadataIndex)) {
+                    result.put("metadata", cursor.getString(metadataIndex));
+                }
             }
-            
-            int tagsIndex = cursor.getColumnIndex(KEY_TAGS);
-            if (!cursor.isNull(tagsIndex)) {
-                result.put("tags", cursor.getString(tagsIndex));
+            return result;
+        } finally {
+            if (cursor != null) {
+                cursor.close();
             }
-            
-            int metadataIndex = cursor.getColumnIndex(KEY_METADATA);
-            if (!cursor.isNull(metadataIndex)) {
-                result.put("metadata", cursor.getString(metadataIndex));
-            }
-            
-            cursor.close();
+            db.close();
         }
-        db.close();
-        return result;
     }
     
     public boolean remove(String key) {
@@ -179,52 +185,73 @@ public class SQLiteStorage extends SQLiteOpenHelper {
         List<String> keys = new ArrayList<>();
         String selectQuery;
         String[] selectionArgs = null;
-        
+
         if (pattern != null) {
             selectQuery = "SELECT " + KEY_ID + " FROM " + TABLE_NAME + " WHERE " + KEY_ID + " LIKE ?";
-            selectionArgs = new String[]{"% " + pattern + "%"};
+            selectionArgs = new String[]{"%" + pattern + "%"};
         } else {
             selectQuery = "SELECT " + KEY_ID + " FROM " + TABLE_NAME;
         }
-        
+
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery(selectQuery, selectionArgs);
-        
-        if (cursor.moveToFirst()) {
-            do {
-                keys.add(cursor.getString(0));
-            } while (cursor.moveToNext());
+        Cursor cursor = null;
+        try {
+            cursor = db.rawQuery(selectQuery, selectionArgs);
+
+            if (cursor != null && cursor.moveToFirst()) {
+                do {
+                    keys.add(cursor.getString(0));
+                } while (cursor.moveToNext());
+            }
+            return keys;
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+            db.close();
         }
-        cursor.close();
-        db.close();
-        return keys;
     }
     
     public boolean has(String key) {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.query(TABLE_NAME, new String[]{KEY_ID}, KEY_ID + "=?",
-                new String[]{key}, null, null, null, null);
-        boolean exists = cursor.getCount() > 0;
-        cursor.close();
-        db.close();
-        return exists;
+        Cursor cursor = null;
+        try {
+            cursor = db.query(TABLE_NAME, new String[]{KEY_ID}, KEY_ID + "=?",
+                    new String[]{key}, null, null, null, null);
+            boolean exists = cursor != null && cursor.getCount() > 0;
+            return exists;
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+            db.close();
+        }
     }
     
     public SizeInfo size() {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT COUNT(*), SUM(LENGTH(" + KEY_VALUE + ")) FROM " + TABLE_NAME, null);
-        
-        long totalSize = 0;
-        int count = 0;
-        
-        if (cursor != null && cursor.moveToFirst()) {
-            count = cursor.getInt(0);
-            totalSize = cursor.getLong(1);
-            cursor.close();
+        Cursor cursor = null;
+        try {
+            cursor = db.rawQuery("SELECT COUNT(*), SUM(LENGTH(" + KEY_VALUE + ")) FROM " + TABLE_NAME, null);
+
+            long totalSize = 0;
+            int count = 0;
+
+            if (cursor != null && cursor.moveToFirst()) {
+                count = cursor.getInt(0);
+                // Check for NULL values from SQL SUM function
+                if (!cursor.isNull(1)) {
+                    totalSize = cursor.getLong(1);
+                }
+            }
+
+            return new SizeInfo(totalSize, count);
+        } finally {
+            if (cursor != null) {
+                cursor.close();
+            }
+            db.close();
         }
-        
-        db.close();
-        return new SizeInfo(totalSize, count);
     }
     
     /**

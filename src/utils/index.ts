@@ -3,6 +3,8 @@
  * Zero dependencies - all utilities implemented from scratch
  */
 
+import { ValidationError } from './errors';
+
 /**
  * Check if code is running in a browser environment
  */
@@ -140,7 +142,12 @@ export function parseSize(size: string | number): number {
   };
 
   const match = size.toLowerCase().match(/^(\d+(?:\.\d+)?)\s*([a-z]+)?$/);
-  if (!match) throw new Error(`Invalid size format: ${size}`);
+  if (!match) {
+    throw new ValidationError('Invalid size format', {
+      provided: size,
+      expected: 'Number with unit (e.g., 5MB, 1GB)',
+    });
+  }
 
   const [, num, unit = 'b'] = match;
   const multiplier = units[unit] || 1;

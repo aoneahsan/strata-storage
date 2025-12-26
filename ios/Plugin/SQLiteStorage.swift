@@ -1,29 +1,47 @@
 import Foundation
 import SQLite3
+import os.log
 
 @objc public class SQLiteStorage: NSObject {
     private var db: OpaquePointer?
     private let dbName: String
     private let tableName = "strata_storage"
+    private let logger = OSLog(subsystem: "com.strata.storage", category: "SQLiteStorage")
     
     @objc public init(dbName: String = "strata.db") {
         self.dbName = dbName
         super.init()
-        openDatabase()
-        createTable()
+        do {
+            try openDatabase()
+            try createTable()
+        } catch {
+            os_log("Failed to initialize SQLite storage: %{public}@", log: logger, type: .error, error.localizedDescription)
+        }
     }
     
     deinit {
         closeDatabase()
     }
     
-    private func openDatabase() {
-        let fileURL = try! FileManager.default
+    private func openDatabase() throws {
+        guard let fileURL = try? FileManager.default
             .url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
-            .appendingPathComponent(dbName)
-        
-        if sqlite3_open(fileURL.path, &db) != SQLITE_OK {
-            print("Unable to open database")
+            .appendingPathComponent(dbName) else {
+            throw NSError(
+                domain: "StrataStorage.SQLiteStorage",
+                code: 1001,
+                userInfo: [NSLocalizedDescriptionKey: "Unable to access document directory"]
+            )
+        }
+
+        guard sqlite3_open(fileURL.path, &db) == SQLITE_OK else {
+            let errorMessage = String(cString: sqlite3_errmsg(db))
+            sqlite3_close(db)
+            throw NSError(
+                domain: "StrataStorage.SQLiteStorage",
+                code: 1002,
+                userInfo: [NSLocalizedDescriptionKey: "Unable to open database: \(errorMessage)"]
+            )
         }
     }
     
@@ -31,7 +49,7 @@ import SQLite3
         sqlite3_close(db)
     }
     
-    private func createTable() {
+    private func createTable() throws {
         let createTableString = """
             CREATE TABLE IF NOT EXISTS \(tableName) (
                 key TEXT PRIMARY KEY NOT NULL,
@@ -43,19 +61,43 @@ import SQLite3
                 metadata TEXT
             );
         """
-        
+
         var createTableStatement: OpaquePointer?
-        if sqlite3_prepare_v2(db, createTableString, -1, &createTableStatement, nil) == SQLITE_OK {
-            if sqlite3_step(createTableStatement) == SQLITE_DONE {
-                print("Storage table created.")
-            }
+
+        guard sqlite3_prepare_v2(db, createTableString, -1, &createTableStatement, nil) == SQLITE_OK else {
+            let errorMessage = String(cString: sqlite3_errmsg(db))
+            throw NSError(
+                domain: "StrataStorage.SQLiteStorage",
+                code: 1003,
+                userInfo: [NSLocalizedDescriptionKey: "Failed to prepare CREATE TABLE: \(errorMessage)"]
+            )
         }
-        sqlite3_finalize(createTableStatement)
+
+        defer {
+            sqlite3_finalize(createTableStatement)
+        }
+
+        guard sqlite3_step(createTableStatement) == SQLITE_DONE else {
+            let errorMessage = String(cString: sqlite3_errmsg(db))
+            throw NSError(
+                domain: "StrataStorage.SQLiteStorage",
+                code: 1004,
+                userInfo: [NSLocalizedDescriptionKey: "Failed to create table: \(errorMessage)"]
+            )
+        }
     }
     
     @objc public func set(key: String, value: Any, expires: Int64? = nil, tags: [String]? = nil, metadata: [String: Any]? = nil) throws -> Bool {
+        guard let db = db else {
+            throw NSError(
+                domain: "StrataStorage.SQLiteStorage",
+                code: 1000,
+                userInfo: [NSLocalizedDescriptionKey: "Database not initialized"]
+            )
+        }
+
         let data: Data
-        
+
         if let dataValue = value as? Data {
             data = dataValue
         } else if let stringValue = value as? String {
@@ -96,9 +138,14 @@ import SQLite3
     }
     
     @objc public func get(key: String) -> [String: Any]? {
+        guard db != nil else {
+            os_log("Database not initialized", log: logger, type: .error)
+            return nil
+        }
+
         let querySQL = "SELECT * FROM \(tableName) WHERE key = ? LIMIT 1"
         var statement: OpaquePointer?
-        
+
         guard sqlite3_prepare_v2(db, querySQL, -1, &statement, nil) == SQLITE_OK,
               sqlite3_bind_text(statement, 1, key, -1, nil) == SQLITE_OK else {
             sqlite3_finalize(statement)
@@ -142,82 +189,105 @@ import SQLite3
     }
     
     @objc public func remove(key: String) -> Bool {
+        guard db != nil else {
+            os_log("Database not initialized", log: logger, type: .error)
+            return false
+        }
+
         let deleteSQL = "DELETE FROM \(tableName) WHERE key = ?"
         var statement: OpaquePointer?
-        
+
         let result = sqlite3_prepare_v2(db, deleteSQL, -1, &statement, nil) == SQLITE_OK &&
             sqlite3_bind_text(statement, 1, key, -1, nil) == SQLITE_OK &&
             sqlite3_step(statement) == SQLITE_DONE
-        
+
         sqlite3_finalize(statement)
         return result
     }
     
     @objc public func clear(prefix: String? = nil) -> Bool {
+        guard db != nil else {
+            os_log("Database not initialized", log: logger, type: .error)
+            return false
+        }
+
         let deleteSQL: String
         if let prefix = prefix {
             deleteSQL = "DELETE FROM \(tableName) WHERE key LIKE ?"
         } else {
             deleteSQL = "DELETE FROM \(tableName)"
         }
-        
+
         var statement: OpaquePointer?
         var result = sqlite3_prepare_v2(db, deleteSQL, -1, &statement, nil) == SQLITE_OK
-        
+
         if result && prefix != nil {
             result = sqlite3_bind_text(statement, 1, "\(prefix!)%", -1, nil) == SQLITE_OK
         }
-        
+
         if result {
             result = sqlite3_step(statement) == SQLITE_DONE
         }
-        
+
         sqlite3_finalize(statement)
         return result
     }
     
     @objc public func keys(pattern: String? = nil) -> [String] {
+        guard db != nil else {
+            os_log("Database not initialized", log: logger, type: .error)
+            return []
+        }
+
         let querySQL: String
         if let pattern = pattern {
             querySQL = "SELECT key FROM \(tableName) WHERE key LIKE ?"
         } else {
             querySQL = "SELECT key FROM \(tableName)"
         }
-        
+
         var statement: OpaquePointer?
         var keys: [String] = []
-        
+
         if sqlite3_prepare_v2(db, querySQL, -1, &statement, nil) == SQLITE_OK {
             if let pattern = pattern {
                 // Use % wildcard for SQL LIKE pattern matching
                 sqlite3_bind_text(statement, 1, "%\(pattern)%", -1, nil)
             }
-            
+
             while sqlite3_step(statement) == SQLITE_ROW {
                 if let key = sqlite3_column_text(statement, 0) {
                     keys.append(String(cString: key))
                 }
             }
         }
-        
+
         sqlite3_finalize(statement)
         return keys
     }
     
     @objc public func size() throws -> (total: Int, count: Int) {
+        guard db != nil else {
+            throw NSError(
+                domain: "StrataStorage.SQLiteStorage",
+                code: 1000,
+                userInfo: [NSLocalizedDescriptionKey: "Database not initialized"]
+            )
+        }
+
         let querySQL = "SELECT COUNT(*), SUM(LENGTH(value)) FROM \(tableName)"
         var statement: OpaquePointer?
-        
+
         var totalSize = 0
         var count = 0
-        
+
         if sqlite3_prepare_v2(db, querySQL, -1, &statement, nil) == SQLITE_OK {
             if sqlite3_step(statement) == SQLITE_ROW {
                 count = Int(sqlite3_column_int(statement, 0))
                 totalSize = Int(sqlite3_column_int64(statement, 1))
             }
         }
-        
+
         sqlite3_finalize(statement)
         return (total: totalSize, count: count)
     }

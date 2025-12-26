@@ -12,6 +12,7 @@ import type {
   QueryCondition,
 } from '@/types';
 import { deepClone } from '@/utils';
+import { QuotaExceededError } from '@/utils/errors';
 
 /**
  * In-memory storage adapter using Map
@@ -80,9 +81,12 @@ export class MemoryAdapter extends BaseAdapter {
       const projectedSize = this.currentSize - oldSize + newSize;
 
       if (projectedSize > this.maxSize) {
-        throw new Error(
-          `Memory storage size limit exceeded. Limit: ${this.maxSize}, Projected: ${projectedSize}`,
-        );
+        throw new QuotaExceededError('Memory storage size limit exceeded', {
+          limit: this.maxSize,
+          current: this.currentSize,
+          projected: projectedSize,
+          key,
+        });
       }
     }
 

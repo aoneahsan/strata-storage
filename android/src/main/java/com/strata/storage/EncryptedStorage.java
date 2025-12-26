@@ -3,8 +3,11 @@ package com.strata.storage;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.util.Log;
 import androidx.security.crypto.EncryptedSharedPreferences;
 import androidx.security.crypto.MasterKey;
+import java.security.GeneralSecurityException;
+import java.io.IOException;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Map;
@@ -18,28 +21,34 @@ public class EncryptedStorage {
     private SharedPreferences.Editor editor;
     private static final String DEFAULT_NAME = "StrataSecureStorage";
     
-    public EncryptedStorage(Context context) throws Exception {
+    public EncryptedStorage(Context context) throws GeneralSecurityException, IOException {
         this(context, DEFAULT_NAME);
     }
-    
-    public EncryptedStorage(Context context, String name) throws Exception {
+
+    public EncryptedStorage(Context context, String name) throws GeneralSecurityException, IOException {
         String fileName = name != null ? name : DEFAULT_NAME;
-        
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            MasterKey masterKey = new MasterKey.Builder(context)
-                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-                .build();
-                
-            encryptedPrefs = EncryptedSharedPreferences.create(
-                context,
-                fileName,
-                masterKey,
-                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-            );
-            
-            editor = encryptedPrefs.edit();
+            try {
+                MasterKey masterKey = new MasterKey.Builder(context)
+                    .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                    .build();
+
+                encryptedPrefs = EncryptedSharedPreferences.create(
+                    context,
+                    fileName,
+                    masterKey,
+                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                );
+
+                editor = encryptedPrefs.edit();
+            } catch (GeneralSecurityException | IOException e) {
+                Log.e("StrataStorage", "Failed to initialize encrypted storage", e);
+                throw e;
+            }
         } else {
+            Log.w("StrataStorage", "API < 23, using unencrypted SharedPreferences");
             // Fallback to regular SharedPreferences for older devices
             encryptedPrefs = context.getSharedPreferences(fileName, Context.MODE_PRIVATE);
             editor = encryptedPrefs.edit();
@@ -68,7 +77,7 @@ public class EncryptedStorage {
             editor.putString(key, stringValue);
             return editor.commit();
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e("StrataStorage", "Failed to set value in encrypted storage", e);
             return false;
         }
     }

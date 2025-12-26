@@ -4,6 +4,7 @@
  */
 
 import { LocalStorageAdapter } from './LocalStorageAdapter';
+import { QuotaExceededError, SerializationError } from '@/utils/errors';
 import type { StorageType, StorageCapabilities } from '@/types';
 
 /**
@@ -89,9 +90,9 @@ export class SessionStorageAdapter extends LocalStorageAdapter {
       window.sessionStorage.setItem(fullKey, serialized);
     } catch (error) {
       if (this.isQuotaError(error)) {
-        throw new Error(`SessionStorage quota exceeded for key ${key}`);
+        throw new QuotaExceededError('SessionStorage quota exceeded', { key, error });
       }
-      throw new Error(`Failed to store key ${key} in sessionStorage: ${error}`);
+      throw new SerializationError(`Failed to store key ${key} in sessionStorage`, error);
     }
 
     // Emit change event

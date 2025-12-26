@@ -5,6 +5,7 @@
 import { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import { Strata } from '@/core/Strata';
 import type { StrataConfig, StorageOptions, StorageChange, QueryCondition } from '@/types';
+import { ValidationError } from '@/utils/errors';
 
 // Context
 const StrataContext = createContext<Strata | null>(null);
@@ -38,7 +39,10 @@ export function StrataProvider({ children, config }: StrataProviderProps) {
 export function useStrata() {
   const strata = useContext(StrataContext);
   if (!strata) {
-    throw new Error('useStrata must be used within StrataProvider');
+    throw new ValidationError('useStrata hook must be used within StrataProvider', {
+      hook: 'useStrata',
+      requiredProvider: 'StrataProvider',
+    });
   }
   return strata;
 }

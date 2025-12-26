@@ -2,6 +2,7 @@ package com.strata.storage;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
@@ -37,7 +38,13 @@ public class SharedPreferencesStorage {
             } else if (value instanceof Boolean) {
                 editor.putBoolean(key, (Boolean) value);
             } else if (value instanceof Set) {
-                editor.putStringSet(key, (Set<String>) value);
+                // Safely convert to Set<String>
+                Set<?> rawSet = (Set<?>) value;
+                Set<String> stringSet = new HashSet<>();
+                for (Object item : rawSet) {
+                    stringSet.add(item != null ? item.toString() : "null");
+                }
+                editor.putStringSet(key, stringSet);
             } else {
                 // Convert complex objects to JSON
                 String json;
@@ -56,7 +63,7 @@ public class SharedPreferencesStorage {
             }
             return editor.commit();
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e("StrataStorage", "Failed to set value in SharedPreferences", e);
             return false;
         }
     }

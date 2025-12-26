@@ -6,7 +6,11 @@ import Foundation
     
     @objc public init(suiteName: String? = nil) {
         self.suiteName = suiteName
-        self.userDefaults = suiteName != nil ? UserDefaults(suiteName: suiteName)! : UserDefaults.standard
+        if let suiteName = suiteName, let customDefaults = UserDefaults(suiteName: suiteName) {
+            self.userDefaults = customDefaults
+        } else {
+            self.userDefaults = UserDefaults.standard
+        }
         super.init()
     }
     
@@ -36,7 +40,14 @@ import Foundation
             if let suiteName = suiteName {
                 UserDefaults(suiteName: suiteName)?.removePersistentDomain(forName: suiteName)
             } else {
-                let domain = Bundle.main.bundleIdentifier!
+                guard let domain = Bundle.main.bundleIdentifier else {
+                    // Fallback: manually clear all keys
+                    let keys = Array(userDefaults.dictionaryRepresentation().keys)
+                    for key in keys {
+                        userDefaults.removeObject(forKey: key)
+                    }
+                    return userDefaults.synchronize()
+                }
                 userDefaults.removePersistentDomain(forName: domain)
             }
         }

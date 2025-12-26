@@ -1,6 +1,7 @@
 // Optional Firebase integration - only import this if you need Firebase sync
 import type { Strata } from './core/Strata';
-import type { StorageAdapter } from './types';
+import type { StorageAdapter, StorageChange } from './types';
+import { StorageError } from './utils/errors';
 
 /**
  * Firebase sync configuration
@@ -44,8 +45,9 @@ export async function enableFirebaseSync(
     }
 
     if (config.firestore) {
-      // @ts-expect-error - Firebase is an optional peer dependency
-      const { getFirestore, doc, setDoc, getDoc, deleteDoc } = await import('firebase/firestore');
+      const { getFirestore, doc, setDoc, getDoc, deleteDoc, collection, getDocs, onSnapshot } =
+        // @ts-expect-error - Firebase is an optional peer dependency
+        await import('firebase/firestore');
       const db = getFirestore();
       const collectionName = config.collectionName || 'strata-storage';
 
@@ -82,12 +84,31 @@ export async function enableFirebaseSync(
           return docSnap.exists();
         },
         async clear() {
-          // Firestore doesn't have a direct clear method
-          console.warn('Clear operation not supported for Firestore adapter');
+          try {
+            const collectionRef = collection(db, collectionName);
+            const snapshot = await getDocs(collectionRef);
+            const deletePromises = snapshot.docs.map((docSnapshot: any) =>
+              deleteDoc(doc(db, collectionName, docSnapshot.id)),
+            );
+            await Promise.all(deletePromises);
+          } catch (error) {
+            throw new StorageError('Failed to clear Firestore collection', {
+              collectionName,
+              originalError: error,
+            });
+          }
         },
         async keys() {
-          // Would need to implement with queries
-          return [];
+          try {
+            const collectionRef = collection(db, collectionName);
+            const snapshot = await getDocs(collectionRef);
+            return snapshot.docs.map((docSnapshot: any) => docSnapshot.id);
+          } catch (error) {
+            throw new StorageError('Failed to retrieve keys from Firestore', {
+              collectionName,
+              originalError: error,
+            });
+          }
         },
         async size() {
           return { total: 0, count: 0 };
@@ -98,9 +119,22 @@ export async function enableFirebaseSync(
         async isAvailable() {
           return true;
         },
-        subscribe() {
-          // Not implemented for Firebase adapter
-          return () => {};
+        subscribe(callback: (change: StorageChange) => void) {
+          const collectionRef = collection(db, collectionName);
+          const unsubscribe = onSnapshot(collectionRef, (snapshot: any) => {
+            snapshot.docChanges().forEach((change: any) => {
+              const docData = change.doc.data() as { value?: unknown };
+              callback({
+                key: change.doc.id,
+                oldValue: change.type === 'removed' ? docData.value : undefined,
+                newValue: change.type !== 'removed' ? docData.value : undefined,
+                source: 'remote',
+                storage: 'firestore' as any,
+                timestamp: Date.now(),
+              });
+            });
+          });
+          return unsubscribe;
         },
         async close() {
           // No cleanup needed
@@ -114,7 +148,7 @@ export async function enableFirebaseSync(
 
     if (config.realtimeDatabase) {
       // @ts-expect-error - Firebase is an optional peer dependency
-      const { getDatabase, ref, set, get, remove } = await import('firebase/database');
+      const { getDatabase, ref, set, get, remove, onValue } = await import('firebase/database');
       const db = getDatabase();
 
       // Create custom adapter for Realtime Database
@@ -163,9 +197,35 @@ export async function enableFirebaseSync(
         async isAvailable() {
           return true;
         },
-        subscribe() {
-          // Not implemented for Firebase adapter
-          return () => {};
+        subscribe(callback: (change: StorageChange) => void) {
+          const dbRef = ref(db, 'strata-storage');
+          let previousData: Record<string, unknown> = {};
+
+          const unsubscribe = onValue(dbRef, (snapshot: any) => {
+            const currentData = snapshot.exists() ? (snapshot.val() as Record<string, unknown>) : {};
+
+            const allKeys = new Set([...Object.keys(previousData), ...Object.keys(currentData)]);
+
+            allKeys.forEach((key) => {
+              const oldValue = previousData[key];
+              const newValue = currentData[key];
+
+              if (oldValue !== newValue) {
+                callback({
+                  key,
+                  oldValue,
+                  newValue,
+                  source: 'remote',
+                  storage: 'realtime' as any,
+                  timestamp: Date.now(),
+                });
+              }
+            });
+
+            previousData = { ...currentData };
+          });
+
+          return unsubscribe;
         },
         async close() {
           // No cleanup needed
@@ -179,9 +239,10 @@ export async function enableFirebaseSync(
 
     // Firebase sync enabled successfully
   } catch (error) {
-    throw new Error(
-      `Failed to enable Firebase sync: ${error instanceof Error ? error.message : 'Unknown error'}`,
-    );
+    throw new StorageError('Failed to enable Firebase sync', {
+      originalError: error,
+      config,
+    });
   }
 }
 

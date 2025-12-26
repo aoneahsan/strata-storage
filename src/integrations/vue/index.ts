@@ -53,7 +53,9 @@ export const StrataPlugin = {
 export function useStrata(): Strata {
   const strata = inject(StrataKey);
   if (!strata) {
-    throw new Error('Strata not provided. Did you install the plugin?');
+    throw new ValidationError('Strata not provided. Plugin not installed.', {
+      required: 'app.use(StrataPlugin, { config })',
+    });
   }
   return strata;
 }
