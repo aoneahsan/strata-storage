@@ -36,7 +36,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest",
     "test:coverage": "vitest --coverage",
-    "prepublishOnly": "yarn build && yarn lint && yarn typecheck",
+    "prepublishOnly": "pnpm build && pnpm lint && pnpm typecheck",
     "postinstall": "node scripts/postinstall.js || true"
   },
   "keywords": [
@@ -67,7 +67,6 @@
     "url": "https://github.com/aoneahsan/strata-storage/issues"
   },
   "homepage": "https://github.com/aoneahsan/strata-storage#readme",
-  "dependencies": {},
   "peerDependencies": {
     "@angular/core": ">=21.0.6",
     "@capacitor/core": ">=8.0.0",
@@ -89,6 +88,7 @@
     }
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.2",
     "@types/node": "^25.0.3",
     "@types/react": "^19.2.7",
     "@typescript-eslint/eslint-plugin": "^8.50.1",

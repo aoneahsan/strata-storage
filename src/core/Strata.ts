@@ -20,7 +20,7 @@ import type {
 } from '@/types';
 
 import { AdapterRegistry } from './AdapterRegistry';
-import { isBrowser, isNode } from '@/utils';
+import { isBrowser, isNode, deepMerge } from '@/utils';
 import { StorageError, EncryptionError } from '@/utils/errors';
 import { EncryptionManager, type EncryptedData } from '@/features/encryption';
 import { CompressionManager, type CompressedData } from '@/features/compression';
@@ -554,11 +554,12 @@ export class Strata {
       } else if (options?.merge) {
         const existing = await this.get(key);
         if (options.merge === 'deep' && typeof existing === 'object' && typeof value === 'object') {
-          // Deep merge will be implemented with utils
-          await this.set(key, {
-            ...(existing as Record<string, unknown>),
-            ...(value as Record<string, unknown>),
-          });
+          // Use deep merge utility for proper nested object merging
+          const merged = deepMerge(
+            existing as Record<string, unknown>,
+            value as Record<string, unknown>,
+          );
+          await this.set(key, merged);
         } else {
           await this.set(key, value);
         }
