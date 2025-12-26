@@ -128,6 +128,15 @@ await storage.set('key', value, {
 - Run lint/typecheck after completing modules
 - Keep UI responsive across all devices
 
+### SVG Assets Policy
+- **ALWAYS** create SVG assets for any images, icons, logos, or graphics needed
+- **NEVER** use raster formats (PNG, JPG, GIF) unless absolutely necessary (e.g., photos)
+- SVG benefits: scalable, small file size, crisp at any resolution, theme-able
+- Create high-quality, optimized SVG files with clean paths
+- Use semantic naming for SVG files (e.g., `logo-primary.svg`, `icon-storage.svg`)
+- Store SVGs in appropriate directories (e.g., `assets/icons/`, `assets/logos/`)
+- Inline small SVGs directly in components when appropriate for performance
+
 ## Platform-Specific Considerations
 
 ### Web Platform
