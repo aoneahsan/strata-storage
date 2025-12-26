@@ -14,60 +14,86 @@ import type {
   NativeSizeOptions,
   NativeSizeResult,
 } from './definitions';
-import type { StorageValue } from '@/types';
+import type { StorageValue, StorageAdapter } from '@/types';
+import { LocalStorageAdapter } from '@/adapters/web/LocalStorageAdapter';
+import { IndexedDBAdapter } from '@/adapters/web/IndexedDBAdapter';
+import { CacheAdapter } from '@/adapters/web/CacheAdapter';
+import { NotSupportedError } from '@/utils/errors';
 
 export class StrataStorageWeb implements StrataStoragePlugin {
-  async isAvailable(_options: { storage: NativeStorageType }): Promise<{ available: boolean }> {
-    // Web platform doesn't support native storage types
-    // This is handled by the web adapters instead
-    return {
-      available: false,
-      platform: 'web',
-      message:
-        'Native storage not available on web. Use web adapters: localStorage, sessionStorage, indexedDB, cookies, or cache instead.',
-    } as { available: boolean; platform: string; message: string };
+  private adapters: Map<NativeStorageType, StorageAdapter> = new Map();
+  private initialized = false;
+
+  private async initializeAdapters() {
+    if (this.initialized) return;
+
+    this.adapters.set('preferences', new LocalStorageAdapter('strata_prefs_'));
+    this.adapters.set('secure', new IndexedDBAdapter('strata-secure'));
+    this.adapters.set('sqlite', new IndexedDBAdapter('strata-db'));
+    this.adapters.set('filesystem', new CacheAdapter('strata-files'));
+
+    await Promise.all(Array.from(this.adapters.values()).map((adapter) => adapter.initialize()));
+
+    this.initialized = true;
+  }
+
+  private getAdapter(storageType: NativeStorageType): StorageAdapter {
+    const adapter = this.adapters.get(storageType);
+    if (!adapter) {
+      throw new NotSupportedError(`Storage type '${storageType}'`, 'web plugin', {
+        availableTypes: Array.from(this.adapters.keys()),
+        suggestion: this.getSuggestion(storageType),
+      });
+    }
+    return adapter;
+  }
+  async isAvailable(options: { storage: NativeStorageType }): Promise<{ available: boolean }> {
+    await this.initializeAdapters();
+    const adapter = this.adapters.get(options.storage);
+    if (!adapter) {
+      return { available: false };
+    }
+    const available = await adapter.isAvailable();
+    return { available };
   }
 
   async get(options: NativeGetOptions): Promise<{ value: StorageValue | null }> {
-    // Not implemented for web - use web adapters instead
-    const storageType = options.storage || 'preferences';
-    const suggestion = this.getSuggestion(storageType);
-    throw new Error(`Native storage '${storageType}' not available on web platform. ${suggestion}`);
+    await this.initializeAdapters();
+    const adapter = this.getAdapter(options.storage || 'preferences');
+    const value = await adapter.get(options.key);
+    return { value };
   }
 
   async set(options: NativeSetOptions): Promise<void> {
-    // Not implemented for web - use web adapters instead
-    const storageType = options.storage || 'preferences';
-    const suggestion = this.getSuggestion(storageType);
-    throw new Error(`Native storage '${storageType}' not available on web platform. ${suggestion}`);
+    await this.initializeAdapters();
+    const adapter = this.getAdapter(options.storage || 'preferences');
+    await adapter.set(options.key, options.value);
   }
 
   async remove(options: NativeRemoveOptions): Promise<void> {
-    // Not implemented for web - use web adapters instead
-    const storageType = options.storage || 'preferences';
-    const suggestion = this.getSuggestion(storageType);
-    throw new Error(`Native storage '${storageType}' not available on web platform. ${suggestion}`);
+    await this.initializeAdapters();
+    const adapter = this.getAdapter(options.storage || 'preferences');
+    await adapter.remove(options.key);
   }
 
   async clear(options: NativeClearOptions): Promise<void> {
-    // Not implemented for web - use web adapters instead
-    const storageType = options.storage || 'preferences';
-    const suggestion = this.getSuggestion(storageType);
-    throw new Error(`Native storage '${storageType}' not available on web platform. ${suggestion}`);
+    await this.initializeAdapters();
+    const adapter = this.getAdapter(options.storage || 'preferences');
+    await adapter.clear();
   }
 
   async keys(options: NativeKeysOptions): Promise<{ keys: string[] }> {
-    // Not implemented for web - use web adapters instead
-    const storageType = options.storage || 'preferences';
-    const suggestion = this.getSuggestion(storageType);
-    throw new Error(`Native storage '${storageType}' not available on web platform. ${suggestion}`);
+    await this.initializeAdapters();
+    const adapter = this.getAdapter(options.storage || 'preferences');
+    const keys = await adapter.keys();
+    return { keys };
   }
 
   async size(options: NativeSizeOptions): Promise<NativeSizeResult> {
-    // Not implemented for web - use web adapters instead
-    const storageType = options.storage || 'preferences';
-    const suggestion = this.getSuggestion(storageType);
-    throw new Error(`Native storage '${storageType}' not available on web platform. ${suggestion}`);
+    await this.initializeAdapters();
+    const adapter = this.getAdapter(options.storage || 'preferences');
+    const sizeInfo = await adapter.size();
+    return { total: sizeInfo.total, count: sizeInfo.count };
   }
 
   /**

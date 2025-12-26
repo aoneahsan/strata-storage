@@ -2,22 +2,45 @@
  * React integration for Strata Storage
  */
 
-import { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+  useMemo,
+  type ReactElement,
+} from 'react';
 import { Strata } from '@/core/Strata';
 import type { StrataConfig, StorageOptions, StorageChange, QueryCondition } from '@/types';
 import { ValidationError } from '@/utils/errors';
 
 // Context
-const StrataContext = createContext<Strata | null>(null);
+interface StrataContextValue {
+  strata: Strata | null;
+  initialized: boolean;
+}
+
+const StrataContext = createContext<StrataContextValue>({
+  strata: null,
+  initialized: false,
+});
 
 // Provider Props
 interface StrataProviderProps {
   children: React.ReactNode;
   config?: StrataConfig;
+  loadingComponent?: React.ReactNode;
+  fallback?: React.ReactNode;
 }
 
 // Provider Component
-export function StrataProvider({ children, config }: StrataProviderProps) {
+export function StrataProvider({
+  children,
+  config,
+  loadingComponent,
+  fallback,
+}: StrataProviderProps) {
   const [strata] = useState(() => new Strata(config));
   const [initialized, setInitialized] = useState(false);
 
@@ -28,23 +51,40 @@ export function StrataProvider({ children, config }: StrataProviderProps) {
     };
   }, [strata]);
 
-  if (!initialized) {
-    return null; // Or loading component
+  const value = useMemo(
+    () => ({
+      strata: initialized ? strata : null,
+      initialized,
+    }),
+    [strata, initialized],
+  );
+
+  if (!initialized && (loadingComponent || fallback)) {
+    return (loadingComponent ?? fallback) as React.ReactElement;
   }
 
-  return <StrataContext.Provider value={strata}>{children}</StrataContext.Provider>;
+  return <StrataContext.Provider value={value}>{children}</StrataContext.Provider>;
 }
 
 // Core hook
 export function useStrata() {
-  const strata = useContext(StrataContext);
-  if (!strata) {
-    throw new ValidationError('useStrata hook must be used within StrataProvider', {
-      hook: 'useStrata',
-      requiredProvider: 'StrataProvider',
-    });
+  const { strata, initialized } = useContext(StrataContext);
+  if (!initialized || !strata) {
+    throw new ValidationError(
+      'useStrata hook must be used within StrataProvider and wait for initialization',
+      {
+        hook: 'useStrata',
+        requiredProvider: 'StrataProvider',
+      },
+    );
   }
   return strata;
+}
+
+// Hook to check initialization status
+export function useStrataInitialized(): boolean {
+  const { initialized } = useContext(StrataContext);
+  return initialized;
 }
 
 // Storage hook with real-time updates

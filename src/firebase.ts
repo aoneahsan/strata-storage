@@ -1,6 +1,6 @@
 // Optional Firebase integration - only import this if you need Firebase sync
 import type { Strata } from './core/Strata';
-import type { StorageAdapter, StorageChange } from './types';
+import type { StorageAdapter, StorageChange, StorageType } from './types';
 import { StorageError } from './utils/errors';
 
 /**
@@ -87,8 +87,8 @@ export async function enableFirebaseSync(
           try {
             const collectionRef = collection(db, collectionName);
             const snapshot = await getDocs(collectionRef);
-            const deletePromises = snapshot.docs.map((docSnapshot: any) =>
-              deleteDoc(doc(db, collectionName, docSnapshot.id)),
+            const deletePromises = snapshot.docs.map((docSnapshot: unknown) =>
+              deleteDoc(doc(db, collectionName, (docSnapshot as { id: string }).id)),
             );
             await Promise.all(deletePromises);
           } catch (error) {
@@ -102,7 +102,7 @@ export async function enableFirebaseSync(
           try {
             const collectionRef = collection(db, collectionName);
             const snapshot = await getDocs(collectionRef);
-            return snapshot.docs.map((docSnapshot: any) => docSnapshot.id);
+            return snapshot.docs.map((docSnapshot: unknown) => (docSnapshot as { id: string }).id);
           } catch (error) {
             throw new StorageError('Failed to retrieve keys from Firestore', {
               collectionName,
@@ -121,18 +121,27 @@ export async function enableFirebaseSync(
         },
         subscribe(callback: (change: StorageChange) => void) {
           const collectionRef = collection(db, collectionName);
-          const unsubscribe = onSnapshot(collectionRef, (snapshot: any) => {
-            snapshot.docChanges().forEach((change: any) => {
-              const docData = change.doc.data() as { value?: unknown };
-              callback({
-                key: change.doc.id,
-                oldValue: change.type === 'removed' ? docData.value : undefined,
-                newValue: change.type !== 'removed' ? docData.value : undefined,
-                source: 'remote',
-                storage: 'firestore' as any,
-                timestamp: Date.now(),
+          const unsubscribe = onSnapshot(collectionRef, (snapshot: unknown) => {
+            (
+              snapshot as {
+                docChanges: () => Array<{
+                  type: string;
+                  doc: { id: string; data: () => unknown };
+                }>;
+              }
+            )
+              .docChanges()
+              .forEach((change) => {
+                const docData = change.doc.data() as { value?: unknown };
+                callback({
+                  key: change.doc.id,
+                  oldValue: change.type === 'removed' ? docData.value : undefined,
+                  newValue: change.type !== 'removed' ? docData.value : undefined,
+                  source: 'remote',
+                  storage: 'firestore' as unknown as StorageType,
+                  timestamp: Date.now(),
+                });
               });
-            });
           });
           return unsubscribe;
         },
@@ -201,29 +210,41 @@ export async function enableFirebaseSync(
           const dbRef = ref(db, 'strata-storage');
           let previousData: Record<string, unknown> = {};
 
-          const unsubscribe = onValue(dbRef, (snapshot: any) => {
-            const currentData = snapshot.exists() ? (snapshot.val() as Record<string, unknown>) : {};
+          const unsubscribe = onValue(
+            dbRef,
+            (snapshot: unknown) => {
+              const snapshotTyped = snapshot as {
+                exists: () => boolean;
+                val: () => Record<string, unknown>;
+              };
+              const currentData = snapshotTyped.exists()
+                ? (snapshotTyped.val() as Record<string, unknown>)
+                : {};
 
-            const allKeys = new Set([...Object.keys(previousData), ...Object.keys(currentData)]);
+              const allKeys = new Set([
+                ...Object.keys(previousData),
+                ...Object.keys(currentData),
+              ]);
 
-            allKeys.forEach((key) => {
-              const oldValue = previousData[key];
-              const newValue = currentData[key];
+              allKeys.forEach((key) => {
+                const oldValue = previousData[key];
+                const newValue = currentData[key];
 
-              if (oldValue !== newValue) {
-                callback({
-                  key,
-                  oldValue,
-                  newValue,
-                  source: 'remote',
-                  storage: 'realtime' as any,
-                  timestamp: Date.now(),
-                });
-              }
-            });
+                if (oldValue !== newValue) {
+                  callback({
+                    key,
+                    oldValue,
+                    newValue,
+                    source: 'remote',
+                    storage: 'realtime' as unknown as StorageType,
+                    timestamp: Date.now(),
+                  });
+                }
+              });
 
-            previousData = { ...currentData };
-          });
+              previousData = { ...currentData };
+            },
+          );
 
           return unsubscribe;
         },

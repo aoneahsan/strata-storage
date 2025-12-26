@@ -16,16 +16,47 @@ import type {
   NativeSizeResult,
 } from './definitions';
 import type { StorageValue } from '@/types';
+import { NotSupportedError } from '@/utils/errors';
 
 // Mock implementation for when Capacitor is not available
 const mockPlugin: StrataStoragePlugin = {
   isAvailable: async () => ({ available: false }),
-  get: async () => ({ value: null }),
-  set: async () => {},
-  remove: async () => {},
-  clear: async () => {},
-  keys: async () => ({ keys: [] }),
-  size: async () => ({ total: 0, count: 0 }),
+  get: async () => {
+    throw new NotSupportedError('Native storage', 'web platform without Capacitor', {
+      suggestion:
+        'Use web adapters: localStorage, sessionStorage, indexedDB, cookies, or cache instead',
+    });
+  },
+  set: async () => {
+    throw new NotSupportedError('Native storage', 'web platform without Capacitor', {
+      suggestion:
+        'Use web adapters: localStorage, sessionStorage, indexedDB, cookies, or cache instead',
+    });
+  },
+  remove: async () => {
+    throw new NotSupportedError('Native storage', 'web platform without Capacitor', {
+      suggestion:
+        'Use web adapters: localStorage, sessionStorage, indexedDB, cookies, or cache instead',
+    });
+  },
+  clear: async () => {
+    throw new NotSupportedError('Native storage', 'web platform without Capacitor', {
+      suggestion:
+        'Use web adapters: localStorage, sessionStorage, indexedDB, cookies, or cache instead',
+    });
+  },
+  keys: async () => {
+    throw new NotSupportedError('Native storage', 'web platform without Capacitor', {
+      suggestion:
+        'Use web adapters: localStorage, sessionStorage, indexedDB, cookies, or cache instead',
+    });
+  },
+  size: async () => {
+    throw new NotSupportedError('Native storage', 'web platform without Capacitor', {
+      suggestion:
+        'Use web adapters: localStorage, sessionStorage, indexedDB, cookies, or cache instead',
+    });
+  },
 };
 
 // Create a lazy-loading wrapper that only attempts to load Capacitor when actually used
