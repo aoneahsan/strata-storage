@@ -210,41 +210,35 @@ export async function enableFirebaseSync(
           const dbRef = ref(db, 'strata-storage');
           let previousData: Record<string, unknown> = {};
 
-          const unsubscribe = onValue(
-            dbRef,
-            (snapshot: unknown) => {
-              const snapshotTyped = snapshot as {
-                exists: () => boolean;
-                val: () => Record<string, unknown>;
-              };
-              const currentData = snapshotTyped.exists()
-                ? (snapshotTyped.val() as Record<string, unknown>)
-                : {};
+          const unsubscribe = onValue(dbRef, (snapshot: unknown) => {
+            const snapshotTyped = snapshot as {
+              exists: () => boolean;
+              val: () => Record<string, unknown>;
+            };
+            const currentData = snapshotTyped.exists()
+              ? (snapshotTyped.val() as Record<string, unknown>)
+              : {};
 
-              const allKeys = new Set([
-                ...Object.keys(previousData),
-                ...Object.keys(currentData),
-              ]);
+            const allKeys = new Set([...Object.keys(previousData), ...Object.keys(currentData)]);
 
-              allKeys.forEach((key) => {
-                const oldValue = previousData[key];
-                const newValue = currentData[key];
+            allKeys.forEach((key) => {
+              const oldValue = previousData[key];
+              const newValue = currentData[key];
 
-                if (oldValue !== newValue) {
-                  callback({
-                    key,
-                    oldValue,
-                    newValue,
-                    source: 'remote',
-                    storage: 'realtime' as unknown as StorageType,
-                    timestamp: Date.now(),
-                  });
-                }
-              });
+              if (oldValue !== newValue) {
+                callback({
+                  key,
+                  oldValue,
+                  newValue,
+                  source: 'remote',
+                  storage: 'realtime' as unknown as StorageType,
+                  timestamp: Date.now(),
+                });
+              }
+            });
 
-              previousData = { ...currentData };
-            },
-          );
+            previousData = { ...currentData };
+          });
 
           return unsubscribe;
         },

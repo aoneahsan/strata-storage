@@ -111,6 +111,12 @@ await storage.set('key', value, {
 - Manual testing on iOS/Android devices
 - Use Vitest or Cypress (not Jest)
 
+### ESLint Configuration
+- **NEVER** use `@eslint/js` package (versioning issues in npm registry)
+- Manually define ESLint recommended rules instead of importing from `@eslint/js`
+- See `eslint.config.mjs` for proper configuration without `@eslint/js`
+- Use `typescript-eslint`, `eslint-plugin-prettier`, and `eslint-config-prettier` directly
+
 ## Key Development Notes
 
 - Maximum 500 lines per file
