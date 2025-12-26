@@ -23,19 +23,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 # Install dev dependencies only
-yarn install
+pnpm install
 
 # Build TypeScript
-yarn build
+pnpm build
 
 # Run tests (when implemented)
-yarn test
+pnpm test
 
 # Lint code
-yarn lint
+pnpm lint
 
 # Check types
-yarn typecheck
+pnpm typecheck
 ```
 
 ## Architecture Overview
@@ -144,10 +144,10 @@ await storage.set('key', value, {
 
 ## Current Status
 
-**Phase**: Documentation and planning completed  
-**Implementation**: Not started  
-**Next Steps**: 
-1. Initialize yarn project with TypeScript
+**Phase**: Documentation and planning completed
+**Implementation**: Not started
+**Next Steps**:
+1. Initialize pnpm project with TypeScript
 2. Set up directory structure
 3. Implement core Strata class
 4. Build Memory adapter first
