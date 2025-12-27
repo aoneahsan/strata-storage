@@ -14,8 +14,37 @@ This file provides guidance to Claude Code when working with code in this reposi
 
 ## Dev Server Ports
 
-- Demo App: 5947
-- Marketing Website: 5948
+| App | Port | Status |
+|-----|------|--------|
+| Demo App | 5947 | Registered |
+| Marketing Website | 5948 | Registered |
+
+### Port Management Rule (CRITICAL)
+
+**NEVER use common/default ports** like 3000, 3001, 4000, 5000, 5173, 8000, 8080, etc.
+
+**Three-Location Sync Required:**
+1. **Project Config** - vite.config.ts or package.json dev script
+2. **Project CLAUDE.md** - documented in Dev Server Ports section
+3. **Global Registry** - `~/.dev-ports.json`
+
+**Verification Process:**
+- On first run in any project, verify all 3 locations are in sync
+- If port missing from global registry, add it with project path and name
+- If using default port, assign new unique port (5900-5999 range recommended)
+- Update all 3 locations to match
+
+**Global Registry Format (`~/.dev-ports.json`):**
+```json
+{
+  "project-key": {
+    "port": 5947,
+    "project": "/full/path/to/project",
+    "name": "Human Readable Name",
+    "last_updated": "YYYY-MM-DD"
+  }
+}
+```
 
 ## Build & Development Commands
 
