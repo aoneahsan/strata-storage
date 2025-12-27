@@ -36,6 +36,10 @@ export type {
   StorageCapabilities,
   StorageMetadata,
   TTLConfig,
+  StrataConfig,
+  StorageChange,
+  SubscriptionCallback,
+  UnsubscribeFunction,
 } from './types';
 
 // Utils
