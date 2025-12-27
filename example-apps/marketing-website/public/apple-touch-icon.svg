@@ -1,0 +1,29 @@
+<svg viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="apple-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e1b4b"/>
+      <stop offset="100%" style="stop-color:#312e81"/>
+    </linearGradient>
+    <linearGradient id="apple-layer1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1"/>
+      <stop offset="100%" style="stop-color:#a78bfa"/>
+    </linearGradient>
+    <linearGradient id="apple-layer2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4f46e5"/>
+      <stop offset="100%" style="stop-color:#7c3aed"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background with rounded corners -->
+  <rect width="180" height="180" rx="40" fill="url(#apple-bg)"/>
+
+  <!-- Logo layers centered -->
+  <g transform="translate(30, 35)">
+    <rect x="0" y="75" width="120" height="30" rx="6" fill="url(#apple-layer2)"/>
+    <rect x="15" y="42" width="90" height="30" rx="6" fill="url(#apple-layer1)"/>
+    <rect x="30" y="9" width="60" height="30" rx="6" fill="url(#apple-layer2)"/>
+    <circle cx="45" cy="24" r="5" fill="white" opacity="0.9"/>
+    <circle cx="45" cy="57" r="5" fill="white" opacity="0.9"/>
+    <circle cx="45" cy="90" r="5" fill="white" opacity="0.9"/>
+  </g>
+</svg>

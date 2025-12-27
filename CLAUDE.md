@@ -113,6 +113,40 @@ strata-storage/
 - Use `// eslint-disable-next-line react-hooks/exhaustive-deps` for intentional omissions
 - Stable refs, setState, dispatch don't need to be dependencies
 
+### Project Info Maintenance (CRITICAL)
+
+**Update IMMEDIATELY when adding features or changes:**
+
+**Required Pages (App Store Compliance):**
+- Privacy Policy - GDPR compliant, all data collection disclosed
+- Terms of Service - License, usage terms, disclaimers
+- About - Project info, developer details, version
+- Contact - Support email, response time, channels
+- Account Deletion - User-initiated account removal
+- Data Deletion - GDPR data removal request
+- Cookie Policy - All tracking/analytics disclosed
+- GDPR Rights - User rights explanation
+
+**Required Assets (All SVG):**
+- Logo (multiple sizes)
+- Favicon (16x16, 32x32, 180x180)
+- Social share image (1200x630)
+- App icons (for PWA manifest)
+
+**Update Checklist (After Every Feature):**
+- [ ] Privacy policy reflects current data collection
+- [ ] Terms updated with new features
+- [ ] About page describes latest functionality
+- [ ] Analytics/tracking disclosed in Cookie Policy
+- [ ] Meta tags updated (title, description, keywords)
+- [ ] manifest.json updated (if PWA features changed)
+- [ ] Open Graph and Twitter cards updated
+
+**App Store Requirements:**
+- Play Console: Privacy policy URL, Data safety section
+- App Store: Privacy details, Data collection disclosure
+- Both: Contact info, Support URL, Account/data deletion
+
 ## Key Features (v2.4.1)
 
 ### Storage Adapters (9 total)
@@ -172,6 +206,8 @@ Analytics service tracks: page views, button clicks, navigation, form submission
 ### Pages
 - Home, Features, Docs, Login, Feedback, Dashboard
 - Code Access, Privacy, Terms, Sitemap, 404
+- About, Contact, Cookie Policy, GDPR Rights
+- Account Deletion, Data Deletion Request
 
 ## Example Demo App
 

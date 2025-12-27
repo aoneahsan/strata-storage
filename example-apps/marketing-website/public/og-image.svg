@@ -1,0 +1,71 @@
+<svg viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="og-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f0f23"/>
+      <stop offset="50%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#16213e"/>
+    </linearGradient>
+    <linearGradient id="og-accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1"/>
+      <stop offset="50%" style="stop-color:#8b5cf6"/>
+      <stop offset="100%" style="stop-color:#a78bfa"/>
+    </linearGradient>
+    <linearGradient id="og-layer1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4f46e5"/>
+      <stop offset="100%" style="stop-color:#7c3aed"/>
+    </linearGradient>
+    <linearGradient id="og-layer2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1"/>
+      <stop offset="100%" style="stop-color:#a78bfa"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#og-bg)"/>
+
+  <!-- Decorative grid pattern -->
+  <g opacity="0.05">
+    <line x1="0" y1="0" x2="1200" y2="630" stroke="white" stroke-width="1"/>
+    <line x1="0" y1="630" x2="1200" y2="0" stroke="white" stroke-width="1"/>
+    <line x1="600" y1="0" x2="600" y2="630" stroke="white" stroke-width="1"/>
+    <line x1="0" y1="315" x2="1200" y2="315" stroke="white" stroke-width="1"/>
+  </g>
+
+  <!-- Accent glow -->
+  <ellipse cx="600" cy="315" rx="400" ry="200" fill="url(#og-accent)" opacity="0.1"/>
+
+  <!-- Logo - Stacked layers -->
+  <g transform="translate(100, 200)">
+    <rect x="0" y="140" width="200" height="50" rx="8" fill="url(#og-layer1)"/>
+    <rect x="20" y="85" width="160" height="50" rx="8" fill="url(#og-layer2)"/>
+    <rect x="40" y="30" width="120" height="50" rx="8" fill="url(#og-layer1)"/>
+    <circle cx="60" cy="55" r="8" fill="white" opacity="0.9"/>
+    <circle cx="60" cy="110" r="8" fill="white" opacity="0.9"/>
+    <circle cx="60" cy="165" r="8" fill="white" opacity="0.9"/>
+  </g>
+
+  <!-- Text -->
+  <text x="350" y="280" font-family="Inter, -apple-system, sans-serif" font-size="72" font-weight="800" fill="white">Strata Storage</text>
+  <text x="350" y="350" font-family="Inter, -apple-system, sans-serif" font-size="32" font-weight="500" fill="#a1a1aa">Universal Storage for Web &amp; Mobile</text>
+
+  <!-- Feature badges -->
+  <g transform="translate(350, 400)">
+    <rect x="0" y="0" width="180" height="40" rx="20" fill="url(#og-accent)" opacity="0.2"/>
+    <text x="90" y="26" font-family="Inter, sans-serif" font-size="16" font-weight="600" fill="white" text-anchor="middle">Zero Dependencies</text>
+
+    <rect x="200" y="0" width="140" height="40" rx="20" fill="url(#og-accent)" opacity="0.2"/>
+    <text x="270" y="26" font-family="Inter, sans-serif" font-size="16" font-weight="600" fill="white" text-anchor="middle">TypeScript</text>
+
+    <rect x="360" y="0" width="160" height="40" rx="20" fill="url(#og-accent)" opacity="0.2"/>
+    <text x="440" y="26" font-family="Inter, sans-serif" font-size="16" font-weight="600" fill="white" text-anchor="middle">9 Adapters</text>
+  </g>
+
+  <!-- Version badge -->
+  <g transform="translate(1050, 50)">
+    <rect x="0" y="0" width="100" height="36" rx="18" fill="url(#og-accent)" opacity="0.3"/>
+    <text x="50" y="24" font-family="Inter, sans-serif" font-size="14" font-weight="600" fill="white" text-anchor="middle">v2.4.1</text>
+  </g>
+
+  <!-- URL -->
+  <text x="600" y="580" font-family="Inter, sans-serif" font-size="20" font-weight="500" fill="#71717a" text-anchor="middle">npmjs.com/package/strata-storage</text>
+</svg>

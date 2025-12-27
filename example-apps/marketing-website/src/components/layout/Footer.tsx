@@ -5,13 +5,11 @@ export function Footer() {
   return (
     <footer className="border-t bg-muted/50">
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-8 md:grid-cols-5">
           {/* Brand */}
-          <div className="space-y-4">
+          <div className="col-span-2 md:col-span-1 space-y-4">
             <Link to="/" className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-600 to-purple-600">
-                <span className="text-lg font-bold text-white">S</span>
-              </div>
+              <img src="/strata-logo.svg" alt="Strata Storage" className="h-8 w-8" />
               <span className="text-xl font-bold">Strata Storage</span>
             </Link>
             <p className="text-sm text-muted-foreground">
@@ -23,6 +21,7 @@ export function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-foreground"
+                aria-label="GitHub"
               >
                 <Github className="h-5 w-5" />
               </a>
@@ -31,10 +30,15 @@ export function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-foreground"
+                aria-label="LinkedIn"
               >
                 <Linkedin className="h-5 w-5" />
               </a>
-              <a href="mailto:aoneahsan@gmail.com" className="text-muted-foreground hover:text-foreground">
+              <a
+                href="mailto:aoneahsan@gmail.com"
+                className="text-muted-foreground hover:text-foreground"
+                aria-label="Email"
+              >
                 <Mail className="h-5 w-5" />
               </a>
               <a
@@ -42,6 +46,7 @@ export function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-foreground"
+                aria-label="Website"
               >
                 <Globe className="h-5 w-5" />
               </a>
@@ -72,6 +77,11 @@ export function Footer() {
                   NPM Package
                 </a>
               </li>
+              <li>
+                <Link to="/about" className="text-muted-foreground hover:text-foreground">
+                  About
+                </Link>
+              </li>
             </ul>
           </div>
 
@@ -87,6 +97,11 @@ export function Footer() {
               <li>
                 <Link to="/feedback" className="text-muted-foreground hover:text-foreground">
                   Feedback
+                </Link>
+              </li>
+              <li>
+                <Link to="/contact" className="text-muted-foreground hover:text-foreground">
+                  Contact Us
                 </Link>
               </li>
               <li>
@@ -114,6 +129,33 @@ export function Footer() {
               <li>
                 <Link to="/terms" className="text-muted-foreground hover:text-foreground">
                   Terms of Service
+                </Link>
+              </li>
+              <li>
+                <Link to="/cookies" className="text-muted-foreground hover:text-foreground">
+                  Cookie Policy
+                </Link>
+              </li>
+              <li>
+                <Link to="/gdpr-rights" className="text-muted-foreground hover:text-foreground">
+                  GDPR Rights
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Data & Account */}
+          <div className="space-y-4">
+            <h3 className="font-semibold">Your Data</h3>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link to="/data-deletion" className="text-muted-foreground hover:text-foreground">
+                  Data Deletion
+                </Link>
+              </li>
+              <li>
+                <Link to="/account-deletion" className="text-muted-foreground hover:text-foreground">
+                  Delete Account
                 </Link>
               </li>
               <li>

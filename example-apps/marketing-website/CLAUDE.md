@@ -26,6 +26,25 @@ This is a sub-project of strata-storage. See root CLAUDE.md for full project gui
 
 **Verification:** Before starting dev server, verify all 3 locations match.
 
+## Project Info Maintenance (CRITICAL)
+
+**Update IMMEDIATELY when adding features:**
+- Privacy Policy, Terms, Contact, About pages
+- Data Deletion, Account Deletion pages
+- Cookie Policy, GDPR Rights pages
+- Meta tags, titles, descriptions, keywords
+- manifest.json (PWA config)
+- All SVG assets (icons, logos, social images)
+
+**Required for:** Google Play, App Store, GDPR compliance
+
+**After every module, verify:**
+- [ ] Privacy policy reflects current data usage
+- [ ] Terms updated with new features
+- [ ] Analytics/tracking disclosed
+- [ ] App store compliance met
+- [ ] SEO metadata optimized
+
 ## Commands
 
 ```bash
