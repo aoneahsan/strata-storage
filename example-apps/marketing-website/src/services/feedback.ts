@@ -1,4 +1,4 @@
-import { collection, addDoc, query, where, getDocs, orderBy, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, query, where, getDocs, orderBy, serverTimestamp, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import analytics from '@/services/analytics';
 
@@ -76,6 +76,30 @@ export async function getPublicReviews(): Promise<Feedback[]> {
   } catch (error) {
     const duration = Math.round(performance.now() - startTime);
     analytics.apiCall('feedback/reviews', 'GET', false, duration);
+    throw error;
+  }
+}
+
+export async function deleteUserFeedback(userId: string): Promise<number> {
+  const startTime = performance.now();
+  try {
+    const q = query(collection(db, COLLECTION), where('userId', '==', userId));
+    const snapshot = await getDocs(q);
+
+    const deletePromises = snapshot.docs.map((docSnapshot) =>
+      deleteDoc(doc(db, COLLECTION, docSnapshot.id))
+    );
+    await Promise.all(deletePromises);
+
+    const duration = Math.round(performance.now() - startTime);
+    analytics.apiCall('feedback/delete-user', 'DELETE', true, duration);
+    analytics.track('user_feedback_deleted', { count: snapshot.docs.length });
+
+    return snapshot.docs.length;
+  } catch (error) {
+    const duration = Math.round(performance.now() - startTime);
+    analytics.apiCall('feedback/delete-user', 'DELETE', false, duration);
+    analytics.error('feedback_delete_error', error instanceof Error ? error.message : 'Unknown error');
     throw error;
   }
 }

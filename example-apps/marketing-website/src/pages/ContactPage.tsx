@@ -38,10 +38,10 @@ export default function ContactPage() {
     // Track form submission attempt
     analytics.track('contact_form_submit', { subject: formData.subject });
 
-    // Simulate sending (in production, this would send to an API or email service)
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    // Brief delay for UX before opening email client
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
-    // For now, open mailto link
+    // Open mailto link with form data
     const mailtoLink = `mailto:aoneahsan@gmail.com?subject=${encodeURIComponent(
       formData.subject
     )}&body=${encodeURIComponent(

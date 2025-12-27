@@ -14,6 +14,9 @@ import {
   Mail,
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { deleteUserFeedback } from '@/services/feedback';
+import { auth } from '@/lib/firebase';
+import { deleteUser } from 'firebase/auth';
 import analytics from '@/services/analytics';
 
 export default function AccountDeletionPage() {
@@ -35,22 +38,34 @@ export default function AccountDeletionPage() {
     analytics.track('account_deletion_initiated');
 
     try {
-      // In production, this would call a Firebase Cloud Function to:
-      // 1. Delete all user data from Firestore
-      // 2. Delete the Firebase Auth user
-      // 3. Clean up any other associated data
+      // 1. Delete all user feedback from Firestore
+      const deletedCount = await deleteUserFeedback(user.uid);
+      analytics.track('user_data_deleted', { feedback_count: deletedCount });
 
-      // For now, we'll just sign out and redirect
+      // 2. Delete the Firebase Auth user
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        await deleteUser(currentUser);
+      }
+
+      // 3. Sign out (in case deleteUser didn't already sign them out)
       await signOut();
+
       setStatus('success');
       analytics.track('account_deletion_completed');
 
       setTimeout(() => {
         navigate('/');
       }, 3000);
-    } catch {
+    } catch (error) {
       setStatus('error');
-      analytics.error('account_deletion_error', 'Failed to delete account');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete account';
+      analytics.error('account_deletion_error', errorMessage);
+
+      // If error is "requires recent login", inform user
+      if (errorMessage.includes('recent')) {
+        analytics.track('account_deletion_requires_reauth');
+      }
     }
   };
 

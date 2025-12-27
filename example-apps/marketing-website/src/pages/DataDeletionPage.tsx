@@ -35,8 +35,8 @@ export default function DataDeletionPage() {
 
     analytics.track('data_request_submitted', { type: requestType });
 
-    // In production, this would submit to a backend or send an email
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    // Brief delay for UX before opening email client
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
     // Open mailto with the request
     const subject = `Data ${requestType === 'deletion' ? 'Deletion' : requestType === 'export' ? 'Export' : 'Access'} Request - Strata Storage`;
