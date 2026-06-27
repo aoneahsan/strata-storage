@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    name: Package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.13.0
+      # Enable Corepack AFTER setup-node and do NOT use setup-node's yarn cache:
+      # the cache step would run `yarn cache dir` with the runner's global Yarn 1.x,
+      # which errors on this project's `packageManager: yarn@4`.
+      - run: corepack enable
+      - run: yarn install --immutable
+      - run: yarn typecheck
+      - run: yarn build
+      - run: yarn lint
+
+  docs:
+    name: Docs Site
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: docs-website
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.13.0
+      - run: corepack enable
+      - run: yarn install --immutable
+      # Builds the Docusaurus site from the top-level ../docs (onBrokenLinks: throw).
+      - run: yarn build
