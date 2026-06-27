@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  root:
+    name: Package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.13.0
+          cache: yarn
+      - run: corepack enable
+      - run: yarn install --immutable
+      - run: yarn typecheck
+      - run: yarn build
+      - run: yarn lint
+
+  docs:
+    name: Docs Site
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: docs
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.13.0
+          cache: yarn
+          cache-dependency-path: docs/yarn.lock
+      - run: corepack enable
+      - run: yarn install --immutable
+      - run: yarn build
+
+  website:
+    name: Website
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: website
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.13.0
+          cache: yarn
+          cache-dependency-path: website/yarn.lock
+      - run: corepack enable
+      - run: yarn install --immutable
+      - run: yarn build
+      - run: yarn lint
+
+  demo:
+    name: Demo App
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: example-apps/demo-app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.13.0
+          cache: yarn
+          cache-dependency-path: example-apps/demo-app/yarn.lock
+      - run: corepack enable
+      - name: Build package artifact for portal dependency
+        working-directory: .
+        run: |
+          yarn install --immutable
+          yarn build
+      - run: yarn install --immutable
+      - run: yarn build

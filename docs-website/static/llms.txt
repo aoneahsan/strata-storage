@@ -1,0 +1,55 @@
+# Strata Storage
+
+> Zero-dependency universal storage library and Capacitor plugin. One unified
+> async/sync API across web, Android, and iOS for localStorage, IndexedDB,
+> cookies, Cache API, SQLite, Preferences, and Keychain/Keystore — with built-in
+> encryption (AES-GCM/CBC), compression, TTL expiration, a MongoDB-style query
+> engine, cross-tab sync, integrity checksums, and disaster recovery. Optional
+> React, Vue, and Angular bindings. MIT. Developed with love by the Strata
+> Storage Team (maintained by Ahsan Mahmood).
+
+Version: 2.8.0 (Node >= 24.13).
+Install: `npm install strata-storage` (or `yarn add strata-storage`).
+Package: https://www.npmjs.com/package/strata-storage
+Docs: https://stratastorage-docs.aoneahsan.com
+Website: https://stratastorage.aoneahsan.com
+For AI agents: https://stratastorage-docs.aoneahsan.com/ai
+Full text (one file for ingestion): https://stratastorage-docs.aoneahsan.com/llms-full.txt
+Developer: https://aoneahsan.com · Contact: aoneahsan@gmail.com
+
+## Getting started
+
+- [Introduction](https://stratastorage-docs.aoneahsan.com/): what Strata Storage is and why it exists.
+- [Installation](https://stratastorage-docs.aoneahsan.com/installation): install for web, React, Vue, Angular, and Capacitor.
+- [Quick Start](https://stratastorage-docs.aoneahsan.com/quick-start): first get/set/remove in five minutes.
+- [Configuration](https://stratastorage-docs.aoneahsan.com/configuration): adapters, defaults, encryption, compression, TTL, namespacing.
+
+## Guides
+
+- [Encryption](https://stratastorage-docs.aoneahsan.com/guides/features/encryption): AES-GCM/CBC at rest.
+- [Compression](https://stratastorage-docs.aoneahsan.com/guides/features/compression): transparent value compression.
+- [TTL](https://stratastorage-docs.aoneahsan.com/guides/features/ttl): expiring keys and sliding windows.
+- [Querying](https://stratastorage-docs.aoneahsan.com/guides/features/queries): MongoDB-style queries over stored values.
+- [Sync](https://stratastorage-docs.aoneahsan.com/guides/features/sync): cross-tab and cross-device synchronization.
+- [Migrations](https://stratastorage-docs.aoneahsan.com/guides/features/migrations): versioned data migrations.
+- [Capacitor](https://stratastorage-docs.aoneahsan.com/guides/platforms/capacitor): native iOS/Android setup.
+- [Firebase](https://stratastorage-docs.aoneahsan.com/guides/platforms/firebase): cross-device Firestore / Realtime DB sync (optional peer dep).
+
+## Adapters
+
+- Web: localStorage, sessionStorage, IndexedDB, Cookie, Cache API, Memory, URL.
+- Capacitor (native): Preferences, SQLite, Secure (Keychain/Keystore), Filesystem.
+- Remote (opt-in): Firebase Firestore and Realtime Database via `enableFirebaseSync`.
+
+## API reference
+
+- [Overview](https://stratastorage-docs.aoneahsan.com/api)
+- [Core (Strata)](https://stratastorage-docs.aoneahsan.com/api/core/strata)
+- [Types](https://stratastorage-docs.aoneahsan.com/api/core/types)
+- [Errors](https://stratastorage-docs.aoneahsan.com/api/core/errors)
+
+## Reference
+
+- [FAQ](https://stratastorage-docs.aoneahsan.com/reference/faq)
+- [Troubleshooting](https://stratastorage-docs.aoneahsan.com/reference/troubleshooting)
+- [Changelog](https://stratastorage-docs.aoneahsan.com/reference/changelog)

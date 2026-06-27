@@ -1,0 +1,34 @@
+{
+  "name": "strata-storage-demo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "yarn@4.17.0",
+  "scripts": {
+    "dev": "NODE_OPTIONS=--preserve-symlinks vite --port 5947",
+    "build": "NODE_OPTIONS=--preserve-symlinks tsc -b && NODE_OPTIONS=--preserve-symlinks vite build",
+    "typecheck": "tsc --noEmit",
+    "preview": "NODE_OPTIONS=--preserve-symlinks vite preview",
+    "lint": "eslint . --max-warnings 0",
+    "cap:sync": "cap sync",
+    "cap:android": "cap open android",
+    "cap:ios": "cap open ios"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.4.0",
+    "@capacitor/core": "^8.4.0",
+    "@capacitor/ios": "^8.4.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-router-dom": "^7.17.0",
+    "strata-storage": "portal:../.."
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.4.0",
+    "@types/react": "^19.2.16",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.2",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.16"
+  }
+}

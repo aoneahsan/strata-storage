@@ -1,0 +1,14 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Strata Storage logo">
+  <defs>
+    <linearGradient id="ss-g" x1="0" y1="0" x2="200" y2="200" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#3b82f6"/>
+      <stop offset="1" stop-color="#1e3a8a"/>
+    </linearGradient>
+  </defs>
+  <rect width="200" height="200" rx="44" fill="url(#ss-g)"/>
+  <g fill="#ffffff">
+    <path d="M100 38 L162 70 L100 102 L38 70 Z" opacity="0.95"/>
+    <path d="M100 84 L162 116 L100 148 L38 116 Z" opacity="0.7"/>
+    <path d="M100 118 L162 150 L100 182 L38 150 Z" opacity="0.45"/>
+  </g>
+</svg>

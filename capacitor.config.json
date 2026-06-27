@@ -1,0 +1,13 @@
+{
+  "appId": "com.stratastorage.plugin",
+  "appName": "Strata Storage",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "npmClient": "yarn",
+  "plugins": {
+    "StrataStorage": {
+      "swiftPath": "ios/Plugin",
+      "androidPath": "android/src/main/java/com/stratastorage"
+    }
+  }
+}

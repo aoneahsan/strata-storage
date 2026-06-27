@@ -1,0 +1,103 @@
+# Source files (only include dist)
+src/
+*.ts
+!*.d.ts
+
+# Development files
+.eslintrc*
+.prettierrc*
+tsconfig.json
+vitest.config.ts
+babel.config.js
+rollup.config.js
+
+# Documentation: in-repo project records (docs/) and the public docs site (docs-website/)
+docs/
+docs-website/
+!dist/README.md
+
+# Examples
+examples/
+
+# Tests
+tests/
+test/
+__tests__/
+*.test.ts
+*.spec.ts
+coverage/
+.nyc_output/
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+.circleci/
+azure-pipelines.yml
+
+# Development tools
+.editorconfig
+.nvmrc
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.sublime-*
+*.code-workspace
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files
+.env
+.env.*
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Build artifacts (we include dist/ for npm)
+# dist/ is NOT ignored
+
+# Private files
+*.ignore.*
+private/
+secrets/
+
+# Native development files (we include these for Capacitor)
+# ios/ is NOT ignored
+# android/ is NOT ignored
+# scripts/ is NOT ignored
+# StrataStorage.podspec is NOT ignored
+
+# Git files
+.git/
+.gitignore
+.gitattributes
+
+# Project files — internal AI/dev instruction files must NOT ship in the tarball
+# (the `files` allowlist pulls in ios/ + android/, which contain nested copies).
+CLAUDE.md
+AGENTS.md
+**/CLAUDE.md
+**/AGENTS.md
+.claude/
+project-development-plan/
+
+# Misc
+*.bak
+*.backup
+*.old
+*.orig
+*~
+.cache/

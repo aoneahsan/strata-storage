@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+
+# Yarn (Berry) — keep the lockfile, ignore install cache/state
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
+
+# Build artifacts
+dist/
+tsconfig.tsbuildinfo
+
+# Logs / OS
+*.log
+.DS_Store
+www/

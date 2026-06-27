@@ -1,0 +1,13 @@
+<svg width="64" height="64" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Strata Storage">
+  <defs>
+    <linearGradient id="ss-fav" x1="0" y1="0" x2="200" y2="200" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#3b82f6"/>
+      <stop offset="1" stop-color="#1e3a8a"/>
+    </linearGradient>
+  </defs>
+  <rect width="200" height="200" rx="44" fill="url(#ss-fav)"/>
+  <g fill="#ffffff">
+    <path d="M100 40 L164 73 L100 106 L36 73 Z" opacity="0.95"/>
+    <path d="M100 92 L164 125 L100 158 L36 125 Z" opacity="0.65"/>
+  </g>
+</svg>

@@ -1,0 +1,27 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0b1220"/>
+      <stop offset="1" stop-color="#13284f"/>
+    </linearGradient>
+    <linearGradient id="mark" x1="0" y1="0" x2="220" y2="220" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#60a5fa"/>
+      <stop offset="1" stop-color="#1e3a8a"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <g transform="translate(96 205)">
+    <rect width="220" height="220" rx="48" fill="url(#mark)"/>
+    <g fill="#ffffff" transform="translate(0 0)">
+      <path d="M110 42 L178 77 L110 112 L42 77 Z" opacity="0.95"/>
+      <path d="M110 92 L178 127 L110 162 L42 127 Z" opacity="0.7"/>
+      <path d="M110 128 L178 163 L110 198 L42 163 Z" opacity="0.45"/>
+    </g>
+  </g>
+  <g transform="translate(372 246)">
+    <text x="0" y="0" font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif" font-size="78" font-weight="800" fill="#ffffff">Strata Storage</text>
+    <text x="2" y="60" font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif" font-size="34" font-weight="500" fill="#93c5fd">Zero-dependency universal storage</text>
+    <text x="2" y="108" font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif" font-size="28" font-weight="400" fill="#cbd5e1">One unified API · web · Android · iOS</text>
+  </g>
+  <text x="96" y="566" font-family="system-ui, -apple-system, Segoe UI, Roboto, sans-serif" font-size="26" font-weight="500" fill="#64748b">npmjs.com/package/strata-storage</text>
+</svg>

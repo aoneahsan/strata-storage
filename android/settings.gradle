@@ -1,0 +1,2 @@
+include ':strata-storage'
+project(':strata-storage').projectDir = new File(rootProject.projectDir, '.')
