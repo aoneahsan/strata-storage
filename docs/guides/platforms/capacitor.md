@@ -332,5 +332,5 @@ try {
 
 - [Capacitor Documentation](https://capacitorjs.com)
 - [Platform Guides](./web.md)
-- [API Reference](../../api/)
-- [Examples](../../examples/)
+- [API Reference](../../api/README.md)
+- [Examples](../../examples/README.md)

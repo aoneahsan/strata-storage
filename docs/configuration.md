@@ -316,6 +316,6 @@ try {
 
 ## Next Steps
 
-- Explore [Storage Adapters](./api/adapters/)
+- Explore [Storage Adapters](./api/adapters/README.md)
 - Learn about [Encryption](./guides/features/encryption.md)
 - Read about [Caching Patterns](./guides/patterns/caching.md)

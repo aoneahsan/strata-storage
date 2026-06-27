@@ -418,4 +418,4 @@ class CachedQuery {
 ## See Also
 
 - [API Reference - Query](../../api/features/query.md)
-- [Storage Adapters](../../api/adapters/)
+- [Storage Adapters](../../api/adapters/README.md)

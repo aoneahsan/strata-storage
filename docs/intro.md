@@ -127,7 +127,7 @@ Strata Storage follows a modular architecture:
 
 1. [Install Strata Storage](./installation.md)
 2. [Follow the Quick Start guide](./quick-start.md)
-3. [Explore the examples](https://stratastorage-docs.aoneahsan.com/examples)
-4. [Read the API documentation](/api/core/strata)
+3. [Explore the examples](./examples/README.md)
+4. [Read the API documentation](./api/core/strata.md)
 
 Join us in making cross-platform storage simple and powerful! 🚀

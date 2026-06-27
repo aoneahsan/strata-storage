@@ -400,5 +400,5 @@ See [Error Classes](./errors.md) for error type definitions.
 ## Next Steps
 
 - Learn about [Error Classes](./errors.md)
-- Explore [Storage Adapters](../adapters/)
-- Read the [API Reference](../)
+- Explore [Storage Adapters](../adapters/README.md)
+- Read the [API Reference](../README.md)

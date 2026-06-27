@@ -478,24 +478,24 @@ Optional peer dependencies (install only the ones you use): `react >= 19.2.3`, `
 
 ## Documentation
 
-📚 **Full documentation: [stratastorage-docs.aoneahsan.com](https://stratastorage-docs.aoneahsan.com)**
-🤖 **For AI agents: [stratastorage-docs.aoneahsan.com/ai](https://stratastorage-docs.aoneahsan.com/ai)** (plus [`/llms.txt`](https://stratastorage-docs.aoneahsan.com/llms.txt) and [`/llms-full.txt`](https://stratastorage-docs.aoneahsan.com/llms-full.txt))
+📚 **Docs:** browse in-repo in [`./docs`](./docs/intro.md) · hosted at [stratastorage-docs.aoneahsan.com](https://stratastorage-docs.aoneahsan.com)
+🤖 **For AI agents:** [`AI-INTEGRATION-GUIDE.md`](./AI-INTEGRATION-GUIDE.md) · hosted [/ai](https://stratastorage-docs.aoneahsan.com/ai) · [`/llms.txt`](https://stratastorage-docs.aoneahsan.com/llms.txt)
 
 ### Getting Started
-- [Installation](https://stratastorage-docs.aoneahsan.com/installation) · [Quick Start](https://stratastorage-docs.aoneahsan.com/quick-start) · [Configuration](https://stratastorage-docs.aoneahsan.com/configuration)
+- [Introduction](./docs/intro.md) · [Installation](./docs/installation.md) · [Quick Start](./docs/quick-start.md) · [Configuration](./docs/configuration.md)
 
 ### API
-- [API Reference](https://stratastorage-docs.aoneahsan.com/api) · [Core (`Strata`)](https://stratastorage-docs.aoneahsan.com/api/core/strata) · [Types](https://stratastorage-docs.aoneahsan.com/api/core/types) · [Errors](https://stratastorage-docs.aoneahsan.com/api/core/errors)
-- [All adapters](https://stratastorage-docs.aoneahsan.com/api/adapters) — web (localStorage, IndexedDB, cookies, Cache, URL, …) + Capacitor (Preferences, Secure, SQLite, Filesystem) + remote (Firebase)
+- [API Reference](./docs/api/README.md) · [Core (`Strata`)](./docs/api/core/strata.md) · [Types](./docs/api/core/types.md) · [Errors](./docs/api/core/errors.md)
+- [All adapters](./docs/api/adapters/README.md) — web (localStorage, IndexedDB, cookies, Cache, URL, …) + Capacitor (Preferences, Secure, SQLite, Filesystem) + remote (Firebase)
 
 ### Features
-- [Encryption](https://stratastorage-docs.aoneahsan.com/guides/features/encryption) · [Compression](https://stratastorage-docs.aoneahsan.com/guides/features/compression) · [TTL](https://stratastorage-docs.aoneahsan.com/api/features/ttl) · [Sync](https://stratastorage-docs.aoneahsan.com/guides/features/sync) · [Queries](https://stratastorage-docs.aoneahsan.com/guides/features/queries) · [Migrations](https://stratastorage-docs.aoneahsan.com/guides/features/migrations) · [Recovery & Integrity](https://stratastorage-docs.aoneahsan.com/api/features/recovery)
+- [Encryption](./docs/guides/features/encryption.md) · [Compression](./docs/guides/features/compression.md) · [TTL](./docs/api/features/ttl.md) · [Sync](./docs/guides/features/sync.md) · [Queries](./docs/guides/features/queries.md) · [Migrations](./docs/guides/features/migrations.md) · [Recovery & Integrity](./docs/api/features/recovery.md)
 
 ### Platforms
-- [Web](https://stratastorage-docs.aoneahsan.com/guides/platforms/web) · [iOS](https://stratastorage-docs.aoneahsan.com/guides/platforms/ios) · [Android](https://stratastorage-docs.aoneahsan.com/guides/platforms/android) · [Capacitor](https://stratastorage-docs.aoneahsan.com/guides/platforms/capacitor) · [Firebase](https://stratastorage-docs.aoneahsan.com/guides/platforms/firebase)
+- [Web](./docs/guides/platforms/web.md) · [iOS](./docs/guides/platforms/ios.md) · [Android](./docs/guides/platforms/android.md) · [Capacitor](./docs/guides/platforms/capacitor.md) · [Firebase](./docs/guides/platforms/firebase.md)
 
 ### Examples & Reference
-- [Examples](https://stratastorage-docs.aoneahsan.com/examples) · [Changelog](https://stratastorage-docs.aoneahsan.com/reference/changelog) · [FAQ](https://stratastorage-docs.aoneahsan.com/reference/faq) · [Troubleshooting](https://stratastorage-docs.aoneahsan.com/reference/troubleshooting) · [Migration](https://stratastorage-docs.aoneahsan.com/migration)
+- [Examples](./docs/examples/README.md) · [Changelog](./docs/reference/changelog.md) · [FAQ](./docs/reference/faq.md) · [Troubleshooting](./docs/reference/troubleshooting.md) · [Migration](./docs/migration.md)
 
 ## Contributing
 

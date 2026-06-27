@@ -203,5 +203,5 @@ async function validate() {
 
 ## See Also
 
-- [Storage Adapters](../../api/adapters/)
+- [Storage Adapters](../../api/adapters/README.md)
 - [Type Definitions](../../api/core/types.md)

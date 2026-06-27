@@ -267,4 +267,4 @@ try {
 ## See Also
 
 - [API Reference - Compression](../../api/features/compression.md)
-- [Storage Adapters](../../api/adapters/)
+- [Storage Adapters](../../api/adapters/README.md)

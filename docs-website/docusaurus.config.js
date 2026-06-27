@@ -50,9 +50,10 @@ const config = {
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
         docs: {
+          path: '../docs',
           routeBasePath: '/',
           sidebarPath: require.resolve('./sidebars.js'),
-          // No "Edit this page" link — the source repository is private.
+          editUrl: 'https://github.com/aoneahsan/strata-storage/edit/main/docs/',
           showLastUpdateTime: true,
         },
         blog: false,

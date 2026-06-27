@@ -166,6 +166,6 @@ await storage.set('key', 'value', { storage: 'sqlite' });
 
 ### Need Help?
 
-- Check the [examples](/examples) section for updated usage patterns
+- Check the [examples](./examples/README.md) section for updated usage patterns
 - [Contact us](https://stratastorage.aoneahsan.com/contact) to report an issue
-- Review the [Introduction](/) for comprehensive documentation
+- Review the [Introduction](./intro.md) for comprehensive documentation

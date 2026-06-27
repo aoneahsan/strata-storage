@@ -362,9 +362,9 @@ main().catch(console.error);
 
 ## Next Steps
 
-- [Basic Usage Guide](/examples/basic-usage) - Detailed examples
-- [Encryption Guide](/guides/features/encryption) - Secure your data
-- [Framework Guides](/examples/frameworks/react) - React, Vue, Angular
-- [API Reference](/api/core/strata) - Complete API documentation
+- [Basic Usage Guide](./examples/basic-usage.md) - Detailed examples
+- [Encryption Guide](./guides/features/encryption.md) - Secure your data
+- [Framework Guides](./examples/frameworks/react.md) - React, Vue, Angular
+- [API Reference](./api/core/strata.md) - Complete API documentation
 
 Need help? Check our [FAQ](./reference/faq.md) or [open an issue](https://stratastorage.aoneahsan.com/contact).

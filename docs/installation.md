@@ -259,9 +259,9 @@ test().catch(console.error);
 ## Next Steps
 
 - [Quick Start Guide](./quick-start.md)
-- [Basic Usage](/examples/basic-usage)
-- [Framework Integration](/examples/frameworks/react)
-- [API Reference](/api/core/strata)
+- [Basic Usage](./examples/basic-usage.md)
+- [Framework Integration](./examples/frameworks/react.md)
+- [API Reference](./api/core/strata.md)
 
 ## Troubleshooting
 

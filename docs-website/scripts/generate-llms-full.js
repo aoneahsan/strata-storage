@@ -12,7 +12,7 @@ const fs = require('fs');
 const path = require('path');
 
 const SITE_URL = 'https://stratastorage-docs.aoneahsan.com';
-const DOCS_DIR = path.join(__dirname, '..', 'docs');
+const DOCS_DIR = path.join(__dirname, '..', '..', 'docs');
 const OUT_FILE = path.join(__dirname, '..', 'static', 'llms-full.txt');
 
 /** Recursively collect .md/.mdx files, sorted for deterministic output. */
