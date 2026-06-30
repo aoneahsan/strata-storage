@@ -5,6 +5,24 @@ All notable changes to Strata Storage will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.1] - 2026-06-30
+
+Documentation and metadata release — **no runtime code changes**, no API changes. Safe drop-in
+upgrade from 2.8.0.
+
+### Changed
+
+- **Bug reports now route to GitHub Issues.** `package.json` `bugs.url` →
+  `https://github.com/aoneahsan/strata-storage/issues`, and the README "Support" section leads with
+  opening a GitHub issue (the marketing-site contact form remains a secondary channel).
+- **AI Integration Guide refreshed to 2.8.1** and made more complete for AI coding agents:
+  the Capacitor section now documents the required `npx cap sync` native-setup step and the
+  `registerCapacitorAdapters(storage)` helper, and a troubleshooting entry covers the TypeScript
+  `moduleResolution: "bundler" | "nodenext"` requirement for the typed subpath exports
+  (`strata-storage/react` · `/vue` · `/angular` · `/capacitor` · `/firebase`).
+- **README** gained a `npx cap sync` note in the iOS/Android section, an explicit GitHub repo link,
+  and a cleaned-up Links/Support section (removed a stray internal auto-generated links block).
+
 ## [2.8.0] - 2026-06-27
 
 Licensing change — **Strata Storage is now released under the MIT License** (relicensed from

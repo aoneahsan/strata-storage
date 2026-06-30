@@ -390,11 +390,14 @@ const active = await storage.query({
 
 ### iOS and Android (via Capacitor)
 
+Strata ships as a Capacitor plugin (native iOS + Android). In a Capacitor app, after `yarn add strata-storage` run **`npx cap sync`** so the native module is copied into your iOS/Android projects — the native adapters (`secure`, `sqlite`, `preferences`, `filesystem`) won't work on-device without it.
+
 Register the native adapters you need when running under Capacitor. All four are zero-runtime-dependency: SQLite is hand-rolled (no plugin dependency) and filesystem uses the platform's native `FileManager` / `java.io.File`.
 
 ```typescript
 import { defineStorage } from 'strata-storage';
 import {
+  registerCapacitorAdapters,
   PreferencesAdapter,
   SecureAdapter,
   SqliteAdapter,
@@ -402,10 +405,15 @@ import {
 } from 'strata-storage/capacitor';
 
 const storage = defineStorage();
-storage.registerAdapter(new PreferencesAdapter());   // UserDefaults / SharedPreferences
-storage.registerAdapter(new SecureAdapter()); // Keychain / EncryptedSharedPreferences
-storage.registerAdapter(new SqliteAdapter());        // native SQLite
-storage.registerAdapter(new FilesystemAdapter());    // native files
+
+// Easiest: register all native adapters at once (also refreshes the active set).
+await registerCapacitorAdapters(storage);
+
+// …or register individually for fine-grained control / custom adapter config:
+// storage.registerAdapter(new PreferencesAdapter()); // UserDefaults / SharedPreferences
+// storage.registerAdapter(new SecureAdapter());      // Keychain / EncryptedSharedPreferences
+// storage.registerAdapter(new SqliteAdapter());      // native SQLite
+// storage.registerAdapter(new FilesystemAdapter());  // native files
 
 await storage.set('secret', token, { storage: 'secure' });
 ```
@@ -518,26 +526,18 @@ MIT License — see [LICENSE](LICENSE). Free for commercial and non-commercial u
 ## Links
 
 - **NPM Package:** https://www.npmjs.com/package/strata-storage
+- **GitHub Repo:** https://github.com/aoneahsan/strata-storage
 - **Documentation:** https://stratastorage-docs.aoneahsan.com
 - **Website:** https://stratastorage.aoneahsan.com
 
 ## Support
 
-1. Check the [FAQ](https://stratastorage-docs.aoneahsan.com/reference/faq) and [Troubleshooting](https://stratastorage-docs.aoneahsan.com/reference/troubleshooting)
-2. Browse the [documentation](https://stratastorage-docs.aoneahsan.com)
-3. [Contact us / report an issue](https://stratastorage.aoneahsan.com/contact)
+- 🐛 **Found a bug or have a feature request?** [Open a GitHub issue](https://github.com/aoneahsan/strata-storage/issues).
+- 📖 Read the [FAQ](https://stratastorage-docs.aoneahsan.com/reference/faq) and [Troubleshooting](https://stratastorage-docs.aoneahsan.com/reference/troubleshooting), or browse the full [documentation](https://stratastorage-docs.aoneahsan.com).
+- 💬 Anything else? [Contact us](https://stratastorage.aoneahsan.com/contact).
 
 ---
 
 Developed with ❤️ by the **Strata Storage Team** — maintained by [Ahsan Mahmood](https://aoneahsan.com) · aoneahsan@gmail.com.
 
 **One API. Every Storage. Everywhere.**
-
-<!-- project-links:start -->
-## Links
-
-- Live: https://www.npmjs.com/package/strata-storage
-- NPM: https://www.npmjs.com/package/strata-storage
-
-_URL source of truth: `01-code/projects/project-live-urls.json` (auto-generated — do not hand-edit between these markers)._
-<!-- project-links:end -->

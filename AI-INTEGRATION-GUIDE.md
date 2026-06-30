@@ -1,6 +1,6 @@
 # AI Integration Guide - strata-storage
 
-Quick reference for AI development agents (Claude Code, Cursor, Copilot, etc.) to integrate `strata-storage` into web and mobile projects. Current version: **2.7.1**.
+Quick reference for AI development agents (Claude Code, Cursor, Copilot, etc.) to integrate `strata-storage` into web and mobile projects. Current version: **2.8.1**.
 
 ## Installation
 
@@ -209,9 +209,16 @@ const storage = defineStorage();
 
 ### Capacitor (native)
 
+`strata-storage` ships as a Capacitor plugin (native iOS + Android). In a Capacitor
+app, after installing run **`npx cap sync`** so the native module is copied into the
+iOS/Android projects — the native adapters (`secure`, `sqlite`, `preferences`,
+`filesystem`) **do not work on-device without it**. No manual plugin registration in
+JS is needed; Capacitor auto-discovers the `StrataStorage` plugin.
+
 ```typescript
 import { defineStorage } from 'strata-storage';
 import {
+  registerCapacitorAdapters,
   PreferencesAdapter,
   SecureAdapter,
   SqliteAdapter,
@@ -219,10 +226,15 @@ import {
 } from 'strata-storage/capacitor';
 
 const storage = defineStorage();
-storage.registerAdapter(new PreferencesAdapter());
-storage.registerAdapter(new SecureAdapter());
-storage.registerAdapter(new SqliteAdapter());       // 2.6.0 — multi-store (database + table)
-storage.registerAdapter(new FilesystemAdapter());   // 2.6.0 — file-per-key, atomic writes
+
+// Easiest — register all four native adapters at once (also refreshes the active set):
+await registerCapacitorAdapters(storage);
+
+// …or register individually for fine-grained control / custom adapter config:
+// storage.registerAdapter(new SecureAdapter());
+// storage.registerAdapter(new SqliteAdapter());     // 2.6.0 — multi-store (database + table)
+// storage.registerAdapter(new FilesystemAdapter()); // 2.6.0 — file-per-key, atomic writes
+
 await storage.set('secret', token, { storage: 'secure' });
 ```
 
@@ -315,6 +327,8 @@ const storage = defineStorage({
 | Issue | Solution |
 |-------|----------|
 | Framework import fails | Ensure `strata-storage >= 2.5.0` (earlier versions never shipped the built entry points). |
+| TS can't find types for `strata-storage/react` \| `/vue` \| `/angular` \| `/capacitor` \| `/firebase` | Set `"moduleResolution": "bundler"` (or `"nodenext"`) in `tsconfig.json`. The package is ESM-only and exposes typed `exports` subpaths; classic `"node"` resolution can't see them. Modern Vite / Angular / Vue templates already use `bundler`/`nodenext`. |
+| Native adapters do nothing on device | Run `npx cap sync` after install so the native iOS/Android module is wired in, then register the Capacitor adapters (`registerCapacitorAdapters(storage)`). |
 | "does not support synchronous operations" | The targeted adapter is async-only; use the async API or a sync-capable adapter. |
 | Sync set throws on encrypt/compress | Encryption/compression are async — use `await storage.set(...)`. |
 | `useStrata must be used within <StrataProvider>` | Use `createStrataHooks(instance)` for provider-free code. |
@@ -333,6 +347,8 @@ Full documentation lives at **https://stratastorage-docs.aoneahsan.com**:
 - [Recovery & Integrity](https://stratastorage-docs.aoneahsan.com/api/features/recovery)
 - [Changelog](https://stratastorage-docs.aoneahsan.com/reference/changelog)
 - Machine-readable: [`/llms.txt`](https://stratastorage-docs.aoneahsan.com/llms.txt) · [`/llms-full.txt`](https://stratastorage-docs.aoneahsan.com/llms-full.txt)
+
+Project: [npm](https://www.npmjs.com/package/strata-storage) · [GitHub](https://github.com/aoneahsan/strata-storage) · [Report an issue](https://github.com/aoneahsan/strata-storage/issues)
 
 ---
 

@@ -5,6 +5,20 @@ All notable changes to Strata Storage will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.1] - 2026-06-30
+
+Documentation and metadata release — **no runtime code changes, no API changes**. Bug reports now
+route to [GitHub Issues](https://github.com/aoneahsan/strata-storage/issues); the AI Integration
+Guide documents the `npx cap sync` native step, the `registerCapacitorAdapters()` helper, and the
+TypeScript `moduleResolution: "bundler" | "nodenext"` requirement for subpath types. See the root
+`CHANGELOG.md` for the full list.
+
+## [2.8.0] - 2026-06-27
+
+**License change: Apache-2.0 → MIT.** A loosening of terms requiring no code changes on your part —
+the only condition is retaining the copyright and license notice. Versions at or before 2.7.1 remain
+available under Apache-2.0; 2.8.0 and later are MIT.
+
 ## [2.7.0] - 2026-06-24
 
 Audit-driven correctness and truthfulness release. No public API surface was

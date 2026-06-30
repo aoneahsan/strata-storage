@@ -14,7 +14,7 @@ This page is a dense, single-screen map of `strata-storage` for AI coding agents
 into **any** project by matching the host project's needs to the right adapters
 and features — without reading the whole site.
 
-> **Package:** `strata-storage` · current version **2.8.0** · MIT · **zero runtime dependencies**.
+> **Package:** `strata-storage` · current version **2.8.1** · MIT · **zero runtime dependencies**.
 > Install: `npm i strata-storage` (or `yarn add strata-storage`). Node ≥ 24.13.
 
 > Machine-readable companions: [`/llms.txt`](https://stratastorage-docs.aoneahsan.com/llms.txt)

@@ -1,6 +1,6 @@
 {
   "name": "strata-storage",
-  "version": "2.8.0",
+  "version": "2.8.1",
   "description": "Zero-dependency universal storage plugin providing a unified API for all storage operations across web, Android, and iOS platforms",
   "type": "module",
   "packageManager": "yarn@4.17.0",
@@ -87,7 +87,7 @@
     "url": "https://github.com/aoneahsan/strata-storage.git"
   },
   "bugs": {
-    "url": "https://stratastorage.aoneahsan.com/contact",
+    "url": "https://github.com/aoneahsan/strata-storage/issues",
     "email": "aoneahsan@gmail.com"
   },
   "homepage": "https://stratastorage.aoneahsan.com",
