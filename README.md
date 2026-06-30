@@ -507,7 +507,7 @@ Optional peer dependencies (install only the ones you use): `react >= 19.2.3`, `
 
 ## Contributing
 
-Contributions are welcome — please read the [Contributing Guide](./.github/CONTRIBUTING.md).
+Contributions are welcome — please read the [Contributing Guide](./CONTRIBUTING.md). `main` is protected: changes land through an approved pull request (the maintainer is the only direct-push), and you can [request contributor access](./CONTRIBUTING.md#becoming-a-contributor) if you'd like to help regularly.
 
 ## License
 

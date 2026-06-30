@@ -44,12 +44,19 @@ yarn lint        # ESLint (check only)
 yarn build       # custom ESM build → dist/ (all six entry points)
 ```
 
-Quality gates are typecheck + lint + build; an automated test suite is on the
-roadmap and contributions are very welcome.
+Quality gates are typecheck + lint + build — these are the project's checks (there
+is no separate test runner, by design).
 
-## Contributing
+## Contributing &amp; governance
 
-See [`.github/CONTRIBUTING.md`](.github/CONTRIBUTING.md) and
+`main` is protected by a GitHub ruleset: **no direct pushes** — every change lands
+through a **pull request that needs one maintainer approval + green CI** (the
+`Package` check). Force-push and deletion of `main` are blocked. **Only the
+maintainer (`@aoneahsan`) can push to `main` directly.** Contribute by forking and
+opening a PR, or [request contributor (write) access](./CONTRIBUTING.md#becoming-a-contributor)
+to work in-repo — write access still cannot bypass review on `main`.
+
+See [`CONTRIBUTING.md`](./CONTRIBUTING.md) (full coding standards + PR process) and
 [`.github/CODE_OF_CONDUCT.md`](.github/CODE_OF_CONDUCT.md). Report security issues
 via [`.github/SECURITY.md`](.github/SECURITY.md).
 
