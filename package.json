@@ -1,6 +1,6 @@
 {
   "name": "strata-storage",
-  "version": "2.8.1",
+  "version": "2.8.3",
   "description": "Zero-dependency universal storage plugin providing a unified API for all storage operations across web, Android, and iOS platforms",
   "type": "module",
   "packageManager": "yarn@4.17.0",

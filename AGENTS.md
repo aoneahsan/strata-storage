@@ -67,10 +67,16 @@ See [`CONTRIBUTING.md`](./CONTRIBUTING.md) (full coding standards + PR process) 
 [`.github/CODE_OF_CONDUCT.md`](.github/CODE_OF_CONDUCT.md). Report security issues
 via [`.github/SECURITY.md`](.github/SECURITY.md).
 
-## Docs
+## Links
 
-- Usage & API reference: https://stratastorage-docs.aoneahsan.com (AI agents: `/ai`)
+- **Marketing site (live):** https://stratastorage.aoneahsan.com
+- **Documentation site (live):** https://stratastorage-docs.aoneahsan.com (AI agents: `/ai` ·
+  `/llms.txt` · `/llms-full.txt`) — its own repo:
+  [aoneahsan/strata-storage-docs](https://github.com/aoneahsan/strata-storage-docs)
+- **npm:** https://www.npmjs.com/package/strata-storage
+- **Repo:** https://github.com/aoneahsan/strata-storage
 - AI integration quick reference: [`AI-INTEGRATION-GUIDE.md`](AI-INTEGRATION-GUIDE.md)
+- Human-only tasks (incl. `npm publish`): [`docs/MANUAL-TASKS.md`](docs/MANUAL-TASKS.md)
 
 
 ## Sub-agents & Skills — Main-Context-First (IRON-SOLID)

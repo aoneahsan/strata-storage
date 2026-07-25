@@ -5,6 +5,39 @@ All notable changes to Strata Storage will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.3] - 2026-07-25
+
+Documentation and metadata release — **no runtime code changes**, no API changes. Restores the
+documentation that 2.8.2 reverted, and repoints the docs links at the standalone documentation site.
+
+### Fixed
+
+- **Restored the native-setup documentation that 2.8.2 dropped.** The README and the AI Integration
+  Guide again document the required `npx cap sync` step and the `registerCapacitorAdapters(storage)`
+  helper. Without `cap sync` the native adapters (`secure`, `sqlite`, `preferences`, `filesystem`) do
+  not work on-device, so 2.8.2 shipped a materially misleading omission for Capacitor apps.
+- **`bugs.url` routes to GitHub Issues again** (`https://github.com/aoneahsan/strata-storage/issues`),
+  as in 2.8.1. The marketing-site contact form remains a secondary channel.
+- Corrected stale version strings — the README still advertised `2.8.0`.
+
+### Changed
+
+- **The documentation site now lives in its own repository:**
+  [aoneahsan/strata-storage-docs](https://github.com/aoneahsan/strata-storage-docs) →
+  <https://stratastorage-docs.aoneahsan.com>. README links now point at the hosted site instead of
+  in-repo `./docs` paths, and this repository's `docs/` holds internal records only.
+
+## [2.8.2] - 2026-06-30
+
+⚠️ **Published in error — superseded by 2.8.3. Prefer 2.8.1 or 2.8.3.**
+
+Released ~55 minutes after 2.8.1 from a stale working tree. The compiled output is byte-identical to
+2.8.1 (no runtime code changed, no API changed), but the **bundled documentation reverted to a
+pre-2.8.1 state**: the `npx cap sync` native-setup step and the `registerCapacitorAdapters()` helper
+were removed from both the README and the AI Integration Guide, and `bugs.url` was pointed at the
+marketing-site contact form. The version bump was never committed or tagged here, which is why this
+file carried no entry for it until 2.8.3 reconstructed one by diffing the published tarballs.
+
 ## [2.8.1] - 2026-06-30
 
 Documentation and metadata release — **no runtime code changes**, no API changes. Safe drop-in

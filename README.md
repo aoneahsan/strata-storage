@@ -9,7 +9,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue.svg)](https://www.typescriptlang.org/)
 [![Platform](https://img.shields.io/badge/platform-Web%20%7C%20iOS%20%7C%20Android-lightgrey.svg)](https://stratastorage.aoneahsan.com)
 
-- **Version:** `2.8.0`
+- **Version:** `2.8.3`
 - **License:** MIT
 - **Node.js:** `>= 24.13.0`
 - **Module format:** ESM only

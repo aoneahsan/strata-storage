@@ -3,7 +3,7 @@
  * Updated for provider-less architecture
  */
 
-import { Strata } from '../src';
+import { Strata } from '../../src';
 
 async function basicUsageExample() {
   // Initialize storage with default configuration

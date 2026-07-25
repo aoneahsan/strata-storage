@@ -8,6 +8,10 @@ commands.
 here → MOVE the entry to `docs/RESOLVED-ISSUES.md` with date + fixing version; **1 open** as of
 2026-07-20 — the empty-prefix localStorage issue).
 
+**Human-only tasks (incl. `npm publish`) → `docs/MANUAL-TASKS.md`.** ⚠️ npm `latest` is **2.8.2, a bad
+release** (published from a stale tree; docs omit the required `npx cap sync` step). The repo is at
+**2.8.3**, which fixes it and is **awaiting `npm publish` by the owner**.
+
 **Documentation site is a SEPARATE repo** (split out 2026-07-25):
 [aoneahsan/strata-storage-docs](https://github.com/aoneahsan/strata-storage-docs) →
 https://stratastorage-docs.aoneahsan.com · local checkout `../strata-storage-docs`. Doc content changes go

@@ -1,6 +1,6 @@
 # AI Integration Guide - strata-storage
 
-Quick reference for AI development agents (Claude Code, Cursor, Copilot, etc.) to integrate `strata-storage` into web and mobile projects. Current version: **2.8.1**.
+Quick reference for AI development agents (Claude Code, Cursor, Copilot, etc.) to integrate `strata-storage` into web and mobile projects. Current version: **2.8.3**.
 
 ## Installation
 
