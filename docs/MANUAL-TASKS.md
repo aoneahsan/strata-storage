@@ -10,9 +10,7 @@
 
 ## ⏳ Pending manual tasks
 
-| # | Task | Why only you | Status |
-|---|------|--------------|--------|
-| 1 | **Deprecate `2.8.2` on npm** (recommended) — command below | A public statement about a release; not asked for, so left to you | ☐ Not started |
+_None._
 
 ### Why 2.8.2 should be deprecated
 
@@ -43,3 +41,4 @@ npm deprecate strata-storage@2.8.2 "Published in error from a stale tree; docs o
 |---|------|-----------|
 | 1 | DNS `stratastorage-docs.aoneahsan.com` → `aoneahsan.github.io` (Hostinger) | 2026-07-25 |
 | 2 | Publish `2.8.3` to npm (now agent-automated; verified live from the registry) | 2026-07-25 |
+| 3 | Deprecate `2.8.2` on npm (now agent-automated; 2.8.1/2.8.0/2.8.3 verified untouched) | 2026-07-25 |

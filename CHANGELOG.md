@@ -30,6 +30,7 @@ documentation that 2.8.2 reverted, and repoints the docs links at the standalone
 ## [2.8.2] - 2026-06-30
 
 ⚠️ **Published in error — superseded by 2.8.3. Prefer 2.8.1 or 2.8.3.**
+**Deprecated on npm 2026-07-25**, so installing it now prints a warning pointing at 2.8.3.
 
 Released ~55 minutes after 2.8.1 from a stale working tree. The compiled output is byte-identical to
 2.8.1 (no runtime code changed, no API changed), but the **bundled documentation reverted to a
