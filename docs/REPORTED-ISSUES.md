@@ -83,10 +83,35 @@ Not worked around in LabFlow — its logger's raw-string value is intentional an
 centralized logger" rule is IRON-SOLID, so the correct fix is here. LabFlow records this in
 `docs/PROJECT-RECORD.md` §9 as a known, non-fatal, third-party console-noise item pending this package.
 
+#### Interim mitigation — now documented publicly (2026-07-25)
+
+Still OPEN. Pending a fix, the package README states the defect plainly under **Limitations** and gives
+consumers the workaround that exists today, since `initializeAdapters()` forwards adapter config through
+to `adapter.initialize()`:
+
+```typescript
+defineStorage({ adapters: { localStorage: { prefix: 'myapp:' } } });
+```
+
+#### ⚠️ The real fix needs an owner decision — it is data-migrating, not just a code change
+
+Suggested fix 1 ("default the web adapters to a real namespace, e.g. `strata:`") **changes where every
+existing consumer's data lives.** Every key written by every prior version was stored unprefixed; a new
+default prefix makes all of it unreadable on upgrade, with no error — reads simply return `null`. That is
+a breaking change requiring a major version and a migration path (read-through to the unprefixed key,
+rewrite under the prefix), not a patch.
+
+Suggested fix 2 (treat a `deserialize()` failure as "not ours" — return `null`, log at `debug` instead of
+`error`) is safe, non-breaking, and fixes the reported console-noise symptom on its own. It does **not**
+fix the underlying namespace-claiming problem, which is the part with data-loss potential.
+
+Owner decision needed on which path to take, and whether fix 2 ships first as a patch.
+
 #### Resolution
 
 - [ ] Fixed in version: `______` · date: `__________` · approach: `__________`
 - [ ] Confirmed against the LabFlow repro above (foreign non-JSON key no longer produces an error log, and
       `keys()` no longer returns keys the adapter never wrote)
 
-**Last updated:** 2026-07-20
+**Last updated:** 2026-07-25 (interim mitigation documented in the README; owner decision noted on the fix
+path. Resolved entries from the same pass — ISSUE-02 … ISSUE-05 — are in `docs/RESOLVED-ISSUES.md`.)

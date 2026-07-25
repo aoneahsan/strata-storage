@@ -5,6 +5,45 @@ All notable changes to Strata Storage will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.4] - 2026-07-25
+
+Documentation, metadata and packaging pass — **no runtime code changes**, no API changes. Brings the
+package to the house documentation standard and closes three packaging defects.
+
+### Fixed
+
+- **`dist/package.json` no longer declares `name: "strata-storage"`.** The build wrote a complete second
+  manifest into `dist/`, carrying the package name and version. Two manifests sharing one name means
+  `cd dist && npm publish` succeeds and ships the wrong tree under the real package name — the structural
+  cause of the 2.8.2 incident. `dist/package.json` is now a two-field module marker
+  (`{ "type": "module", "sideEffects": false }`), so that publish fails immediately for want of a name.
+  Resolution is unaffected: it is governed entirely by the root manifest's `exports` map.
+- **`funding` added** to `package.json`, so npm and `npm fund` surface the support link.
+- **`CHANGELOG.md` now ships in the tarball.** It was absent from the `files` allowlist and npm does not
+  add it automatically, so installed copies had no version history. `README.md` and `LICENSE` are now
+  listed explicitly too.
+- **`homepage` points at the documentation site** (`stratastorage-docs.aoneahsan.com`) rather than the
+  marketing site, so npmjs.com's primary link lands on the docs. The marketing site remains linked from
+  the README.
+- **`repository.url` uses the `git+https://` form** npm expects for a git remote.
+
+### Changed
+
+- **README rewritten to the canonical package pattern** — anchored, linkable sections; a table of
+  contents; absolute links throughout (npm renders the README outside the repo, where relative links are
+  dead); and new **Limitations** and **Troubleshooting** sections that state plainly what the package does
+  not do: ESM-only, no automated test suite, non-cryptographic integrity checksums, minimal Node support,
+  and the open `ISSUE-01` empty-prefix defect with its `prefix` mitigation.
+- **`description` shortened** to `One storage API across web, iOS and Android — zero runtime
+  dependencies.`, matching the README's one-line promise.
+- **`keywords` trimmed from 16 to 12** and normalised to lower case.
+- **`.npmignore` deleted.** `files` is an allowlist and already governed the tarball completely — verified
+  by comparing `npm pack --dry-run` file lists with and without the file, which were identical. Keeping a
+  denylist alongside it only risks disagreement.
+- **`dist/README.md` is no longer generated**, removing a duplicate copy of the largest text file in the
+  tarball.
+- Added `assets/logo.svg` as the brand master, and `docs/PACKAGES.md` as the dependency inventory.
+
 ## [2.8.3] - 2026-07-25
 
 Documentation and metadata release — **no runtime code changes**, no API changes. Restores the

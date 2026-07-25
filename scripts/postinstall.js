@@ -7,13 +7,15 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-console.log('\n🚀 Strata Storage - Zero Dependencies, Infinite Possibilities!\n');
+console.log('\n🚀 Strata Storage — one storage API across web, iOS and Android.\n');
 
+// Keep this snippet identical to the README's Quick Start. `new Strata()` +
+// `initialize()` still works, but the default instance is the documented entry
+// point and needs no setup call.
 console.log('📚 Quick Start:');
-console.log('   import { Strata } from "strata-storage";');
-console.log('   const storage = new Strata();');
-console.log('   await storage.initialize();');
-console.log('   await storage.set("key", "value");\n');
+console.log('   import { storage } from "strata-storage";');
+console.log('   await storage.set("key", "value");');
+console.log('   const value = await storage.get("key");\n');
 
 // Check if this is a Capacitor project
 const capacitorConfigPaths = [
@@ -27,17 +29,18 @@ const isCapacitorProject = capacitorConfigPaths.some(configPath =>
 );
 
 if (isCapacitorProject) {
-  console.log('📱 Capacitor Support Available (Optional):');
+  console.log('📱 Capacitor project detected — native setup is REQUIRED:');
+  console.log('   npx cap sync    ← without this the native adapters fail on device');
+  console.log('');
   console.log('   import { registerCapacitorAdapters } from "strata-storage/capacitor";');
-  console.log('   await registerCapacitorAdapters(storage);');
-  console.log('   Run "yarn cap sync" to sync native code\n');
+  console.log('   await registerCapacitorAdapters(storage);\n');
 }
 
 console.log('✨ Features:');
-console.log('   • Works everywhere - Web, Node.js, Mobile');
+console.log('   • One API over 11 storage backends');
 console.log('   • Zero runtime dependencies');
-console.log('   • Optional Capacitor integration');
-console.log('   • Built-in encryption & compression');
+console.log('   • Optional React / Vue / Angular / Capacitor / Firebase bindings');
+console.log('   • Opt-in encryption, compression, TTL and integrity checks');
 console.log('   • Cross-tab synchronization\n');
 
 console.log('📖 Documentation: https://stratastorage-docs.aoneahsan.com');

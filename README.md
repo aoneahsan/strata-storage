@@ -1,60 +1,191 @@
-# Strata Storage
+<div align="center">
 
-> Zero-dependency universal storage for the web, iOS, and Android. One API for `localStorage`, IndexedDB, cookies, the URL, native Keychain/Keystore, SQLite, and more — with optional React, Vue, Angular, Capacitor, and Firebase surfaces.
+<img src="https://raw.githubusercontent.com/aoneahsan/strata-storage/main/assets/logo.svg" alt="Strata Storage logo" width="120" />
 
-- **[AI Integration Guide](./AI-INTEGRATION-GUIDE.md)** — quick reference for AI development agents (Claude Code, Cursor, Copilot).
+<h1>strata-storage</h1>
+
+<p><strong>One storage API across web, iOS and Android — zero runtime dependencies.</strong></p>
 
 [![npm version](https://img.shields.io/npm/v/strata-storage.svg)](https://www.npmjs.com/package/strata-storage)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue.svg)](https://www.typescriptlang.org/)
-[![Platform](https://img.shields.io/badge/platform-Web%20%7C%20iOS%20%7C%20Android-lightgrey.svg)](https://stratastorage.aoneahsan.com)
+[![downloads](https://img.shields.io/npm/dm/strata-storage.svg)](https://www.npmjs.com/package/strata-storage)
+[![license](https://img.shields.io/npm/l/strata-storage.svg)](https://github.com/aoneahsan/strata-storage/blob/main/LICENSE)
+[![types](https://img.shields.io/npm/types/strata-storage.svg)](https://www.npmjs.com/package/strata-storage)
+[![bundle size](https://img.shields.io/bundlephobia/minzip/strata-storage.svg)](https://bundlephobia.com/package/strata-storage)
+[![CI](https://github.com/aoneahsan/strata-storage/actions/workflows/ci.yml/badge.svg)](https://github.com/aoneahsan/strata-storage/actions/workflows/ci.yml)
+[![node](https://img.shields.io/node/v/strata-storage.svg)](https://nodejs.org)
 
-- **Version:** `2.8.3`
-- **License:** MIT
-- **Node.js:** `>= 24.13.0`
-- **Module format:** ESM only
+[Docs](https://stratastorage-docs.aoneahsan.com) · [npm](https://www.npmjs.com/package/strata-storage) · [GitHub](https://github.com/aoneahsan/strata-storage) · [Changelog](https://github.com/aoneahsan/strata-storage/blob/main/CHANGELOG.md) · [AI Guide](https://github.com/aoneahsan/strata-storage/blob/main/AI-INTEGRATION-GUIDE.md) · [Support](https://github.com/aoneahsan/strata-storage/issues)
 
-## Why Strata Storage
+</div>
 
-Every product re-solves the same storage problem: pick a backend per platform, learn its quirks, wrap it for your framework, and bolt on encryption, expiry, and cross-tab sync by hand. Strata Storage replaces that with one adapter-based API that runs everywhere and keeps the runtime package free of dependencies.
+> [!IMPORTANT]
+> In a Capacitor app, run **`npx cap sync`** after installing. Without it the native module is never
+> copied into your iOS/Android projects and the native adapters — `secure`, `sqlite`, `preferences`,
+> `filesystem` — fail silently on device while working fine in the browser.
 
-- **Zero runtime dependencies.** The core is pure TypeScript. React, Vue, Angular, and `@capacitor/core` are optional peer dependencies — install only what you use.
-- **One API, every backend.** `get`/`set`/`remove`/`query`/`subscribe` behave the same whether the value lives in `localStorage`, IndexedDB, the URL, or the iOS Keychain.
-- **Provider-free.** `defineStorage()` returns a ready-to-use instance you create once and import anywhere — no React context, Vue plugin, or Angular module required (the Provider/Plugin/Module styles still work if you prefer them).
-- **Opt-in power features.** Encryption, compression, TTL, queries, cross-tab sync, integrity checksums, durable writes, mirroring, and snapshots are all off by default and added per call or per instance.
+Strata Storage gives you one `get`/`set`/`remove`/`query`/`subscribe` API over every storage backend a
+cross-platform app touches: `localStorage`, `sessionStorage`, IndexedDB, cookies, the Cache API, the page
+URL, and — through Capacitor — the iOS Keychain, Android EncryptedSharedPreferences, native SQLite and the
+filesystem. The core is pure TypeScript with **no runtime dependencies**; React, Vue, Angular, Capacitor and
+Firebase are optional peers you install only if you use them. Encryption, compression, TTL, cross-tab sync,
+integrity checksums and mirrored backups are opt-in per call or per instance.
 
-## Installation
+| | |
+|---|---|
+| **Version** | `2.8.4` |
+| **License** | MIT |
+| **Node** | `>=24.13.0` |
+| **Platforms** | Web · iOS · Android (via Capacitor) |
+| **Module format** | ESM only — no CommonJS build |
+| **Install size** | 155 kB packed · 660 kB unpacked, of which 130 kB is iOS + Android native source |
+| **Types** | Bundled `.d.ts` for every entry point |
+| **Status** | Stable · actively maintained |
+
+<a id="table-of-contents"></a>
+## 🧭 Table of Contents&nbsp;[#](#table-of-contents)
+
+- [💡 Why strata-storage](#why-strata-storage)
+- [✨ Features](#features)
+- [📱 Platform Support](#platform-support)
+- [📋 Requirements](#requirements)
+- [📦 Installation](#installation)
+- [🚀 Quick Start](#quick-start)
+- [🛠️ Usage](#usage)
+- [⚙️ Configuration](#configuration)
+- [🔧 API Reference](#api-reference)
+- [🧩 Types](#types)
+- [💻 Command Line](#command-line)
+- [🧪 Examples](#examples)
+- [🎛️ Advanced Features](#advanced-features)
+- [🚑 Recovery & Troubleshooting](#recovery-troubleshooting)
+- [🚧 Limitations](#limitations)
+- [📚 Documentation](#documentation)
+- [🔄 Changelog](#changelog)
+- [🤝 Contributing](#contributing)
+- [🗂️ Repository](#repository)
+- [💬 Support](#support)
+- [📄 License](#license)
+- [👤 Author](#author)
+- [🔗 Links](#links)
+- [🏷️ Keywords](#keywords)
+
+<a id="why-strata-storage"></a>
+## 💡 Why strata-storage&nbsp;[#](#why-strata-storage)
+
+Every cross-platform product re-solves the same problem: pick a storage backend per platform, learn each
+one's quirks, wrap it for your framework, then bolt on encryption, expiry and cross-tab sync by hand. The
+result is a per-platform layer nobody wants to own. Strata Storage replaces it with one adapter-based API
+that behaves identically everywhere, and keeps the runtime package dependency-free so it adds nothing to
+your dependency tree.
+
+| | `strata-storage` | Rolling your own per platform |
+|---|---|---|
+| Backends | 11 adapters behind one API | one integration per backend, written twice |
+| Runtime dependencies | none | whatever each wrapper pulls in |
+| Framework binding | optional sub-path imports, no provider required | hand-written hooks per framework |
+| Encryption · TTL · sync · queries | opt-in flags | built and maintained by you |
+| Native iOS/Android | ships as a Capacitor plugin | a separate native module to maintain |
+| Automated test suite | **none** — typecheck, lint and build are the gates | yours to write |
+
+**Not the right tool when** — you only need `localStorage` in one web app (use it directly); you need a
+CommonJS build or Node below 24.13 (this package is ESM-only); you need a server-side or multi-user
+database (this is client-side key-value storage); or you need cryptographic tamper-proofing from the
+integrity feature specifically — its checksums are non-cryptographic, so use the encryption feature instead.
+
+<a id="features"></a>
+## ✨ Features&nbsp;[#](#features)
+
+- **One API, every backend** — the same calls whether the value lives in `localStorage`, IndexedDB, the URL
+  or the iOS Keychain.
+- **Zero runtime dependencies** — the core is pure TypeScript; every framework and platform binding is an
+  optional peer.
+- **Provider-free by default** — create one instance and import it anywhere. No React context, Vue plugin or
+  Angular module is required, though all three styles are still supported.
+- **Synchronous API alongside the async one** — for initial render and event handlers, on the backends that
+  are genuinely synchronous.
+- **Opt-in encryption and compression** — AES-GCM via Web Crypto, size-thresholded compression, both off by
+  default.
+- **TTL and expiry** — absolute or sliding, with expiry inspection and a cleanup sweep.
+- **Queries and tags** — MongoDB-style conditions over stored values and their tags.
+- **Cross-tab synchronisation** — subscribe to changes made in other tabs of the same origin.
+- **Recovery features** — integrity checksums, durable writes, mirrored read-repair, portable snapshots and
+  scheduled backups.
+- **Native adapters with no plugin dependencies** — SQLite is hand-rolled and the filesystem adapter uses
+  the platform's own `FileManager` / `java.io.File`.
+- **Typed end to end** — bundled declarations for every entry point, including each framework sub-path.
+
+<a id="platform-support"></a>
+## 📱 Platform Support&nbsp;[#](#platform-support)
+
+| Platform | Supported | Notes |
+|---|---|---|
+| Browsers | ✅ | All seven web adapters: `memory`, `localStorage`, `sessionStorage`, `indexedDB`, `cookies`, `cache`, `url`. |
+| iOS | ✅ | Via Capacitor. Requires `npx cap sync`. Keychain, UserDefaults, SQLite, FileManager. |
+| Android | ✅ | Via Capacitor. Requires `npx cap sync`. EncryptedSharedPreferences, SharedPreferences, SQLite, `java.io.File`. |
+| Node / SSR | ⚠️ | Imports and runs, but only the `memory` adapter is available — there is no DOM storage. Browser-only adapters report `isAvailable() === false` instead of throwing. |
+| Firebase | ✅ | Optional cloud sync through the `strata-storage/firebase` sub-path. |
+
+<a id="requirements"></a>
+## 📋 Requirements&nbsp;[#](#requirements)
+
+| Requirement | Version | Why |
+|---|---|---|
+| Node | `>=24.13.0` | Matches `.nvmrc`; the package is ESM-only and relies on modern Node resolution. |
+| TypeScript | `moduleResolution: "bundler"` or `"nodenext"` | Older `node`/`node10` resolution cannot see the typed sub-path exports. |
+| `@capacitor/core` | `>=8.0.0` | Optional peer — only for the native iOS/Android adapters. |
+| `react` | `>=19.2.3` | Optional peer — only for `strata-storage/react`. |
+| `vue` | `>=3.5.26` | Optional peer — only for `strata-storage/vue`. |
+| `@angular/core`, `@angular/forms` | `>=21.0.6` | Optional peers — only for `strata-storage/angular`. |
+| `firebase` | `>=10.0.0` | Optional peer — only for `strata-storage/firebase`. |
+
+<a id="installation"></a>
+## 📦 Installation&nbsp;[#](#installation)
 
 ```bash
 yarn add strata-storage
 ```
 
-Framework adapters import from sub-paths; no extra install beyond the framework itself:
+Nothing else is needed for web use. Install only the optional peer you actually import:
 
 ```bash
-# React / Vue / Angular peers are optional — install the one you use
-yarn add react        # for strata-storage/react
-yarn add vue          # for strata-storage/vue
+yarn add react                          # for strata-storage/react
+yarn add vue                            # for strata-storage/vue
 yarn add @angular/core @angular/forms   # for strata-storage/angular
 yarn add @capacitor/core                # for strata-storage/capacitor
+yarn add firebase                       # for strata-storage/firebase
 ```
 
-## Quick Start
+**Capacitor apps must then sync the native module**, or the native adapters will not work on device:
 
-The shortest path is the default `storage` instance. It registers the standard web adapters and initializes lazily on first use, so importing the package does no I/O.
+```bash
+npx cap sync
+```
+
+An optional interactive wizard can scaffold a configuration file for you — see
+[Command Line](#command-line).
+
+<a id="quick-start"></a>
+## 🚀 Quick Start&nbsp;[#](#quick-start)
+
+The default `storage` instance registers the standard web adapters and initialises lazily on first use, so
+importing the package performs no I/O.
 
 ```typescript
 import { storage } from 'strata-storage';
 
-// No setup, no Provider, no initialize() call — works immediately.
-await storage.set('user', { id: 123, name: 'John Doe' });
+await storage.set('user', { id: 123, name: 'Ada Lovelace' });
 const user = await storage.get<{ id: number; name: string }>('user');
 
 await storage.remove('user');
-await storage.clear();
 ```
 
-Need your own configured instance? Use `defineStorage()` — it is the same factory the default instance is built from.
+<a id="usage"></a>
+## 🛠️ Usage&nbsp;[#](#usage)
+
+### Your own configured instance
+
+`defineStorage()` is the same factory the default instance is built from. Create one at module scope and
+import it anywhere — no provider needed.
 
 ```typescript
 import { defineStorage } from 'strata-storage';
@@ -64,29 +195,15 @@ export const storage = defineStorage({
   encryption: { enabled: true, password: process.env.STORAGE_KEY! },
 });
 
-await storage.set('token', '...', { encrypt: true });
+await storage.set('token', '…', { encrypt: true });
 ```
 
-`defineStorage()` registers memory, `localStorage`, `sessionStorage`, IndexedDB, cookies, and the Cache API. Add the URL adapter or native adapters yourself when you need them (see below).
-
-## Provider-Free Usage
-
-The recommended pattern across all frameworks: create one instance and bind to it. No Provider, plugin, or module is required. The Provider-based styles remain available and are documented in the [examples](https://stratastorage-docs.aoneahsan.com/examples).
-
-### Vanilla JavaScript / TypeScript
-
-```typescript
-import { defineStorage } from 'strata-storage';
-
-export const storage = defineStorage();
-
-await storage.set('theme', 'dark');
-const theme = await storage.get<string>('theme');
-```
+It registers `memory`, `localStorage`, `sessionStorage`, `indexedDB`, `cookies` and `cache`. Register the
+URL adapter and the native adapters yourself when you need them.
 
 ### React
 
-Bind the hooks to an instance once at module scope with `createStrataHooks`, then use them in any component — no `<StrataProvider>` needed.
+Bind the hooks to an instance once, then use them in any component.
 
 ```tsx
 // storage.ts
@@ -102,36 +219,19 @@ export const { useStorage, useStorageQuery, useStorageTTL } = createStrataHooks(
 import { useStorage } from './storage';
 
 function Settings() {
-  // [value, setValue, loading]
   const [theme, setTheme, loading] = useStorage<string>('theme', 'light');
-
   if (loading) return <p>Loading…</p>;
-
   return (
-    <button onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>
-      Theme: {theme}
-    </button>
+    <button onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}>Theme: {theme}</button>
   );
 }
 ```
 
-Prefer context? `<StrataProvider>` still works and now accepts an `instance` prop so it can wrap an instance you created yourself:
-
-```tsx
-import { StrataProvider, useStorage } from 'strata-storage/react';
-import { storage } from './storage';
-
-<StrataProvider instance={storage}>
-  <App />
-</StrataProvider>;
-```
+`<StrataProvider instance={storage}>` still works if you prefer context.
 
 ### Vue
 
-`createStrataComposables` binds the composables to an instance. Each built-in composable also accepts an optional instance as its last argument, and the classic `StrataPlugin` still works.
-
 ```typescript
-// storage.ts
 import { defineStorage } from 'strata-storage';
 import { createStrataComposables } from 'strata-storage/vue';
 
@@ -139,87 +239,54 @@ export const storage = defineStorage();
 export const { useStorage, useStorageQuery, useStorageTTL } = createStrataComposables(storage);
 ```
 
-```vue
-<script setup lang="ts">
-import { useStorage } from './storage';
-
-const { value: theme, update } = useStorage<string>('theme', 'light');
-</script>
-
-<template>
-  <button @click="update(theme === 'light' ? 'dark' : 'light')">Theme: {{ theme }}</button>
-</template>
-```
+The classic `StrataPlugin` remains available, and each built-in composable also accepts an instance as its
+last argument.
 
 ### Angular
 
-`provideStrata` accepts either a pre-created instance or a config object, and registers `StrataService` for injection. It works in `bootstrapApplication` (standalone) or a component's `providers`. The `STRATA_INSTANCE` token holds the instance; `StrataModule.forRoot(config)` remains for NgModule apps.
-
 ```typescript
-// main.ts
 import { bootstrapApplication } from '@angular/platform-browser';
 import { defineStorage } from 'strata-storage';
 import { provideStrata } from 'strata-storage/angular';
 import { AppComponent } from './app/app.component';
 
-const storage = defineStorage();
-
-bootstrapApplication(AppComponent, {
-  providers: [provideStrata(storage)], // or provideStrata({ defaultStorages: ['indexedDB'] })
-});
+bootstrapApplication(AppComponent, { providers: [provideStrata(defineStorage())] });
 ```
 
-```typescript
-// any.component.ts
-import { Component } from '@angular/core';
-import { StrataService } from 'strata-storage/angular';
+`StrataService` is then injectable and returns RxJS Observables. `StrataModule.forRoot(config)` remains for
+NgModule applications.
 
-@Component({ /* ... */ })
-export class AnyComponent {
-  constructor(private storage: StrataService) {}
-
-  save() {
-    // StrataService methods return RxJS Observables
-    this.storage.set('theme', 'dark').subscribe();
-  }
-}
-```
-
-## Synchronous API
-
-For UI code that must read or write without `await` — initial render, event handlers, synchronous state hydration — Strata exposes a synchronous API alongside the async one:
+### Native adapters (iOS and Android)
 
 ```typescript
 import { defineStorage } from 'strata-storage';
+import { registerCapacitorAdapters } from 'strata-storage/capacitor';
 
 const storage = defineStorage();
+await registerCapacitorAdapters(storage);
 
-storage.setSync('lastTab', 'inbox');
-const tab = storage.getSync<string>('lastTab'); // 'inbox'
-storage.hasSync('lastTab');                      // true
-storage.keysSync();                              // string[]
-storage.removeSync('lastTab');
-storage.clearSync();
+await storage.set('token', value, { storage: 'secure' }); // Keychain / EncryptedSharedPreferences
 ```
 
-### Limitations (read these)
+`PreferencesAdapter`, `SecureAdapter`, `SqliteAdapter` and `FilesystemAdapter` are also exported
+individually when you need per-adapter configuration. Each `SqliteAdapter` binds to one `(database, table)`
+pair, so separate logical stores map to separate physical files and cannot collide.
 
-The sync API only works on adapters that are genuinely synchronous: **`memory`, `localStorage`, `sessionStorage`, `cookies`, and `url`**. It does not paper over async backends, and it cannot do work that is inherently asynchronous:
-
-- Targeting an async-only adapter (`indexedDB`, `cache`, `sqlite`, `filesystem`, `secure`, `preferences`) throws a `StorageError` telling you to use the async API.
-- `setSync` with `{ encrypt: true }` or `{ compress: true }` throws — Web Crypto and compression are async, so use `await storage.set(...)`.
-- `getSync` on a value that was stored encrypted or compressed throws — read it with `await storage.get(...)`.
-
-TTL, tags, and metadata work with the sync API; encryption and compression do not.
+### The synchronous API
 
 ```typescript
-// Pick a sync-capable backend explicitly when needed:
-storage.setSync('filters', { status: 'open' }, { storage: 'localStorage', ttl: 60_000 });
+storage.setSync('lastTab', 'inbox');
+const tab = storage.getSync<string>('lastTab');
+storage.removeSync('lastTab');
 ```
 
-## URL Adapter
+Available on `memory`, `localStorage`, `sessionStorage`, `cookies` and `url` only, and it cannot encrypt or
+compress — see [Limitations](#limitations).
 
-The `URLAdapter` (storage type `'url'`) persists state in the page URL so it survives reloads and round-trips through shareable/bookmarkable links — filters, the active tab, pagination, and other small UI state. It is inherently synchronous and emits change events on `popstate`/`hashchange`, so back/forward navigation and manual URL edits notify subscribers.
+### The URL adapter
+
+Persists small UI state in the page URL so it survives reloads and shareable links, and emits change events
+on `popstate`/`hashchange`.
 
 ```typescript
 import { defineStorage, URLAdapter } from 'strata-storage';
@@ -227,317 +294,273 @@ import { defineStorage, URLAdapter } from 'strata-storage';
 const storage = defineStorage();
 storage.registerAdapter(new URLAdapter());
 
-// Write to the URL (no await needed — URL access is synchronous)
 storage.setSync('tab', 'pending', { storage: 'url' });
-storage.setSync('page', 3, { storage: 'url' });
-
-// Read it back (e.g. on reload)
 const tab = storage.getSync<string>('tab', { storage: 'url' });
-
-// React to back/forward navigation or manual edits
-storage.subscribe((change) => {
-  if (change.key === 'tab') applyTab(change.newValue);
-}, { storage: 'url' });
 ```
 
-### Configuration
+<a id="configuration"></a>
+## ⚙️ Configuration&nbsp;[#](#configuration)
 
-Pass `URLAdapterConfig` when constructing the adapter:
+Passed to `defineStorage(config)` or `new Strata(config)`:
+
+| Option | Type | Default | What it does |
+|---|---|---|---|
+| `defaultStorages` | `StorageType[]` | `['localStorage', 'indexedDB', 'sessionStorage', 'memory']` | Preference order for picking the default adapter. |
+| `adapters` | `object` | `{}` | Per-adapter settings, or `false` to skip one. `localStorage`/`sessionStorage` take `{ prefix }`; `indexedDB` takes `{ dbName, version }`; `cookies` takes `{ secure, sameSite }`; `cache` takes `{ cacheName }`. |
+| `encryption` | `{ enabled, password }` | disabled | AES-GCM encryption on every write. Async path only. |
+| `compression` | `{ enabled, threshold }` | disabled | Compress values above `threshold` bytes. Async path only. |
+| `sync` | `{ enabled }` | disabled | Cross-tab change notifications. |
+| `integrity` | `boolean` | `false` | Store an FNV-1a checksum with each value and verify it on read. |
+| `durableWrites` | `boolean` | `false` | Read each write back and retry on mismatch. Costs one extra read per write. |
+| `mirror` | `StorageType[]` | `[]` | Copy every write to backup storages, and read-repair the primary from them. |
+| `autoBackup` | `{ interval, storage }` | disabled | Take periodic snapshots into a durable adapter. |
+| `debug` | `boolean` | `false` | Raise the internal log level from `warn` to `debug`. |
+
+The `URLAdapter` takes its own options: `mode` (`'query'` \| `'hash'`, default `'query'`), `prefix`
+(default `'strata.'`), `history` (`'push'` \| `'replace'`, default `'replace'`) and `maxLength` (default
+`2000`).
+
+Full reference: [Configuration](https://stratastorage-docs.aoneahsan.com/configuration).
+
+<a id="api-reference"></a>
+## 🔧 API Reference&nbsp;[#](#api-reference)
+
+An index of the main surface. Full signatures and behaviour live on the docs site.
+
+| Export | Signature | Docs |
+|---|---|---|
+| `storage` | the default `Strata` instance | [→](https://stratastorage-docs.aoneahsan.com/quick-start) |
+| `defineStorage` | `(config?: StrataConfig) => Strata` | [→](https://stratastorage-docs.aoneahsan.com/configuration) |
+| `Strata` | `new (config?: StrataConfig)` | [→](https://stratastorage-docs.aoneahsan.com/api/core/strata) |
+| `.get` / `.set` | `get<T>(key, opts?) => Promise<T \| null>` · `set<T>(key, value, opts?) => Promise<void>` | [→](https://stratastorage-docs.aoneahsan.com/api/core/strata) |
+| `.remove` / `.clear` / `.has` / `.keys` | `(key?, opts?) => Promise<…>` | [→](https://stratastorage-docs.aoneahsan.com/api/core/strata) |
+| `.getSync` / `.setSync` / `.removeSync` / `.hasSync` / `.keysSync` / `.clearSync` | synchronous equivalents, sync-capable adapters only | [→](https://stratastorage-docs.aoneahsan.com/api/core/strata) |
+| `.query` | `(condition, opts?) => Promise<Array<{ key, value }>>` | [→](https://stratastorage-docs.aoneahsan.com/guides/features/queries) |
+| `.subscribe` | `(cb, opts?) => UnsubscribeFunction` | [→](https://stratastorage-docs.aoneahsan.com/guides/features/sync) |
+| `.getTTL` / `.extendTTL` / `.persist` / `.getExpiring` / `.cleanupExpired` | TTL inspection and maintenance | [→](https://stratastorage-docs.aoneahsan.com/api/features/ttl) |
+| `.snapshot` / `.restore` / `.export` / `.import` | portable backup and transfer | [→](https://stratastorage-docs.aoneahsan.com/api/features/recovery) |
+| `.size` / `.getCapabilities` / `.getAvailableStorageTypes` | introspection | [→](https://stratastorage-docs.aoneahsan.com/api/core/strata) |
+| `.registerAdapter` / `.refreshAdapters` / `.close` | lifecycle | [→](https://stratastorage-docs.aoneahsan.com/api/adapters) |
+| `computeChecksum` / `verifyChecksum` | `(data) => string` · `(data, sum) => boolean` | [→](https://stratastorage-docs.aoneahsan.com/api/features/recovery) |
+| `URLAdapter` and the six web adapters | `new (config?)` | [→](https://stratastorage-docs.aoneahsan.com/api/adapters) |
+| `registerCapacitorAdapters` | `(strata) => Promise<void>` — `strata-storage/capacitor` | [→](https://stratastorage-docs.aoneahsan.com/guides/platforms/capacitor) |
+| `enableFirebaseSync` | `(strata, config) => Promise<void>` — `strata-storage/firebase` | [→](https://stratastorage-docs.aoneahsan.com/guides/platforms/firebase) |
+| Error classes | `StrataError`, `StorageError`, `IntegrityError`, `QuotaExceededError`, `EncryptionError`, `CompressionError`, `SerializationError`, `ValidationError`, `NotSupportedError`, `AdapterNotAvailableError` | [→](https://stratastorage-docs.aoneahsan.com/api/core/errors) |
+
+<a id="types"></a>
+## 🧩 Types&nbsp;[#](#types)
+
+The types a consumer touches directly. Full definitions:
+[Types](https://stratastorage-docs.aoneahsan.com/api/core/types).
 
 ```typescript
-new URLAdapter(); // defaults below
+type StorageType =
+  | 'memory' | 'localStorage' | 'sessionStorage' | 'indexedDB' | 'cookies' | 'cache' | 'url'
+  | 'preferences' | 'secure' | 'sqlite' | 'filesystem';
+
+interface StorageOptions {
+  storage?: StorageType;      // target a specific adapter
+  ttl?: number;               // milliseconds
+  sliding?: boolean;          // reset the TTL on each read
+  tags?: string[];            // for query()
+  encrypt?: boolean;          // per-call override (async only)
+  compress?: boolean;         // per-call override (async only)
+  verify?: boolean;           // integrity check on read
+  durable?: boolean;          // read-back-and-retry on write
+}
+
+interface StrataConfig {
+  defaultStorages?: StorageType[];
+  adapters?: { /* per-adapter settings — see Configuration */ };
+  encryption?: EncryptionConfig;
+  compression?: CompressionConfig;
+  sync?: SyncConfig;
+  integrity?: boolean;
+  durableWrites?: boolean;
+  mirror?: StorageType[];
+  autoBackup?: { interval: number; storage: StorageType };
+  debug?: boolean;
+}
 ```
 
-| Option | Type | Default | Meaning |
-|--------|------|---------|---------|
-| `mode` | `'query'` \| `'hash'` | `'query'` | Store params in the query string (`?strata.tab=...`) or the hash fragment (`#strata.tab=...`). |
-| `prefix` | `string` | `'strata.'` | Prefix on every param name to avoid collisions with your own query params. |
-| `history` | `'push'` \| `'replace'` | `'replace'` | Whether each write adds a browser history entry or replaces the current one. |
-| `maxLength` | `number` | `2000` | Soft warning threshold (chars) for total URL length. |
+<a id="command-line"></a>
+## 💻 Command Line&nbsp;[#](#command-line)
 
-The adapter is configured through `StrataConfig.adapters.url` when you let Strata manage it:
-
-```typescript
-const storage = defineStorage({ adapters: { url: { mode: 'hash', history: 'push' } } });
-storage.registerAdapter(new URLAdapter());
+```bash
+npx strata-storage <command>
 ```
 
-### Limitations (read these)
+| Command | What it does |
+|---|---|
+| `configure` | Interactive wizard that writes a Strata configuration for your project. |
+| `init` | Alias for `configure`. |
+| `setup` | Alias for `configure`. |
+| `--help` | Print usage. |
 
-- **Length limits.** URLs have practical limits (~2000 chars in some browsers and servers). This adapter is for small, simple, serializable state — not bulk data. Writes past `maxLength` are allowed but logged as a warning.
-- **Server visibility.** In `'query'` mode the data is sent to the server on every navigation and appears in server/proxy logs. Use `'hash'` mode to keep it client-only (the fragment is never sent to the server).
-- **Browser only.** Outside a browser (SSR/Node) the adapter reports unavailable; `isAvailable()` returns `false`.
-- **Not persistent.** State lives only as long as the URL does — it is not durable storage.
+The CLI is optional — everything it produces can be written by hand.
 
-## Disaster Recovery
+<a id="examples"></a>
+## 🧪 Examples&nbsp;[#](#examples)
 
-Strata includes opt-in recovery features for data you cannot afford to silently lose. **Everything here is off by default** — enable only what you need, since each adds overhead.
+| Goal | Example |
+|---|---|
+| See every core call in one file | [`docs/examples/basic-usage.ts`](https://github.com/aoneahsan/strata-storage/blob/main/docs/examples/basic-usage.ts) |
+| Run a real app against a local build | [`example-apps/demo-app`](https://github.com/aoneahsan/strata-storage/tree/main/example-apps/demo-app) |
+| Browse framework and feature recipes | [Examples on the docs site](https://stratastorage-docs.aoneahsan.com/examples) |
 
-### Integrity checksums
+<a id="advanced-features"></a>
+## 🎛️ Advanced Features&nbsp;[#](#advanced-features)
 
-Set `integrity: true` (or per call `{ verify: true }`) to compute and store an FNV-1a checksum with each value and verify it on read. On corruption, Strata first attempts mirror read-repair (below); otherwise it honors `{ ignoreCorruption: true }` (returns `null`) or throws a typed `IntegrityError`.
+- **Encryption** — AES-GCM through Web Crypto, per instance or per call.
+  [→](https://stratastorage-docs.aoneahsan.com/guides/features/encryption)
+- **Compression** — applied above a byte threshold you set.
+  [→](https://stratastorage-docs.aoneahsan.com/guides/features/compression)
+- **TTL and expiry** — absolute or sliding, with a cleanup sweep.
+  [→](https://stratastorage-docs.aoneahsan.com/api/features/ttl)
+- **Queries** — MongoDB-style conditions over values and tags.
+  [→](https://stratastorage-docs.aoneahsan.com/guides/features/queries)
+- **Cross-tab sync** — change notifications across tabs of one origin.
+  [→](https://stratastorage-docs.aoneahsan.com/guides/features/sync)
+- **Integrity, durable writes, mirroring, snapshots** — the opt-in recovery set, all off by default.
+  [→](https://stratastorage-docs.aoneahsan.com/api/features/recovery)
+- **Migrations** — an experimental adapter-level utility for reshaping stored data.
+  [→](https://stratastorage-docs.aoneahsan.com/guides/features/migrations)
+- **Firebase sync** — mirror values to Firestore or the Realtime Database.
+  [→](https://stratastorage-docs.aoneahsan.com/guides/platforms/firebase)
 
-```typescript
-import { defineStorage } from 'strata-storage';
+<a id="recovery-troubleshooting"></a>
+## 🚑 Recovery & Troubleshooting&nbsp;[#](#recovery-troubleshooting)
 
-const storage = defineStorage({ integrity: true });
+| Symptom | Cause | Fix |
+|---|---|---|
+| Native adapters do nothing on device, but web works | The native module was never copied into the iOS/Android project | Run `npx cap sync`, then rebuild the app |
+| `Cannot find module 'strata-storage/react'` or its types | TypeScript is on `moduleResolution: "node"`, which cannot read sub-path exports | Set `"moduleResolution": "bundler"` or `"nodenext"` in `tsconfig.json` |
+| `StorageError` telling you to use the async API | A sync call targeted an async-only adapter (`indexedDB`, `cache`, `sqlite`, `filesystem`, `secure`, `preferences`) | Use `await storage.get/set(...)`, or pass `{ storage: 'localStorage' }` |
+| `setSync` throws with `{ encrypt: true }` or `{ compress: true }` | Web Crypto and compression are asynchronous | Use `await storage.set(...)` for encrypted or compressed values |
+| `getSync` throws on a value you stored earlier | The value was written encrypted or compressed | Read it with `await storage.get(...)` |
+| `IntegrityError` on read | The stored value no longer matches its checksum | Configure `mirror` for read-repair, or pass `{ ignoreCorruption: true }` to get `null` instead |
+| `No available storage adapters` | Every adapter in `defaultStorages` reported unavailable — common in Node and SSR | Include `'memory'` in `defaultStorages`, or guard the call behind a browser check |
+| Console errors naming keys your app owns, not Strata's | Known open defect — see [Limitations](#limitations) | Set a prefix: `defineStorage({ adapters: { localStorage: { prefix: 'myapp:' } } })` |
 
-await storage.set('config', settings);   // checksum stored
-const config = await storage.get('config'); // verified; throws IntegrityError if corrupted
+More: [Troubleshooting](https://stratastorage-docs.aoneahsan.com/reference/troubleshooting) ·
+[FAQ](https://stratastorage-docs.aoneahsan.com/reference/faq).
+
+<a id="limitations"></a>
+## 🚧 Limitations&nbsp;[#](#limitations)
+
+- **ESM only.** There is no CommonJS build. `engines.node` is `>=24.13.0`, where Node can `require()` an ESM
+  graph; on older Node a `require('strata-storage')` will fail.
+- **No automated test suite.** This is a deliberate project decision — `yarn typecheck`, `yarn lint` and
+  `yarn build` are the gates, in local development and in CI. There is no unit or integration coverage to
+  point at.
+- **Native behaviour cannot be verified from web or Node.** The iOS and Android adapters depend on your
+  Capacitor project's own configuration, so verify them on a real device using the
+  [device-verification guide](https://stratastorage-docs.aoneahsan.com/guides/platforms/device-verification).
+- **Integrity checksums are not cryptographic.** They are FNV-1a: they cheaply catch accidental corruption
+  such as truncated writes, and they do **not** resist deliberate tampering. Use encryption for that.
+- **The synchronous API is genuinely limited.** It works only on `memory`, `localStorage`,
+  `sessionStorage`, `cookies` and `url`, and it cannot encrypt or compress.
+- **The URL adapter is not durable storage.** URLs have practical length limits around 2,000 characters,
+  and in `'query'` mode the data is sent to the server and appears in its logs. Use `'hash'` mode to keep it
+  client-side.
+- **Node support is minimal.** Only the `memory` adapter is available outside a browser, so values do not
+  persist across processes.
+- **Known open defect — web adapters default to an empty key prefix.** With no prefix, `keys()` on
+  `localStorage`/`sessionStorage` returns every key on the origin, including keys written by other code, and
+  the TTL sweep reads them. In the worst case a foreign key whose value happens to be JSON with an expired
+  `expires` field can be removed. Until this is fixed, set an explicit prefix:
+  `defineStorage({ adapters: { localStorage: { prefix: 'myapp:' } } })`. Tracked as `ISSUE-01` in
+  [docs/REPORTED-ISSUES.md](https://github.com/aoneahsan/strata-storage/blob/main/docs/REPORTED-ISSUES.md).
+- **Firebase adapter names are not in the `StorageType` union.** `'firestore'` and `'realtime'` are runtime
+  names, so strict TypeScript may need a cast on the options object.
+
+<a id="documentation"></a>
+## 📚 Documentation&nbsp;[#](#documentation)
+
+| Document | Read it when |
+|---|---|
+| [Installation](https://stratastorage-docs.aoneahsan.com/installation) | setting the package up for the first time |
+| [Quick start](https://stratastorage-docs.aoneahsan.com/quick-start) | you want a working call in two minutes |
+| [Configuration](https://stratastorage-docs.aoneahsan.com/configuration) | you need the full option set |
+| [API reference](https://stratastorage-docs.aoneahsan.com/api) | you need an exact signature |
+| [Adapters](https://stratastorage-docs.aoneahsan.com/api/adapters) | choosing a backend, or writing your own |
+| [Platform guides](https://stratastorage-docs.aoneahsan.com/guides/platforms/capacitor) | wiring web, iOS, Android, Capacitor or Firebase |
+| [Recovery and integrity](https://stratastorage-docs.aoneahsan.com/api/features/recovery) | the data must survive corruption |
+| [Migration guide](https://stratastorage-docs.aoneahsan.com/migration) | upgrading from an earlier major |
+| [Troubleshooting](https://stratastorage-docs.aoneahsan.com/reference/troubleshooting) · [FAQ](https://stratastorage-docs.aoneahsan.com/reference/faq) | something is not behaving |
+| [AI integration guide](https://github.com/aoneahsan/strata-storage/blob/main/AI-INTEGRATION-GUIDE.md) | a coding agent is implementing against this package |
+| [llms.txt](https://stratastorage-docs.aoneahsan.com/llms.txt) · [llms-full.txt](https://stratastorage-docs.aoneahsan.com/llms-full.txt) | you need the docs as machine-readable text |
+
+<a id="changelog"></a>
+## 🔄 Changelog&nbsp;[#](#changelog)
+
+Latest release: **`2.8.4`** — documentation, metadata and packaging only, with no runtime changes. Ships
+`CHANGELOG.md` inside the tarball for the first time, adds the `funding` link, and stops the build writing a
+second manifest into `dist/`.
+
+Full history: [CHANGELOG.md](https://github.com/aoneahsan/strata-storage/blob/main/CHANGELOG.md).
+
+<a id="contributing"></a>
+## 🤝 Contributing&nbsp;[#](#contributing)
+
+Fork and open a pull request — see
+[CONTRIBUTING.md](https://github.com/aoneahsan/strata-storage/blob/main/CONTRIBUTING.md) for setup,
+standards, and how to
+[request collaborator access](https://github.com/aoneahsan/strata-storage/blob/main/CONTRIBUTING.md#becoming-a-contributor).
+`main` is protected: every change lands through a reviewed pull request.
+
+<a id="repository"></a>
+## 🗂️ Repository&nbsp;[#](#repository)
+
+```text
+src/            TypeScript source — core, adapters, features, framework integrations
+dist/           build output (published)
+ios/            native iOS plugin sources (published, for Capacitor)
+android/        native Android plugin sources (published, for Capacitor)
+scripts/        build script and the npx CLI (published)
+docs/           internal project records — NOT the docs site
+example-apps/   runnable demo application
 ```
 
-> **Honest note:** checksums are **FNV-1a, non-cryptographic**. They cheaply detect *accidental* corruption (truncated writes, bit flips, partial storage). They do **not** resist tampering — for tamper resistance use the encryption feature.
+The documentation site lives in its own repository:
+[aoneahsan/strata-storage-docs](https://github.com/aoneahsan/strata-storage-docs).
 
-### Durable writes
+<a id="support"></a>
+## 💬 Support&nbsp;[#](#support)
 
-`durableWrites: true` (or per call `{ durable: true }`) reads each value back after writing and retries on mismatch, throwing `StorageError` if it cannot confirm the write after a few attempts. This adds one read per write.
+Questions and bugs: [open an issue](https://github.com/aoneahsan/strata-storage/issues).
 
-```typescript
-const storage = defineStorage({ durableWrites: true });
-await storage.set('order', order); // confirmed written, or throws
-```
+If this package saves you time, you can support its maintenance at
+[aoneahsan.com/payment](https://aoneahsan.com/payment?project-id=strata-storage&project-identifier=strata-storage).
 
-### Mirroring (read-repair)
+<a id="license"></a>
+## 📄 License&nbsp;[#](#license)
 
-`mirror: [...]` copies every write/remove to backup storage types. On a primary read miss or corruption, Strata recovers the value from a mirror and repairs the primary in place.
+MIT © Ahsan Mahmood — see
+[LICENSE](https://github.com/aoneahsan/strata-storage/blob/main/LICENSE).
 
-```typescript
-const storage = defineStorage({
-  defaultStorages: ['localStorage'],
-  integrity: true,
-  mirror: ['indexedDB'], // localStorage is primary; indexedDB backs it up
-});
-```
+<a id="author"></a>
+## 👤 Author&nbsp;[#](#author)
 
-### Snapshots and scheduled backups
+**Ahsan Mahmood** — [aoneahsan.com](https://aoneahsan.com) · [GitHub](https://github.com/aoneahsan) ·
+[LinkedIn](https://linkedin.com/in/aoneahsan) · [aoneahsan@gmail.com](mailto:aoneahsan@gmail.com)
 
-`snapshot()` produces a portable, integrity-verified backup string (embedding a checksum manifest); `restore()` validates that checksum and throws `IntegrityError` on a corrupted backup. `autoBackup` schedules periodic snapshots to a durable adapter.
+<a id="links"></a>
+## 🔗 Links&nbsp;[#](#links)
 
-```typescript
-const backup = await storage.snapshot();      // store/download this string
-await storage.restore(backup);                 // validates, then restores
+| | |
+|---|---|
+| Documentation | https://stratastorage-docs.aoneahsan.com |
+| npm | https://www.npmjs.com/package/strata-storage |
+| Repository | https://github.com/aoneahsan/strata-storage |
+| Issues | https://github.com/aoneahsan/strata-storage/issues |
+| Changelog | https://github.com/aoneahsan/strata-storage/blob/main/CHANGELOG.md |
+| Docs site source | https://github.com/aoneahsan/strata-storage-docs |
+| Project website | https://stratastorage.aoneahsan.com |
+| Support the project | https://aoneahsan.com/payment |
 
-// Scheduled, every 5 minutes, into indexedDB
-const storage = defineStorage({
-  autoBackup: { interval: 5 * 60_000, storage: 'indexedDB' },
-});
-```
+<a id="keywords"></a>
+## 🏷️ Keywords&nbsp;[#](#keywords)
 
-Integrity helpers and error classes are exported for direct use:
-
-```typescript
-import { computeChecksum, verifyChecksum, IntegrityError } from 'strata-storage';
-```
-
-## Advanced Features
-
-### Encryption (async only)
-
-```typescript
-const storage = defineStorage({ encryption: { enabled: true, password: 'secret' } });
-await storage.set('secret', { token: 'abc' });        // encrypted with AES-GCM
-await storage.set('one-off', data, { encrypt: true }); // per-call override
-```
-
-### TTL / expiration
-
-```typescript
-await storage.set('session', data, { ttl: 3_600_000 });          // expires in 1 hour
-await storage.set('cache', data, { ttl: 600_000, sliding: true }); // reset on access
-const ms = await storage.getTTL('session');
-await storage.persist('session');                                  // remove expiry
-```
-
-### Compression (async only)
-
-```typescript
-const storage = defineStorage({ compression: { enabled: true, threshold: 1024 } });
-await storage.set('largePayload', bigObject); // compressed above 1KB
-```
-
-### Cross-tab sync
-
-```typescript
-const storage = defineStorage({ sync: { enabled: true } });
-storage.subscribe((change) => {
-  console.log(`${change.key} changed`, change.newValue);
-});
-```
-
-### Queries
-
-```typescript
-await storage.set('user:1', user, { tags: ['users', 'active'] });
-const active = await storage.query({
-  tags: { $in: ['active'] },
-  'value.age': { $gte: 18 },
-});
-```
-
-## Platform Support
-
-### Web (works in any JS environment)
-
-| Adapter | Backend | Use case |
-|---------|---------|----------|
-| `memory` | In-memory `Map` | Always-available fallback, tests |
-| `localStorage` | `window.localStorage` | Persistent key-value (~5 MB) |
-| `sessionStorage` | `window.sessionStorage` | Session-scoped data |
-| `indexedDB` | IndexedDB | Large structured data |
-| `cookies` | `document.cookie` | Small, server-accessible data |
-| `cache` | Cache API | Service-worker / HTTP cache |
-| `url` | `location` query/hash | Shareable UI state (see above) |
-
-### iOS and Android (via Capacitor)
-
-Strata ships as a Capacitor plugin (native iOS + Android). In a Capacitor app, after `yarn add strata-storage` run **`npx cap sync`** so the native module is copied into your iOS/Android projects — the native adapters (`secure`, `sqlite`, `preferences`, `filesystem`) won't work on-device without it.
-
-Register the native adapters you need when running under Capacitor. All four are zero-runtime-dependency: SQLite is hand-rolled (no plugin dependency) and filesystem uses the platform's native `FileManager` / `java.io.File`.
-
-```typescript
-import { defineStorage } from 'strata-storage';
-import {
-  registerCapacitorAdapters,
-  PreferencesAdapter,
-  SecureAdapter,
-  SqliteAdapter,
-  FilesystemAdapter,
-} from 'strata-storage/capacitor';
-
-const storage = defineStorage();
-
-// Easiest: register all native adapters at once (also refreshes the active set).
-await registerCapacitorAdapters(storage);
-
-// …or register individually for fine-grained control / custom adapter config:
-// storage.registerAdapter(new PreferencesAdapter()); // UserDefaults / SharedPreferences
-// storage.registerAdapter(new SecureAdapter());      // Keychain / EncryptedSharedPreferences
-// storage.registerAdapter(new SqliteAdapter());      // native SQLite
-// storage.registerAdapter(new FilesystemAdapter());  // native files
-
-await storage.set('secret', token, { storage: 'secure' });
-```
-
-| Adapter | iOS backend | Android backend |
-|---------|-------------|-----------------|
-| `preferences` | UserDefaults | SharedPreferences |
-| `secure` | Keychain | EncryptedSharedPreferences |
-| `sqlite` | SQLite (multi-store) | SQLite (multi-store) |
-| `filesystem` | FileManager | java.io.File |
-
-**SQLite multi-store** (2.6.0+): each `SqliteAdapter` instance binds to a `(database, table)` pair, so distinct logical stores map to distinct physical SQLite files / tables and cannot collide.
-
-```typescript
-import { SqliteAdapter } from 'strata-storage/capacitor';
-
-const analytics = defineStorage();
-analytics.registerAdapter(new SqliteAdapter({ database: 'analytics', table: 'events' }));
-
-const audit = defineStorage();
-audit.registerAdapter(new SqliteAdapter({ database: 'audit', table: 'rows' }));
-// → separate physical .db files; writes to `analytics` can never bleed into `audit`.
-```
-
-`await storage.size(true)` aggregates `{ total, count, byStorage, ... }`; native SQLite and filesystem additionally report a per-column byte breakdown (keys / values / metadata) when called on those adapters directly.
-
-> **Honest note:** the native iOS/Android adapters depend on your downstream Capacitor project setup and platform configuration, and native behavior cannot be exercised in a web/Node environment. Follow the [device-verification guide](https://stratastorage-docs.aoneahsan.com/guides/platforms/device-verification) to verify on a real iOS and Android device after integrating.
-
-### Firebase (optional cloud sync)
-
-```typescript
-import { defineStorage } from 'strata-storage';
-import { enableFirebaseSync } from 'strata-storage/firebase';
-
-const storage = defineStorage();
-await enableFirebaseSync(storage, {
-  apiKey: '…', authDomain: '…', projectId: '…', appId: '…',
-  firestore: true,
-});
-// 'firestore' / 'realtime' are runtime adapter names (not in the StorageType
-// union, so strict TS may need a cast on the options object).
-await storage.set('data', value, { storage: 'firestore' });
-```
-
-## Storage Types
-
-| Type | Platform | Synchronous | Encrypt/Compress | Notes |
-|------|----------|-------------|-------------------|-------|
-| `memory` | All | ✅ | async only | Always available |
-| `localStorage` | Web | ✅ | async only | ~5 MB, persistent |
-| `sessionStorage` | Web | ✅ | async only | Session-scoped |
-| `indexedDB` | Web | ❌ | async only | Large structured data |
-| `cookies` | Web | ✅ | async only | ~4 KB, server-readable |
-| `cache` | Web | ❌ | async only | Cache API |
-| `url` | Web | ✅ | async only | Shareable UI state, length-limited |
-| `preferences` | Mobile | ❌ | async only | UserDefaults / SharedPreferences |
-| `secure` | Mobile | ❌ | async only | Keychain / EncryptedSharedPreferences |
-| `sqlite` | Mobile | ❌ | async only | Native SQLite — multi-store via `(database, table)` (2.6.0+) |
-| `filesystem` | Mobile | ❌ | async only | Native files — file-per-key with atomic writes (2.6.0+) |
-
-"async only" means encryption and compression require the `await storage.set(...)` path — the synchronous API cannot encrypt or compress.
-
-## Requirements
-
-- **Node.js:** `>= 24.13.0`
-- **TypeScript:** strict mode supported (optional, recommended)
-- **Capacitor:** `@capacitor/core >= 8.0.0` (for native platforms; optional peer dependency)
-
-Optional peer dependencies (install only the ones you use): `react >= 19.2.3`, `vue >= 3.5.26`, `@angular/core` & `@angular/forms >= 21.0.6`.
-
-## Documentation
-
-📚 **Docs:** [stratastorage-docs.aoneahsan.com](https://stratastorage-docs.aoneahsan.com) · site source in [aoneahsan/strata-storage-docs](https://github.com/aoneahsan/strata-storage-docs)
-🤖 **For AI agents:** [`AI-INTEGRATION-GUIDE.md`](./AI-INTEGRATION-GUIDE.md) · hosted [/ai](https://stratastorage-docs.aoneahsan.com/ai) · [`/llms.txt`](https://stratastorage-docs.aoneahsan.com/llms.txt)
-
-### Getting Started
-- [Introduction](https://stratastorage-docs.aoneahsan.com/) · [Installation](https://stratastorage-docs.aoneahsan.com/installation) · [Quick Start](https://stratastorage-docs.aoneahsan.com/quick-start) · [Configuration](https://stratastorage-docs.aoneahsan.com/configuration)
-
-### API
-- [API Reference](https://stratastorage-docs.aoneahsan.com/api) · [Core (`Strata`)](https://stratastorage-docs.aoneahsan.com/api/core/strata) · [Types](https://stratastorage-docs.aoneahsan.com/api/core/types) · [Errors](https://stratastorage-docs.aoneahsan.com/api/core/errors)
-- [All adapters](https://stratastorage-docs.aoneahsan.com/api/adapters) — web (localStorage, IndexedDB, cookies, Cache, URL, …) + Capacitor (Preferences, Secure, SQLite, Filesystem) + remote (Firebase)
-
-### Features
-- [Encryption](https://stratastorage-docs.aoneahsan.com/guides/features/encryption) · [Compression](https://stratastorage-docs.aoneahsan.com/guides/features/compression) · [TTL](https://stratastorage-docs.aoneahsan.com/api/features/ttl) · [Sync](https://stratastorage-docs.aoneahsan.com/guides/features/sync) · [Queries](https://stratastorage-docs.aoneahsan.com/guides/features/queries) · [Migrations](https://stratastorage-docs.aoneahsan.com/guides/features/migrations) · [Recovery & Integrity](https://stratastorage-docs.aoneahsan.com/api/features/recovery)
-
-### Platforms
-- [Web](https://stratastorage-docs.aoneahsan.com/guides/platforms/web) · [iOS](https://stratastorage-docs.aoneahsan.com/guides/platforms/ios) · [Android](https://stratastorage-docs.aoneahsan.com/guides/platforms/android) · [Capacitor](https://stratastorage-docs.aoneahsan.com/guides/platforms/capacitor) · [Firebase](https://stratastorage-docs.aoneahsan.com/guides/platforms/firebase)
-
-### Examples & Reference
-- [Examples](https://stratastorage-docs.aoneahsan.com/examples) · [Changelog](https://stratastorage-docs.aoneahsan.com/reference/changelog) · [FAQ](https://stratastorage-docs.aoneahsan.com/reference/faq) · [Troubleshooting](https://stratastorage-docs.aoneahsan.com/reference/troubleshooting) · [Migration](https://stratastorage-docs.aoneahsan.com/migration)
-
-## Contributing
-
-Contributions are welcome — please read the [Contributing Guide](./CONTRIBUTING.md). `main` is protected: changes land through an approved pull request (the maintainer is the only direct-push), and you can [request contributor access](./CONTRIBUTING.md#becoming-a-contributor) if you'd like to help regularly.
-
-## License
-
-MIT License — see [LICENSE](LICENSE). Free for commercial and non-commercial use, modification, distribution, and sublicensing; the only condition is keeping the copyright and license notice; provided without warranty.
-
-## Author
-
-**Ahsan Mahmood**
-- Email: aoneahsan@gmail.com
-- LinkedIn: [linkedin.com/in/aoneahsan](https://linkedin.com/in/aoneahsan)
-- Portfolio: [aoneahsan.com](https://aoneahsan.com)
-- GitHub: [@aoneahsan](https://github.com/aoneahsan)
-- NPM: [npmjs.com/~aoneahsan](https://www.npmjs.com/~aoneahsan)
-- Phone/WhatsApp: +923046619706
-
-## Links
-
-- **NPM Package:** https://www.npmjs.com/package/strata-storage
-- **GitHub Repo:** https://github.com/aoneahsan/strata-storage
-- **Documentation:** https://stratastorage-docs.aoneahsan.com
-- **Website:** https://stratastorage.aoneahsan.com
-
-## Support
-
-- 🐛 **Found a bug or have a feature request?** [Open a GitHub issue](https://github.com/aoneahsan/strata-storage/issues).
-- 📖 Read the [FAQ](https://stratastorage-docs.aoneahsan.com/reference/faq) and [Troubleshooting](https://stratastorage-docs.aoneahsan.com/reference/troubleshooting), or browse the full [documentation](https://stratastorage-docs.aoneahsan.com).
-- 💬 Anything else? [Contact us](https://stratastorage.aoneahsan.com/contact).
-
----
-
-Developed with ❤️ by the **Strata Storage Team** — maintained by [Ahsan Mahmood](https://aoneahsan.com) · aoneahsan@gmail.com.
-
-**One API. Every Storage. Everywhere.**
+*storage · capacitor · localstorage · indexeddb · sqlite · keychain · cross-platform · zero-dependencies ·
+react · vue · angular · typescript*

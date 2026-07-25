@@ -122,9 +122,11 @@ const fixPathAliases = (dir) => {
 
 fixPathAliases(distDir);
 
-// Copy other files
+// Copy the LICENSE so the build output carries its own licence notice.
+// README.md is deliberately NOT copied: the root README is the published one,
+// and a second copy inside dist/ only doubles the tarball's largest text file.
 console.log('📄 Copying additional files...');
-const filesToCopy = ['README.md', 'LICENSE'];
+const filesToCopy = ['LICENSE'];
 filesToCopy.forEach(file => {
   const srcPath = path.join(rootDir, file);
   const destPath = path.join(distDir, file);
@@ -133,62 +135,22 @@ filesToCopy.forEach(file => {
   }
 });
 
-// Create package.json for distribution
-console.log('📋 Preparing package metadata...');
-const packageJson = JSON.parse(fs.readFileSync(path.join(rootDir, 'package.json'), 'utf8'));
-const distPackageJson = {
-  name: packageJson.name,
-  version: packageJson.version,
-  description: packageJson.description,
-  type: 'module',
-  main: './index.js',
-  types: './index.d.ts',
-  exports: {
-    '.': {
-      types: './index.d.ts',
-      default: './index.js'
-    },
-    './capacitor': {
-      types: './capacitor.d.ts',
-      default: './capacitor.js'
-    },
-    './firebase': {
-      types: './firebase.d.ts',
-      default: './firebase.js'
-    },
-    './react': {
-      types: './integrations/react/index.d.ts',
-      default: './integrations/react/index.js'
-    },
-    './vue': {
-      types: './integrations/vue/index.d.ts',
-      default: './integrations/vue/index.js'
-    },
-    './angular': {
-      types: './integrations/angular/index.d.ts',
-      default: './integrations/angular/index.js'
-    },
-    './package.json': './package.json'
-  },
-  author: packageJson.author,
-  license: packageJson.license,
-  repository: packageJson.repository,
-  // Carry metadata-only fields through so the dist manifest never drifts from
-  // the root manifest (bugs/homepage were previously dropped).
-  bugs: packageJson.bugs,
-  homepage: packageJson.homepage,
-  keywords: packageJson.keywords,
-  peerDependencies: packageJson.peerDependencies,
-  peerDependenciesMeta: packageJson.peerDependenciesMeta,
-  capacitor: packageJson.capacitor,
-  sideEffects: false,
-  // Mirror the root engines so the published manifest never drifts from it.
-  engines: packageJson.engines || { node: '>=18.0.0' }
-};
-
+// Marker manifest for dist/ — NOT a package manifest.
+//
+// 🔴 It must NEVER carry `name` or `version`. A second manifest declaring
+// `name: "strata-storage"` makes `cd dist && npm publish` succeed and ship the
+// wrong tree under the real package name — the structural cause of the
+// strata-storage@2.8.2 incident (published from a stale directory, sat as
+// `latest` for 25 days). Without name+version, that publish fails immediately.
+//
+// The two fields below are the only ones that do any work: `type` pins the
+// module format for the emitted .js files, and `sideEffects` keeps bundlers
+// tree-shaking when a consumer deep-imports a file under dist/. Resolution is
+// governed entirely by the root manifest's `exports` map.
+console.log('📋 Writing dist module marker...');
 fs.writeFileSync(
   path.join(distDir, 'package.json'),
-  JSON.stringify(distPackageJson, null, 2)
+  JSON.stringify({ type: 'module', sideEffects: false }, null, 2) + '\n'
 );
 
 console.log('✅ Build completed successfully!');
