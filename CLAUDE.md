@@ -8,6 +8,11 @@ commands.
 here → MOVE the entry to `docs/RESOLVED-ISSUES.md` with date + fixing version; **1 open** as of
 2026-07-20 — the empty-prefix localStorage issue).
 
+**Documentation site is a SEPARATE repo** (split out 2026-07-25):
+[aoneahsan/strata-storage-docs](https://github.com/aoneahsan/strata-storage-docs) →
+https://stratastorage-docs.aoneahsan.com · local checkout `../strata-storage-docs`. Doc content changes go
+there, not here — `docs/` in this repo is internal records only.
+
 
 ## Sub-agents & Skills — Main-Context-First (IRON-SOLID)
 Default/built-in sub-agents (`general-purpose`, `Explore`, `Plan`, `claude`, `fork`, …) do NOT have

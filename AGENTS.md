@@ -25,7 +25,10 @@ filesystem) — with optional React, Vue, Angular, Capacitor, and Firebase bindi
 - `src/features/` — encryption, compression, TTL, query, sync, migration, recovery.
 - `src/integrations/` — framework bindings (optional peer deps).
 - `ios/`, `android/` — native plugin sources.
-- `docs-website/` — the public documentation site (Docusaurus).
+- `docs/` — internal records only (the reported/resolved issue queue). **The public
+  documentation site lives in its own repo:** [aoneahsan/strata-storage-docs](https://github.com/aoneahsan/strata-storage-docs)
+  → https://stratastorage-docs.aoneahsan.com (split out 2026-07-25; local checkout at
+  `../strata-storage-docs`). Doc content changes go there, not here.
 - `example-apps/demo-app/` — a runnable feature demo.
 
 ## Hard rules
