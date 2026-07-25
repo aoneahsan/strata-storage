@@ -3,16 +3,21 @@
 > The ONE place for everything only you (the human) can do. Fixed path: `docs/MANUAL-TASKS.md`.
 > Global spec: `~/.claude/rules/manual-tasks.md`. Last updated: 2026-07-25
 
+> ℹ️ **`npm publish` is no longer a manual task.** As of 2026-07-25 the agent publishes npm packages
+> automatically once work on them is done, behind a 7-step pre-publish gate — see
+> `~/.claude/skills/aoneahsan-cccs-packages-up-to-date/references/publishing.md`. Only the *first-ever*
+> publish of a brand-new package still needs you.
+
 ## ⏳ Pending manual tasks
 
 | # | Task | Why only you | Status |
 |---|------|--------------|--------|
-| 1 | **Publish `2.8.3` to npm** — `yarn build` then `npm publish` | `npm publish` is user-only by standing rule | ☐ Not started |
-| 2 | **Deprecate `2.8.2` on npm** (optional but recommended) — see below | Registry mutation, same reason as publish | ☐ Not started |
+| 1 | **Deprecate `2.8.2` on npm** (recommended) — command below | A public statement about a release; not asked for, so left to you | ☐ Not started |
 
-### Why 2.8.3 needs publishing
+### Why 2.8.2 should be deprecated
 
-**`2.8.2` on npm is a bad release.** It was published 2026-06-30T12:46Z, ~55 minutes after 2.8.1,
+**`2.8.2` on npm is a bad release.** (`2.8.3` was published 2026-07-25 and is now `latest`; verified from
+the registry that `npx cap sync` and `registerCapacitorAdapters` are back in the shipped docs.) It was published 2026-06-30T12:46Z, ~55 minutes after 2.8.1,
 from a stale working tree. Verified by diffing the two published tarballs:
 
 - The compiled output is **byte-identical** to 2.8.1 — no runtime code or API changed.
@@ -24,9 +29,9 @@ from a stale working tree. Verified by diffing the two published tarballs:
 - `bugs.url` was changed off GitHub Issues to the marketing contact form.
 
 The version bump was never committed or tagged here, which is why the repo sat at 2.8.1 while npm
-served 2.8.2. **2.8.3 restores all of it** and is tagged `v2.8.3` in this repo.
+served 2.8.2. **2.8.3 restores all of it**, is tagged `v2.8.3`, and is published.
 
-Suggested deprecation notice for #2:
+Deprecating 2.8.2 stops anyone pinning to it unknowingly. It is reversible (`npm deprecate <pkg>@2.8.2 ""`):
 
 ```bash
 npm deprecate strata-storage@2.8.2 "Published in error from a stale tree; docs omit the required 'npx cap sync' step. Use 2.8.3 or later."
@@ -37,3 +42,4 @@ npm deprecate strata-storage@2.8.2 "Published in error from a stale tree; docs o
 | # | Task | Completed |
 |---|------|-----------|
 | 1 | DNS `stratastorage-docs.aoneahsan.com` → `aoneahsan.github.io` (Hostinger) | 2026-07-25 |
+| 2 | Publish `2.8.3` to npm (now agent-automated; verified live from the registry) | 2026-07-25 |
