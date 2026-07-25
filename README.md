@@ -32,7 +32,7 @@ integrity checksums and mirrored backups are opt-in per call or per instance.
 
 | | |
 |---|---|
-| **Version** | `2.8.4` |
+| **Version** | `2.8.5` |
 | **License** | MIT |
 | **Node** | `>=24.13.0` |
 | **Platforms** | Web · iOS · Android (via Capacitor) |
@@ -494,9 +494,7 @@ More: [Troubleshooting](https://stratastorage-docs.aoneahsan.com/reference/troub
 <a id="changelog"></a>
 ## 🔄 Changelog&nbsp;[#](#changelog)
 
-Latest release: **`2.8.4`** — documentation, metadata and packaging only, with no runtime changes. Ships
-`CHANGELOG.md` inside the tarball for the first time, adds the `funding` link, and stops the build writing a
-second manifest into `dist/`.
+Latest release: **`2.8.5`** — documentation only: the at-a-glance table above reported the previous version, because it is a static duplicate of `package.json`. Full history in the changelog.
 
 Full history: [CHANGELOG.md](https://github.com/aoneahsan/strata-storage/blob/main/CHANGELOG.md).
 
