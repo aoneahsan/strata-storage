@@ -3,8 +3,9 @@
 Guidance for humans and AI coding agents working in this repository.
 
 **Consumer-reported package issues → `docs/REPORTED-ISSUES.md`** (open queue, `### ISSUE-` sections; fix
-here → MOVE the entry to `docs/RESOLVED-ISSUES.md` with date + fixing version; **1 open** as of
-2026-07-20 — the empty-prefix localStorage issue).
+here → MOVE the entry to `docs/RESOLVED-ISSUES.md` with date + fixing version; **3 open** as of
+2026-07-29 — the empty-prefix localStorage issue, docs version drift, and an unscoped
+`subscribe()` that throws).
 
 ## What this is
 

@@ -5,8 +5,9 @@ that file for the project overview, structure, hard rules, and local-development
 commands.
 
 **Consumer-reported package issues → `docs/REPORTED-ISSUES.md`** (open queue, `### ISSUE-` sections; fix
-here → MOVE the entry to `docs/RESOLVED-ISSUES.md` with date + fixing version; **1 open** as of
-2026-07-20 — the empty-prefix localStorage issue).
+here → MOVE the entry to `docs/RESOLVED-ISSUES.md` with date + fixing version; **3 open** as of
+2026-07-29 — the empty-prefix localStorage issue, docs version drift, and an unscoped
+`subscribe()` that throws).
 
 **Human-only tasks (incl. `npm publish`) → `docs/MANUAL-TASKS.md`.** ⚠️ npm `latest` is **2.8.2, a bad
 release** (published from a stale tree; docs omit the required `npx cap sync` step). The repo is at

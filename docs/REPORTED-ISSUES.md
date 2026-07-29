@@ -113,5 +113,107 @@ Owner decision needed on which path to take, and whether fix 2 ships first as a 
 - [ ] Confirmed against the LabFlow repro above (foreign non-JSON key no longer produces an error log, and
       `keys()` no longer returns keys the adapter never wrote)
 
-**Last updated:** 2026-07-25 (interim mitigation documented in the README; owner decision noted on the fix
-path. Resolved entries from the same pass — ISSUE-02 … ISSUE-05 — are in `docs/RESOLVED-ISSUES.md`.)
+---
+
+### ISSUE-06 — Version claims in the repo's own docs contradict `package.json` and each other
+
+**Status:** 🟡 OPEN · **Reported:** 2026-07-29 while refreshing the global `aoneahsan-cccs-strata-storage`
+skill · **Affects:** documentation only — no runtime impact · **Severity:** low
+
+#### Symptom
+
+Three in-repo statements about the current version disagree, so an agent or contributor reading any one of
+them alone reaches a false conclusion about what is released:
+
+| Source | Claim |
+|---|---|
+| `package.json:3` | version is **`2.8.5`** |
+| `CHANGELOG.md:8,16` | `[2.8.5] - 2026-07-25` and `[2.8.4] - 2026-07-25` both released |
+| `CLAUDE.md:11-13` | npm `latest` is **`2.8.2`, a bad release**; "the repo is at **2.8.3** … **awaiting `npm publish` by the owner**" |
+| `docs/MANUAL-TASKS.md:17-18,43` | `2.8.3` "was published 2026-07-25 and is now `latest`"; the publish row is ticked **done** 2026-07-25 |
+
+`CLAUDE.md` is contradicted by `MANUAL-TASKS.md` on whether 2.8.3 shipped, and by `package.json` +
+`CHANGELOG.md` on the current version — it is two releases stale and still describes a publish that its own
+sibling file records as completed.
+
+Separately, **ISSUE-01 above carries `Affects: strata-storage@2.8.1`** while remaining open through 2.8.5.
+A reader on 2.8.5 can reasonably read that header as "already fixed", which is the opposite of the truth,
+and consumer skills copied the ≤2.8.1 framing.
+
+#### Why it matters
+
+`CLAUDE.md` is the first file an agent reads in this repo, and it is the one asserting a bad `latest` and a
+pending publish. Acting on it produces a wrong deprecation call, a duplicate publish attempt, or a version
+bump from the wrong base.
+
+#### Suggested fix (docs only)
+
+1. Refresh `CLAUDE.md:8-13` to the real state: current version, the actual open-issue count, and the 2.8.2
+   deprecation status as recorded in `docs/MANUAL-TASKS.md` — or replace the version prose with a pointer to
+   `MANUAL-TASKS.md`/`CHANGELOG.md` so there is one home for it rather than three.
+2. Change ISSUE-01's header to `Affects: ≤ 2.8.5 (still open)`, or add "still reproduces on `<version>`" and
+   keep it current as versions ship — an `Affects:` pinned to first-sighting reads as a fixed range.
+3. Consider making the version line in `CLAUDE.md` a pointer rather than a value; a hand-copied version
+   number in a fourth place will drift again.
+
+#### Resolution
+
+- [ ] Fixed in version: `______` · date: `__________` · approach: `__________`
+- [ ] `CLAUDE.md`, `MANUAL-TASKS.md`, `CHANGELOG.md` and `package.json` agree; ISSUE-01's affected range is
+      current
+
+**Last updated:** 2026-07-29 (ISSUE-06 added — version-claim drift across `CLAUDE.md`, `MANUAL-TASKS.md` and
+`package.json`, plus ISSUE-01's stale `Affects:` range. Earlier, 2026-07-25: interim mitigation documented in
+the README; owner decision noted on the ISSUE-01 fix path. Resolved entries from that pass — ISSUE-02 …
+ISSUE-05 — are in `docs/RESOLVED-ISSUES.md`.)
+
+---
+
+### ISSUE-07 — An unscoped `subscribe()` throws, because it attaches to adapters that cannot subscribe
+
+**Reported by:** LifeWell click dummy (`lifewell-project-root/click-dummy/db.js`) · 2026-07-29
+**Affected version:** 2.8.5 (current) · **Severity:** high — it kills application boot
+**Symptom (verbatim):**
+
+```
+NotSupportedError: Operation 'subscribe' is not supported by indexedDB adapter
+    at J.subscribe (strata.iife.js:1:49502)
+    at i (strata.iife.js:1:36939)
+    at c.subscribe (strata.iife.js:1:36979)
+```
+
+**Repro.** Create an instance that registers the default web adapters, then subscribe with no options —
+the shape the docs describe as "omit options to hear every adapter":
+
+```js
+const storage = defineStorage({ adapters: { localStorage: { prefix: 'app:' } } });
+storage.subscribe(change => render(change));   // throws
+```
+
+**Root cause.** `Strata.subscribe` fans the subscription out across every registered adapter and does not
+skip the ones whose `subscribe` is unimplemented. `IndexedDBAdapter.subscribe` throws `NotSupportedError`
+rather than returning a no-op unsubscribe, so the first unsupported adapter aborts the whole call. Because
+the default registration includes `indexedDB`, the documented "hear everything" form is unusable on any
+instance built with the defaults.
+
+**Consequence.** The throw propagates out of whatever set up the subscription — in our case the store's
+boot promise — so the app does not start. There is no partial-success path: the caller cannot tell which
+adapters did attach.
+
+**Suggested fix (in preference order).**
+1. `subscribe()` skips adapters that do not implement it, and returns an unsubscribe closing over the ones
+   that did. An observer that hears fewer backends is the expected outcome of "hear every adapter" when
+   some cannot speak.
+2. Failing that, have `IndexedDBAdapter.subscribe` return a no-op unsubscribe instead of throwing —
+   `NotSupportedError` is right for a direct call and wrong for a fan-out.
+3. At minimum, document that the options-less form is unsafe whenever `indexedDB` or `cache` is
+   registered, which is every default instance.
+
+**Consumer workaround (in use).** Scope every subscription to a backend that supports it:
+
+```js
+storage.subscribe(cb, { storage: 'localStorage' });
+```
+
+**Note.** Cross-tab change delivery for `localStorage` needs no `sync` feature — the adapter attaches a
+`storage`-event listener itself — so the scoped form loses nothing for the common case.
