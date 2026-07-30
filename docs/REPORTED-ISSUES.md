@@ -217,3 +217,84 @@ storage.subscribe(cb, { storage: 'localStorage' });
 
 **Note.** Cross-tab change delivery for `localStorage` needs no `sync` feature — the adapter attaches a
 `storage`-event listener itself — so the scoped form loses nothing for the common case.
+
+---
+
+### ISSUE-08 — `defineStorage({ adapters: { localStorage: { prefix } } })` never reaches the adapter, so the documented ISSUE-01 mitigation is a silent no-op
+
+**Status:** 🔴 OPEN · **Reported:** 2026-07-30 from the HabitForge click dummy
+(`habitforge-project-root/click-dummy`) · **Affects:** `strata-storage@2.8.5`
+
+#### Symptom
+
+The per-adapter `prefix` is the mitigation ISSUE-01 tells consumers to apply, and the fleet skill
+(`aoneahsan-cccs-strata-storage`) has been instructing every project to write it. It does nothing: values
+are stored at the bare logical key and `adapter.prefix` stays `""`.
+
+#### Repro (measured, not inferred)
+
+Reading the physical key straight back out of a `localStorage` stand-in:
+
+```js
+const s = defineStorage({
+  adapters: { localStorage: { prefix: 'hf-dummy:' } },
+  defaultStorages: ['localStorage'],
+});
+s.setSync('axis:theme', 'dark');
+// physical keys -> ["axis:theme"]        expected ["hf-dummy:axis:theme"]
+// s.getRegistry().get('localStorage').prefix -> ""   expected "hf-dummy:"
+```
+
+The adapter itself is correct — it is only `defineStorage` that drops the option:
+
+```js
+const a = new LocalStorageAdapter();
+console.log(a.prefix);                       // ""
+await a.initialize({ prefix: 'hf-dummy:' });
+console.log(a.prefix);                       // "hf-dummy:"   ← honoured
+a.setSync('k', 'v');
+// physical keys -> ["hf-dummy:k"]           ← correct
+```
+
+So `initialize({ prefix })` works and the config path to it does not.
+
+| What the consumer writes | Physical key | `adapter.prefix` |
+|---|---|---|
+| `defineStorage({ prefix: 'x:' })` | `theme` | `""` — already documented as a no-op |
+| `defineStorage({ adapters: { localStorage: { prefix: 'x:' } } })` | `theme` | **`""` — this issue** |
+| `new LocalStorageAdapter()` + `initialize({ prefix: 'x:' })` | `x:theme` | `"x:"` |
+| `defineStorage({ namespace: 'x' })` | `x:theme` | `""` |
+
+#### Why it matters more than it looks
+
+ISSUE-01's guidance is the only isolation advice consumers are given, and it is reachable only through
+`defineStorage` — so **every project that followed it is still running the empty default** and believes
+otherwise. That is worse than no guidance, because it removes the prompt to check.
+
+It bites hardest on `file://`, where **every document shares a single origin**: an unprefixed dummy or
+local tool writing keys named `habits`, `settings` or `theme` collides with every other local page the
+user has ever opened.
+
+#### Suggested fix
+
+Pass the per-adapter config through to `adapter.initialize()` in `defineStorage`'s adapter setup — the
+adapter already accepts and honours it, so this looks like a plumbing gap rather than a design decision.
+If the intent is that `namespace` supersedes `prefix`, then say so in ISSUE-01 and in the docs, and
+consider deprecating the per-adapter `prefix` so it cannot be written silently.
+
+#### Two related findings from the same session, both worth folding into the docs
+
+1. **`defaultStorages` does not protect the sync path.** It reads as an ordered fallback list. With
+   `localStorage` unavailable, `defineStorage({ defaultStorages: ['localStorage','memory'] }).setSync(...)`
+   still selected `localStorage` and threw `SerializationError: Failed to store key k in localStorage`
+   rather than falling through to `memory`. Consumers must probe availability themselves.
+2. **The ISSUE-01 sweep is latent, not live, on 2.8.5 — good news worth recording.** After
+   `defineStorage(...)`, `adapter.ttlCleanupInterval` was **not set** (no timer started), and an explicit
+   `cleanupExpired()` did **not** delete planted foreign keys carrying a past `expires`
+   (`someOtherApp:session`, `plainForeignKey` both survived). ISSUE-01's data-loss path therefore did not
+   reproduce in this configuration. Worth confirming against a real browser before softening ISSUE-01's
+   severity.
+
+**Consumer workaround (in use).** `defineStorage({ namespace: 'hf-dummy' })` — it does prefix the physical
+key (`hf-dummy:axis:theme`), and a second instance without the namespace reads `null` for the same logical
+key, so the partition is real.
