@@ -107,11 +107,46 @@ fix the underlying namespace-claiming problem, which is the part with data-loss 
 
 Owner decision needed on which path to take, and whether fix 2 ships first as a patch.
 
+#### Second consumer, independently — ClearHire, 2026-08-22, on `2.8.5`
+
+Reported from ClearHire (private repo `aoneahsan/clearhire`, branch `redevelop-v1`), found by USING the app
+in a browser rather than by any gate. Same root cause, four minor versions later, so recording it here rather
+than opening a duplicate.
+
+```
+[strata-storage] Failed to get key _cltk from sessionStorage: SyntaxError:
+Unexpected non-whitespace character after JSON at position 1
+```
+
+Chain: `TTLManager.cleanup` → `Strata.cleanupAllAdapters` → `SessionStorageAdapter.keys` → `keysSync` →
+`getSync` → `deserialize`. It fires **twice on every page load** — once from `cleanupExpired` and once from
+`cleanupAllAdapters`.
+
+**🔴 What is new here, and it is not the adapter.** LabFlow's trigger was `logger-level`, a key **LabFlow
+itself writes**. ClearHire's is `_cltk` (measured value `1psy75t`), written by **Microsoft Clarity** — a
+third-party SDK. The consumer does not control that key, cannot change its format, and cannot stop it being
+written without removing analytics the product is required to carry. So the "it is the other app's unusual
+value" reading of ISSUE-01 does not survive a second data point: **any origin running any third-party script
+that uses raw-string storage reproduces this**, which is most origins.
+
+**🔴 AND THE DOCUMENTED MITIGATION DOES NOT WORK — this is the part worth triaging on.** The interim
+mitigation above tells consumers to pass `defineStorage({ adapters: { localStorage: { prefix: 'myapp:' } } })`.
+**ISSUE-08 in this same file reports that this config never reaches the adapter and is a silent no-op.**
+Read together: a consumer whose trigger is a third-party key has *no* available remedy — they cannot change
+the foreign value (it is not theirs) and the prefix workaround does not take effect. That combination is
+what makes suggested fix 2 (treat a `deserialize()` failure as "not ours" — return `null`, log at `debug`)
+worth shipping as a patch on its own, ahead of the data-migrating fix 1.
+
+**Downstream status (ClearHire):** not worked around. `console.*` is banned there and the noise comes from
+this package's own logger, so the fix belongs here. Recorded in that project's wave-3 tracker as `D-W3-05`.
+
 #### Resolution
 
 - [ ] Fixed in version: `______` · date: `__________` · approach: `__________`
 - [ ] Confirmed against the LabFlow repro above (foreign non-JSON key no longer produces an error log, and
       `keys()` no longer returns keys the adapter never wrote)
+- [ ] Confirmed against the ClearHire case: with Microsoft Clarity active (`_cltk` in `sessionStorage`), a
+      page load produces no `strata-storage` error log
 
 ---
 
