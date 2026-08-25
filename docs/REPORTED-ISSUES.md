@@ -14,6 +14,70 @@ the authoritative fix queue. Fleet rule: `~/.claude/rules/project-issue-reportin
 
 ## Open
 
+### ISSUE-09 — `defineStorage()` registers ALL six web adapters regardless of `defaultStorages`, so the expiry sweep reaches `sessionStorage` keys the instance was never meant to touch
+
+**Status:** 🔴 OPEN · **Reported:** 2026-08-25 from LabFlow (private repo `aoneahsan/lab-system`,
+Phase B wave 1 of the rebuild) · **Affects:** `strata-storage@2.8.5`, `defineStorage()` /
+`registerWebAdapters()`, `src/core/BaseAdapter.ts` `cleanupExpired()`
+
+#### Symptom
+
+Every page load logged, at **error** level:
+
+```
+[strata-storage] Failed to get key _cltk from sessionStorage: SyntaxError: Unexpected token 's', "ts3hsf" is not valid JSON
+```
+
+`_cltk` is **Microsoft Clarity's** session key. It is written to `sessionStorage` by the Clarity tag, is
+not JSON, and has nothing to do with this package.
+
+#### Why this is NOT a duplicate of ISSUE-01 or ISSUE-08
+
+ISSUE-01 is the empty-prefix `localStorage` case and ISSUE-08 is the per-adapter `prefix` option not
+reaching the adapter. This is a third, separate fact, and it is the one that makes the other two
+unavoidable rather than merely awkward:
+
+🔴 **`defaultStorages` selects which adapters are READ, not which are REGISTERED.** `defineStorage()` is
+`registerWebAdapters(new Strata(config))`, which registers all six web adapters unconditionally. The
+expiry sweep in `BaseAdapter.cleanupExpired()` then enumerates every key in **every registered adapter**
+and deserialises it — so an instance that only ever reads `localStorage` still walks `sessionStorage`,
+`indexedDB`, cookies and the Cache API on a timer.
+
+🔴 **Measured, not inferred:** setting `defaultStorages: ['localStorage']` was tried **first** and did
+**not** fix it — re-driving the app produced the identical line. Only constructing `Strata` directly and
+registering `MemoryAdapter` + `LocalStorageAdapter` by hand stopped it.
+
+🔴 **The instance was namespaced and it made no difference.** It was constructed with
+`namespace: 'labflow'` and still read, parsed and error-logged about `_cltk`. A namespaced storage
+library should never read, parse, or log about a key outside its own namespace — that is the defect,
+independently of which adapter the key lives in.
+
+#### Repro
+
+Any page that loads both strata-storage and Microsoft Clarity. Without Clarity:
+
+```js
+sessionStorage.setItem('_cltk', 'ts3hsf');   // any foreign, non-JSON raw string
+const s = defineStorage({ namespace: 'anything', defaultStorages: ['localStorage'] });
+await s.initialize();
+await s.cleanupExpired();                     // → logger.error for a sessionStorage key
+```
+
+#### Suggested fix
+
+Register only the adapters the instance will use, and make the sweep namespace-aware: enumerate keys
+carrying the instance's own prefix and skip everything else rather than deserialising it to find out. A
+foreign key that fails to parse should never reach `logger.error` — the package learning it cannot parse
+somebody else's value is not an application error.
+
+#### Worked around in the reporting project
+
+`labflow/src/lib/storage/index.ts` constructs `Strata` directly and registers only `MemoryAdapter` and
+`LocalStorageAdapter`. The workaround is in place, so nothing is blocked here — this is filed so the
+package can fix the cause.
+
+---
+
 ### ISSUE-01 — Empty-prefix adapters claim the entire `localStorage` namespace, then error-log on other apps' keys
 
 **Status:** 🔴 OPEN · **Reported:** 2026-07-15 from LabFlow (private repo `aoneahsan/lab-system`) ·
