@@ -5,13 +5,17 @@ that file for the project overview, structure, hard rules, and local-development
 commands.
 
 **Consumer-reported package issues → `docs/REPORTED-ISSUES.md`** (open queue, `### ISSUE-` sections; fix
-here → MOVE the entry to `docs/RESOLVED-ISSUES.md` with date + fixing version; **3 open** as of
-2026-07-29 — the empty-prefix localStorage issue, docs version drift, and an unscoped
-`subscribe()` that throws).
+here → MOVE the entry to `docs/RESOLVED-ISSUES.md` with date + fixing version). **The queue is currently
+empty** — all ten entries filed to date are resolved. Next id is `ISSUE-11`; numbers are never reused.
 
-**Human-only tasks (incl. `npm publish`) → `docs/MANUAL-TASKS.md`.** ⚠️ npm `latest` is **2.8.2, a bad
-release** (published from a stale tree; docs omit the required `npx cap sync` step). The repo is at
-**2.8.3**, which fixes it and is **awaiting `npm publish` by the owner**.
+**Agent-owed follow-ups → root `PENDING-TASKS.md`** (`TASK-001`: the 3.0.0 default key prefix).
+**Human-only tasks → `docs/MANUAL-TASKS.md`** (`npm publish` is agent-automated since 2026-07-25).
+
+🔴 **The current version lives in `package.json` and `CHANGELOG.md` — NOT here.** This file carried a
+hand-copied version for two releases and was wrong about both the published `latest` and a pending
+publish its own sibling file recorded as done (that was `ISSUE-06`). Read the version from those two
+files; a fourth copy will drift again. `yarn build` fails if the README's version row disagrees with
+`package.json`.
 
 **Documentation site is a SEPARATE repo** (split out 2026-07-25):
 [aoneahsan/strata-storage-docs](https://github.com/aoneahsan/strata-storage-docs) →

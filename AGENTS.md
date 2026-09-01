@@ -3,9 +3,17 @@
 Guidance for humans and AI coding agents working in this repository.
 
 **Consumer-reported package issues → `docs/REPORTED-ISSUES.md`** (open queue, `### ISSUE-` sections; fix
-here → MOVE the entry to `docs/RESOLVED-ISSUES.md` with date + fixing version; **3 open** as of
-2026-07-29 — the empty-prefix localStorage issue, docs version drift, and an unscoped
-`subscribe()` that throws).
+here → MOVE the entry to `docs/RESOLVED-ISSUES.md` with date + fixing version). **The queue is currently
+empty** — all ten entries filed to date are resolved. Next id is `ISSUE-11`; numbers are never reused.
+
+**Agent-owed follow-ups → root [`PENDING-TASKS.md`](PENDING-TASKS.md)** (`TASK-001`: the 3.0.0 default
+key prefix). **Human-only tasks → [`docs/MANUAL-TASKS.md`](docs/MANUAL-TASKS.md)** (`npm publish` is
+agent-automated since 2026-07-25).
+
+🔴 **The current version lives in `package.json` and `CHANGELOG.md` — NOT here.** A hand-copied version in
+a guidance file drifted across two releases and misreported both the published `latest` and a pending
+publish its sibling file recorded as done (that was `ISSUE-06`). `yarn build` fails if the README's
+version row disagrees with `package.json`.
 
 ## What this is
 
@@ -77,7 +85,7 @@ via [`.github/SECURITY.md`](.github/SECURITY.md).
 - **npm:** https://www.npmjs.com/package/strata-storage
 - **Repo:** https://github.com/aoneahsan/strata-storage
 - AI integration quick reference: [`AI-INTEGRATION-GUIDE.md`](AI-INTEGRATION-GUIDE.md)
-- Human-only tasks (incl. `npm publish`): [`docs/MANUAL-TASKS.md`](docs/MANUAL-TASKS.md)
+- Human-only tasks: [`docs/MANUAL-TASKS.md`](docs/MANUAL-TASKS.md) · agent-owed follow-ups: [`PENDING-TASKS.md`](PENDING-TASKS.md)
 
 
 ## Sub-agents & Skills — Main-Context-First (IRON-SOLID)

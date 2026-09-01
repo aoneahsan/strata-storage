@@ -153,5 +153,98 @@ fs.writeFileSync(
   JSON.stringify({ type: 'module', sideEffects: false }, null, 2) + '\n'
 );
 
+// ---------------------------------------------------------------------------
+// Build gates
+//
+// This project deliberately ships no test framework — typecheck, lint and build
+// are the gates (README ▸ Limitations). These two checks live inside the build
+// for that reason: they add no dependency and no runner, and they cover exactly
+// the two things the other gates are blind to.
+// ---------------------------------------------------------------------------
+
+const fail = (message) => {
+  console.error(`\n❌ ${message}`);
+  process.exit(1);
+};
+
+// GATE 1 — the storage-ownership predicate.
+//
+// `isStorageEnvelope` decides whether a key in a SHARED storage area belongs to
+// this library. Get it wrong in the permissive direction and we are back to
+// reading, error-logging about, and deleting other applications' data (ISSUE-01,
+// ISSUE-09); wrong in the strict direction and we stop recognising our own.
+// Neither failure is visible to typecheck, lint or a green build.
+console.log('🔍 Gate: storage-ownership predicate...');
+const { isStorageEnvelope } = await import(
+  new URL('../dist/utils/index.js', import.meta.url).href
+);
+
+const envelope = (extra = {}) => ({ value: 'v', created: 1, updated: 2, ...extra });
+const OWNERSHIP_CASES = [
+  // Foreign values seen in the wild — every one of these reached logger.error
+  // before 2.9.0. `ts3hsf` is Microsoft Clarity's `_cltk`; `warn` is a consumer
+  // logger's own level key.
+  ['clarity _cltk raw string', 'ts3hsf', false],
+  ['logger-level raw string', 'warn', false],
+  ['foreign JSON object', { a: 1 }, false],
+  ['foreign JSON array', [1, 2, 3], false],
+  ['foreign object carrying a value key', { value: 'v' }, false],
+  ['null', null, false],
+  ['undefined', undefined, false],
+  ['number', 42, false],
+  ['string', 'plain', false],
+  // Near-misses: shaped like ours but not written by us.
+  ['envelope missing created', { value: 'v', updated: 2 }, false],
+  ['envelope with non-numeric updated', { value: 'v', created: 1, updated: 'x' }, false],
+  ['envelope with NaN created', { value: 'v', created: NaN, updated: 2 }, false],
+  ['envelope with non-numeric expires', envelope({ expires: 'soon' }), false],
+  // Ours, in every shape a write path produces.
+  ['plain envelope', envelope(), true],
+  ['envelope holding null', envelope({ value: null }), true],
+  ['envelope with expires', envelope({ expires: Date.now() }), true],
+  ['envelope with tags + metadata', envelope({ tags: ['a'], metadata: { b: 1 } }), true],
+  ['envelope with created 0', { value: 'v', created: 0, updated: 0 }, true],
+];
+
+const ownershipFailures = OWNERSHIP_CASES.filter(
+  ([, input, expected]) => isStorageEnvelope(input) !== expected
+).map(([name, , expected]) => `  · ${name}: expected ${expected}, got ${!expected}`);
+
+if (ownershipFailures.length > 0) {
+  fail(
+    `Storage-ownership predicate is wrong in ${ownershipFailures.length} case(s):\n` +
+      ownershipFailures.join('\n')
+  );
+}
+console.log(`   ✓ ${OWNERSHIP_CASES.length} ownership cases`);
+
+// GATE 2 — the README's version row cannot drift from package.json.
+//
+// The row is a hand-maintained duplicate of `version`, so it goes stale the
+// moment the version is bumped — it has already shipped stale once (2.8.5), and
+// three in-repo files disagreeing about the current version is ISSUE-06. This
+// asserts on the ARTEFACT that npm actually renders, not on the release process
+// that is supposed to update it.
+console.log('🔍 Gate: README version row matches package.json...');
+const pkgVersion = JSON.parse(
+  fs.readFileSync(path.join(rootDir, 'package.json'), 'utf8')
+).version;
+const readme = fs.readFileSync(path.join(rootDir, 'README.md'), 'utf8');
+const versionRow = readme.match(/^\|\s*\*\*Version\*\*\s*\|\s*`([^`]+)`/m);
+
+if (!versionRow) {
+  fail(
+    'README has no at-a-glance `| **Version** | `x.y.z` |` row, so nothing pins the ' +
+      'published version claim. Restore the row rather than removing this gate.'
+  );
+}
+if (versionRow[1] !== pkgVersion) {
+  fail(
+    `README version row says \`${versionRow[1]}\` but package.json says \`${pkgVersion}\`. ` +
+      'Update the README row — npm renders it verbatim on the package page.'
+  );
+}
+console.log(`   ✓ README version row is ${pkgVersion}`);
+
 console.log('✅ Build completed successfully!');
 console.log(`📂 Output: ${distDir}`);

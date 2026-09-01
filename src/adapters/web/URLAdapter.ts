@@ -59,11 +59,20 @@ export class URLAdapter extends BaseAdapter {
     );
   }
 
-  async initialize(config?: URLAdapterConfig): Promise<void> {
+  configure(config?: URLAdapterConfig): void {
     if (config?.mode) this.mode = config.mode;
     if (config?.prefix !== undefined) this.prefix = config.prefix;
     if (config?.history) this.historyMode = config.history;
     if (typeof config?.maxLength === 'number') this.maxLength = config.maxLength;
+  }
+
+  /** The URL is usable whenever `window.location` is. */
+  isAvailableSync(): boolean {
+    return typeof window !== 'undefined' && typeof window.location !== 'undefined';
+  }
+
+  async initialize(config?: URLAdapterConfig): Promise<void> {
+    this.configure(config);
 
     if (typeof window === 'undefined') return;
 

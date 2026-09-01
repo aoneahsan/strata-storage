@@ -56,14 +56,18 @@ export class IndexedDBAdapter extends BaseAdapter {
   /**
    * Initialize the adapter
    */
+  configure(config?: { dbName?: string; storeName?: string; version?: number }): void {
+    if (config?.dbName) this.dbName = config.dbName;
+    if (config?.storeName) this.storeName = config.storeName;
+    if (config?.version) this.version = config.version;
+  }
+
   async initialize(config?: {
     dbName?: string;
     storeName?: string;
     version?: number;
   }): Promise<void> {
-    if (config?.dbName) this.dbName = config.dbName;
-    if (config?.storeName) this.storeName = config.storeName;
-    if (config?.version) this.version = config.version;
+    this.configure(config);
 
     await this.openDatabase();
     this.startTTLCleanup();

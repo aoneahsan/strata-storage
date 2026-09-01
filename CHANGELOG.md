@@ -5,6 +5,97 @@ All notable changes to Strata Storage will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.9.0] - 2026-09-01
+
+Closes the entire consumer-reported issue queue — six entries from five projects (LabFlow, ClearHire,
+HabitForge, LifeWell, Trizlink). **No API changes and no data migration**: every key stays exactly where
+it is.
+
+### Fixed
+
+- **A web adapter no longer treats another application's keys as its own** (ISSUE-01, ISSUE-09).
+  `localStorage`, `sessionStorage` and cookies are shared with every other script on the origin, and the
+  default key prefix is empty — so `startsWith(prefix)` matched *every* key there. An adapter now
+  identifies its own data by **shape**: a key counts as ours only if its stored value deserializes into a
+  `StorageValue` envelope. Consequences, all measured in a browser against 2.8.5 and again after:
+  - The permanent error stream is gone. `[strata-storage] Failed to get key _cltk from sessionStorage:
+    SyntaxError…` (Microsoft Clarity's session key) and the same message for a consumer's own
+    `logger-level` no longer occur. **A foreign value is not an error** — it is evidence the key belongs
+    to somebody else, which is the ordinary case in a shared area, so it is skipped and reported at
+    `debug`. `logger.error` is now reserved for a key carrying *our* envelope that still fails, and for a
+    genuine storage-access fault (private mode, a blocked origin).
+  - `keys()` no longer returns keys this library never wrote.
+  - 🔴 **`cleanupExpired()` no longer deletes another application's data.** A foreign key holding valid
+    JSON with a past `expires` was removed by the TTL sweep. Earlier notes in the issue queue recorded
+    this path as latent; driving the repro in a real browser showed it firing, so it was live.
+  - 🔴 **`clear()` no longer wipes the origin.** With an empty prefix the unfiltered branch deleted every
+    key present, including other applications'. It now removes only entries we wrote.
+- **An unscoped `subscribe()` no longer throws** (ISSUE-07). `Strata.subscribe` fanned out across every
+  registered adapter, and `indexedDB`, `cookies` and `cache` — all registered by default — throw
+  `NotSupportedError: Operation 'subscribe' is not supported by indexedDB adapter`. The documented
+  "omit options to hear every adapter" form therefore killed application boot on any default instance.
+  Non-observable backends are skipped; an observer that hears fewer backends is the right outcome when
+  some cannot speak. Naming a non-observable backend explicitly now warns instead of failing silently.
+- **Per-adapter configuration actually reaches the adapter** (ISSUE-08).
+  `defineStorage({ adapters: { localStorage: { prefix: 'app:' } } })` was a silent no-op — the isolation
+  advice the README gave and the fleet skill taught, doing nothing. The adapter honoured
+  `initialize({ prefix })` all along; the config path to it did not cover the **synchronous** API, which
+  is deliberately usable before initialization completes. Adapters now apply configuration synchronously
+  at registration, so `setSync`/`getSync` issued before `initialize()` resolves use the configured prefix
+  instead of writing to the bare key.
+- **`defaultStorages` now protects the synchronous path too** (ISSUE-08, related finding). It reads as an
+  ordered fallback list and behaved as one only for the async API: with `localStorage` unavailable,
+  `defineStorage({ defaultStorages: ['localStorage','memory'] }).setSync(...)` still selected
+  `localStorage` and threw rather than falling through to `memory`.
+- **`clear({ expiredOnly: true })` was a guaranteed no-op** on `localStorage`, `sessionStorage` and
+  cookies. It filtered the output of `keysSync()`, which excludes expired entries — so it inspected
+  exactly the set that could never match.
+- **`cleanupExpired()` reported `0` while doing the work.** On these adapters the reaping happened as an
+  undocumented side effect of enumeration; the count is now real.
+- **`size()` on `LocalStorageAdapter` read `window.localStorage` directly** instead of the adapter's own
+  storage area, so every inherited method was wrong for `sessionStorage` until the subclass
+  re-implemented it.
+- **Cross-tab `storage` events could never match for `sessionStorage`.** The listener compared against
+  `window.localStorage` by name rather than the adapter's own area.
+- **`setLogLevel` / `getLogLevel` are now exported.** The logger documented `setLogLevel('debug')` as a
+  supported control, and it was unreachable from the package entry point. This matters as of this
+  release: skipped foreign keys are reported at `debug`, so raising the level is how a consumer answers
+  "why is my key missing from `keys()`?".
+- **The repo's own version claims contradicted each other** (ISSUE-06). `CLAUDE.md` asserted npm `latest`
+  was `2.8.2` (a bad release) with `2.8.3` "awaiting publish", while `docs/MANUAL-TASKS.md` recorded that
+  publish as done and `package.json` was two releases further on. The version prose is now a pointer to a
+  single home, and **the build fails** when the README's at-a-glance version row disagrees with
+  `package.json` — the row is what npm renders, and it had already shipped stale once.
+
+### Changed
+
+- **`adapters: { <name>: false }` now opts an adapter out of *registration*, not just initialization.**
+  Registering an adapter the instance never uses still costs a TTL sweep over a storage area it does not
+  own. 🔴 `defaultStorages` is **not** this switch — it is the preference order for choosing the *default*
+  adapter, while multi-adapter operations deliberately span everything registered. That distinction was
+  undocumented, and reading `defaultStorages` as a registration allow-list is what produced ISSUE-09.
+- **`SessionStorageAdapter` shrank from 303 lines to 64.** It re-implemented ~230 lines that differed from
+  its parent only by naming `window.sessionStorage`, while the parent already routes every read and write
+  through `getStorage()`. That duplication is why one defect became two issue numbers: the copy carried
+  its own error call, so fixing the `localStorage` path left the `sessionStorage` path untouched.
+
+### Added
+
+- `isStorageEnvelope(value)` is exported — the predicate deciding whether a stored value was written by
+  this library, useful when auditing a shared storage area.
+- Two build gates, run by `yarn build`: the ownership predicate is asserted over 18 cases (including the
+  real-world foreign values above), and the README's version row is checked against `package.json`. Both
+  were watched failing against two differently-shaped planted defects each before being trusted.
+
+### Notes for upgraders
+
+Nothing moves and no migration is required. Behaviour that changes: `keys()` and `clear()` now see only
+this library's own entries, which is the fix rather than a regression. If you relied on an empty-prefix
+instance enumerating or clearing foreign keys, target those keys directly instead.
+
+A future **3.0.0** will give the web adapters a real default key prefix, built on this release's shape
+check, with migrate-on-read and an opt-out for consumers whose physical key names are frozen.
+
 ## [2.8.5] - 2026-07-25
 
 ### Fixed

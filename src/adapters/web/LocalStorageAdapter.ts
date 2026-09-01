@@ -13,7 +13,7 @@ import type {
   SubscriptionCallback,
   UnsubscribeFunction,
 } from '@/types';
-import { serialize, deserialize, getObjectSize } from '@/utils';
+import { serialize, getObjectSize } from '@/utils';
 import { QuotaExceededError, SerializationError, StorageError } from '@/utils/errors';
 import { logger } from '@/utils/logger';
 
@@ -62,13 +62,39 @@ export class LocalStorageAdapter extends BaseAdapter {
   }
 
   /**
+   * Apply configuration synchronously. See `BaseAdapter.configure` for why the
+   * prefix cannot wait for the async `initialize()`.
+   */
+  configure(config?: { prefix?: string }): void {
+    if (config?.prefix !== undefined) {
+      this.prefix = config.prefix;
+    }
+  }
+
+  /**
    * Initialize the adapter
    */
   async initialize(config?: { prefix?: string }): Promise<void> {
-    if (config?.prefix) {
-      this.prefix = config.prefix;
-    }
+    this.configure(config);
     this.startTTLCleanup();
+  }
+
+  /**
+   * Whether this storage area is usable RIGHT NOW, without awaiting anything.
+   * The synchronous API needs this: `defaultStorages` reads as an ordered
+   * fallback list, and without a sync probe `setSync` selects an unusable
+   * backend and throws instead of falling through to the next one.
+   */
+  isAvailableSync(): boolean {
+    try {
+      const storage = this.getStorage();
+      const testKey = `${this.prefix}__test__`;
+      storage.setItem(testKey, 'test');
+      storage.removeItem(testKey);
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   /**
@@ -95,23 +121,28 @@ export class LocalStorageAdapter extends BaseAdapter {
    * Get a value from localStorage (synchronous)
    */
   getSync<T = unknown>(key: string): StorageValue<T> | null {
+    let item: string | null;
     try {
-      const item = this.getStorage().getItem(this.prefix + key);
-      if (!item) return null;
-
-      const value = deserialize(item) as StorageValue<T>;
-
-      // Check TTL
-      if (this.isExpired(value)) {
-        this.removeSync(key);
-        return null;
-      }
-
-      return value;
+      item = this.getStorage().getItem(this.prefix + key);
     } catch (error) {
-      logger.error(`Failed to get key ${key} from ${this.name}:`, error);
+      // A genuine storage-access fault — the area is blocked (private mode, a
+      // cookie policy, a SecurityError on an opaque origin). This one IS ours to
+      // report: the read we were asked for did not happen.
+      logger.error(`Failed to read key ${key} from ${this.name}:`, error);
       return null;
     }
+
+    // A value that is not our envelope belongs to somebody else sharing this
+    // area. parseOwnValue() logs it at debug and returns null — never an error.
+    const value = this.parseOwnValue<T>(item, key);
+    if (!value) return null;
+
+    if (this.isExpired(value)) {
+      this.removeSync(key);
+      return null;
+    }
+
+    return value;
   }
 
   /**
@@ -161,14 +192,7 @@ export class LocalStorageAdapter extends BaseAdapter {
     // overflow). Only read when a listener actually needs the old value.
     let oldValue: StorageValue | null = null;
     if (this.hasChangeListeners()) {
-      const item = this.getStorage().getItem(this.prefix + key);
-      if (item) {
-        try {
-          oldValue = deserialize(item) as StorageValue;
-        } catch {
-          oldValue = null;
-        }
-      }
+      oldValue = this.parseOwnValue(this.getStorage().getItem(this.prefix + key), key);
     }
 
     this.getStorage().removeItem(this.prefix + key);
@@ -193,23 +217,22 @@ export class LocalStorageAdapter extends BaseAdapter {
       !options ||
       (!options.pattern && !options.prefix && !options.tags && !options.expiredOnly)
     ) {
-      // Clear all with our prefix
+      // Clear everything WE wrote — never the whole area. With an empty prefix a
+      // name-only sweep here deletes every key on the origin, including another
+      // application's; ownKeys() bounds it to our own envelopes.
       const storage = this.getStorage();
-      const keysToRemove: string[] = [];
-      for (let i = 0; i < storage.length; i++) {
-        const key = storage.key(i);
-        if (key?.startsWith(this.prefix)) {
-          keysToRemove.push(key);
-        }
+      for (const { fullKey } of this.ownKeys(true)) {
+        storage.removeItem(fullKey);
       }
-
-      keysToRemove.forEach((key) => storage.removeItem(key));
       this.emitChange('*', undefined, undefined, 'local');
       return;
     }
 
-    // Synchronous filtered clear (mirrors BaseAdapter.clear logic)
-    for (const key of this.keysSync()) {
+    // Synchronous filtered clear (mirrors BaseAdapter.clear logic).
+    // Iterates owned entries INCLUDING expired ones: `expiredOnly` filters on
+    // exactly the entries `keysSync()` leaves out, so driving this loop from
+    // `keysSync()` made that option a guaranteed no-op.
+    for (const { key, value } of this.ownKeys(true)) {
       let shouldDelete = true;
 
       const pattern = options.pattern || options.prefix;
@@ -218,17 +241,13 @@ export class LocalStorageAdapter extends BaseAdapter {
       }
 
       if (shouldDelete && options.tags) {
-        const value = this.getSync(key);
-        if (!value?.tags || !options.tags.some((tag) => value.tags?.includes(tag))) {
+        if (!value.tags || !options.tags.some((tag) => value.tags?.includes(tag))) {
           shouldDelete = false;
         }
       }
 
-      if (shouldDelete && options.expiredOnly) {
-        const value = this.getSync(key);
-        if (!value || !this.isExpired(value)) {
-          shouldDelete = false;
-        }
+      if (shouldDelete && options.expiredOnly && !this.isExpired(value)) {
+        shouldDelete = false;
       }
 
       if (shouldDelete) {
@@ -248,23 +267,61 @@ export class LocalStorageAdapter extends BaseAdapter {
    * Get all keys (synchronous)
    */
   keysSync(pattern?: string | RegExp): string[] {
+    return this.filterKeys(
+      this.ownKeys().map((entry) => entry.key),
+      pattern,
+    );
+  }
+
+  /**
+   * Every key in this storage area that this adapter actually owns, with the
+   * envelope already parsed (one read per key, not two).
+   *
+   * 🔴 Name is not enough. With the default empty prefix `startsWith(prefix)` is
+   * true for EVERY key on the origin, so this method — not the prefix — is what
+   * keeps `keys()`, the TTL sweep and `clear()` off other scripts' data. An
+   * expired entry is skipped here exactly as before.
+   */
+  protected ownKeys(
+    includeExpired = false,
+  ): Array<{ key: string; fullKey: string; value: StorageValue }> {
     const storage = this.getStorage();
-    const keys: string[] = [];
+    const owned: Array<{ key: string; fullKey: string; value: StorageValue }> = [];
 
     for (let i = 0; i < storage.length; i++) {
       const fullKey = storage.key(i);
-      if (fullKey?.startsWith(this.prefix)) {
-        const key = fullKey.substring(this.prefix.length);
+      if (!fullKey?.startsWith(this.prefix)) continue;
 
-        // Check if not expired
-        const value = this.getSync(key);
-        if (value) {
-          keys.push(key);
-        }
-      }
+      const key = fullKey.substring(this.prefix.length);
+      const value = this.parseOwnValue(storage.getItem(fullKey), key);
+      if (!value) continue;
+      if (!includeExpired && this.isExpired(value)) continue;
+
+      owned.push({ key, fullKey, value });
     }
 
-    return this.filterKeys(keys, pattern);
+    return owned;
+  }
+
+  /**
+   * Reclaim expired entries, returning how many were removed.
+   *
+   * Overrides the base per-key sweep for two reasons. It reads each key once
+   * instead of twice, and — the load-bearing one — the base sweep is built on
+   * `keys()`, which does not surface expired entries here, so it could only ever
+   * report 0. Before this override the reaping happened as an undocumented side
+   * effect of `getSync()` deleting what it found expired during enumeration,
+   * while the returned count stayed 0.
+   */
+  async cleanupExpired(): Promise<number> {
+    let removed = 0;
+    for (const { key, value } of this.ownKeys(true)) {
+      if (this.isExpired(value)) {
+        this.removeSync(key);
+        removed++;
+      }
+    }
+    return removed;
   }
 
   /**
@@ -285,21 +342,22 @@ export class LocalStorageAdapter extends BaseAdapter {
     let valueSize = 0;
     const byKey: Record<string, number> = {};
 
-    for (let i = 0; i < window.localStorage.length; i++) {
-      const fullKey = window.localStorage.key(i);
-      if (fullKey?.startsWith(this.prefix)) {
-        const item = window.localStorage.getItem(fullKey);
-        if (item) {
-          count++;
-          const key = fullKey.substring(this.prefix.length);
-          const itemSize = (fullKey.length + item.length) * 2; // UTF-16
-          total += itemSize;
+    // `this.getStorage()`, never `window.localStorage` — the subclass points at a
+    // different area, and hard-coding it here made every inherited method wrong
+    // for sessionStorage until the subclass re-implemented it. Owned keys only,
+    // so a shared area is not reported as this adapter's footprint.
+    const storage = this.getStorage();
+    for (const { fullKey, key } of this.ownKeys(true)) {
+      const item = storage.getItem(fullKey);
+      if (item) {
+        count++;
+        const itemSize = (fullKey.length + item.length) * 2; // UTF-16
+        total += itemSize;
 
-          if (detailed) {
-            keySize += fullKey.length * 2;
-            valueSize += item.length * 2;
-            byKey[key] = itemSize;
-          }
+        if (detailed) {
+          keySize += fullKey.length * 2;
+          valueSize += item.length * 2;
+          byKey[key] = itemSize;
         }
       }
     }
@@ -327,15 +385,25 @@ export class LocalStorageAdapter extends BaseAdapter {
 
     // Also subscribe to remote changes via storage events
     const listener = (event: StorageEvent) => {
-      // Only process events from other windows/tabs
-      if (event.storageArea !== window.localStorage) return;
+      // Only process events from this adapter's own area. Comparing against
+      // `window.localStorage` by name meant the sessionStorage subclass could
+      // never match its own events.
+      let area: Storage;
+      try {
+        area = this.getStorage();
+      } catch {
+        return;
+      }
+      if (event.storageArea !== area) return;
 
-      // Check if the key belongs to us
+      // Check if the key belongs to us — by name AND by shape, since an empty
+      // prefix matches every key another script on this origin writes.
       if (!event.key || !event.key.startsWith(this.prefix)) return;
 
       const key = event.key.substring(this.prefix.length);
-      const oldValue = event.oldValue ? (deserialize(event.oldValue) as StorageValue | null) : null;
-      const newValue = event.newValue ? (deserialize(event.newValue) as StorageValue | null) : null;
+      const oldValue = this.parseOwnValue(event.oldValue, key);
+      const newValue = this.parseOwnValue(event.newValue, key);
+      if (!oldValue && !newValue) return;
 
       callback({
         key,

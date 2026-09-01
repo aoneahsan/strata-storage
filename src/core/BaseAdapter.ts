@@ -15,7 +15,7 @@ import type {
   QueryCondition,
 } from '@/types';
 import { NotSupportedError } from '@/utils/errors';
-import { EventEmitter, matchGlob, getObjectSize } from '@/utils';
+import { EventEmitter, matchGlob, getObjectSize, deserialize, isStorageEnvelope } from '@/utils';
 import { logger } from '@/utils/logger';
 import { QueryEngine } from '@/features/query';
 
@@ -30,6 +30,25 @@ export abstract class BaseAdapter implements StorageAdapter {
   protected queryEngine = new QueryEngine();
   protected ttlCleanupInterval?: ReturnType<typeof setInterval>;
   protected ttlCheckInterval = 60000; // Check every minute
+
+  /**
+   * Apply adapter configuration SYNCHRONOUSLY, before any operation runs.
+   *
+   * 🔴 Config that changes the PHYSICAL KEY (`prefix`) cannot wait for the async
+   * `initialize()`. The synchronous API is deliberately usable before
+   * initialization completes — `Strata.selectAdapterSync()` falls back to the
+   * registry — so a `prefix` applied only at `initialize()` is silently absent
+   * for every `setSync`/`getSync` issued in that window, and the value lands at
+   * the bare key. That is the whole of ISSUE-08: `initialize({ prefix })` worked,
+   * and the config path to it did not.
+   *
+   * `initialize()` calls this first, so both paths agree. Default is a no-op;
+   * adapters with configurable fields override it with pure assignment only —
+   * never I/O, never a timer.
+   */
+  configure(_config?: unknown): void {
+    // No configurable fields by default.
+  }
 
   /**
    * Initialize TTL cleanup if needed
@@ -79,6 +98,46 @@ export abstract class BaseAdapter implements StorageAdapter {
       }
     }
     return removed;
+  }
+
+  /**
+   * Parse a raw stored string into a value THIS adapter owns, or null.
+   *
+   * 🔴 The classification is the point, not the parse. Web adapters share their
+   * storage area with every other script on the origin, so a raw value that is
+   * not our envelope means the key belongs to somebody else — the ordinary case,
+   * not a failure. Reporting it through `logger.error` asserts something untrue
+   * about the consumer's own data, and on any origin running a third-party
+   * script that stores a raw string (Microsoft Clarity's `_cltk` is the usual
+   * one) it produces a permanent error stream that reaches their error tracker.
+   *
+   * `logger.error` is therefore reserved for a key carrying OUR envelope that
+   * still fails — which is a real defect, and currently cannot be distinguished
+   * from somebody else's data at all.
+   */
+  protected parseOwnValue<T = unknown>(raw: string | null, key: string): StorageValue<T> | null {
+    if (raw === null || raw === '') return null;
+
+    let parsed: unknown;
+    try {
+      parsed = deserialize(raw);
+    } catch {
+      logger.debug(
+        `${this.name}: skipping key "${key}" — value is not readable as ${this.name} data ` +
+          `(not written by this adapter).`,
+      );
+      return null;
+    }
+
+    if (!isStorageEnvelope(parsed)) {
+      logger.debug(
+        `${this.name}: skipping key "${key}" — value carries no storage envelope ` +
+          `(not written by this adapter).`,
+      );
+      return null;
+    }
+
+    return parsed as StorageValue<T>;
   }
 
   /**

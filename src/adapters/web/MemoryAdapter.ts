@@ -45,8 +45,17 @@ export class MemoryAdapter extends BaseAdapter {
   /**
    * Initialize the adapter
    */
+  configure(config?: { maxSize?: number }): void {
+    if (config?.maxSize !== undefined) this.maxSize = config.maxSize;
+  }
+
+  /** Memory is always usable — no environment can take it away. */
+  isAvailableSync(): boolean {
+    return true;
+  }
+
   async initialize(config?: { maxSize?: number }): Promise<void> {
-    this.maxSize = config?.maxSize;
+    this.configure(config);
     this.startTTLCleanup();
   }
 

@@ -843,6 +843,8 @@ export class Strata {
   // Synchronous adapter lookup — falls back to the registry so sync operations
   // work even before async initialize() has completed.
   private selectAdapterSync(storage?: StorageType | StorageType[]): StorageAdapter {
+    // An explicitly named storage is honoured as asked — the caller chose it, and
+    // a hard error naming it is more useful than a silent substitution.
     if (storage) {
       const names = Array.isArray(storage) ? storage : [storage];
       for (const name of names) {
@@ -852,17 +854,47 @@ export class Strata {
       throw new StorageError(`No adapter registered for storage type(s): ${names.join(', ')}`);
     }
 
-    if (this.defaultAdapter) return this.defaultAdapter;
+    if (this.defaultAdapter && Strata.isUsableSync(this.defaultAdapter)) {
+      return this.defaultAdapter;
+    }
 
+    // 🔴 `defaultStorages` reads as an ordered fallback list, so honour it as
+    // one HERE too. It previously guarded only the async path: with
+    // localStorage unavailable (SSR, private mode, a blocked cookie policy),
+    // `defineStorage({ defaultStorages: ['localStorage','memory'] }).setSync()`
+    // still selected localStorage and threw SerializationError rather than
+    // falling through to memory, which is the whole point of listing memory.
     const preferred = this.config.defaultStorages ?? [];
     for (const name of preferred) {
       const adapter = this.adapters.get(name) ?? this.registry.get(name);
-      if (adapter) return adapter;
+      if (adapter && Strata.isUsableSync(adapter)) return adapter;
     }
 
+    for (const adapter of this.registry.getAll().values()) {
+      if (Strata.isUsableSync(adapter)) return adapter;
+    }
+
+    // Nothing usable: fall back to the previous behaviour so the caller gets the
+    // adapter's own specific error rather than a vague one from here.
+    if (this.defaultAdapter) return this.defaultAdapter;
     const first = this.registry.getAll().values().next().value;
     if (first) return first;
     throw new StorageError('No storage adapter registered for synchronous operation.');
+  }
+
+  /**
+   * Whether an adapter can serve a synchronous operation right now. An adapter
+   * with no `isAvailableSync` is assumed usable — absence of a probe is not
+   * evidence of unavailability.
+   */
+  private static isUsableSync(adapter: StorageAdapter): boolean {
+    if (!adapter.capabilities.synchronous || !adapter.getSync) return false;
+    if (!adapter.isAvailableSync) return true;
+    try {
+      return adapter.isAvailableSync();
+    } catch {
+      return false;
+    }
   }
 
   // All sync-capable adapters (initialized set, or the registry before init).
@@ -986,13 +1018,44 @@ export class Strata {
 
     const attach = (): void => {
       if (cancelled) return;
-      const targets =
-        options?.storage !== undefined
-          ? [this.adapters.get(options.storage as StorageType)]
-          : Array.from(this.adapters.values());
+      const explicit = options?.storage !== undefined;
+      const targets = explicit
+        ? [this.adapters.get(options.storage as StorageType)]
+        : Array.from(this.adapters.values());
+
       for (const adapter of targets) {
-        if (adapter?.subscribe) {
+        if (!adapter?.subscribe) continue;
+
+        // 🔴 Skip backends that cannot observe rather than letting the first one
+        // abort the fan-out. `BaseAdapter.subscribe` throws NotSupportedError
+        // when `capabilities.observable` is false — true for indexedDB, cookies
+        // and cache, ALL of which the default registration includes — so the
+        // documented options-less "hear every adapter" form threw on every
+        // default instance and took application boot down with it.
+        //
+        // An observer that hears fewer backends is the correct outcome of "hear
+        // every adapter" when some cannot speak. When the caller named ONE
+        // backend explicitly they get told, because silence is not what they
+        // asked for.
+        if (!adapter.capabilities.observable) {
+          if (explicit) {
+            logger.warn(
+              `subscribe: storage "${adapter.name}" does not support change events, so this ` +
+                `subscription will never fire. Target an observable backend ` +
+                `(memory, localStorage, sessionStorage, url).`,
+            );
+          } else {
+            logger.debug(`subscribe: skipping non-observable adapter "${adapter.name}".`);
+          }
+          continue;
+        }
+
+        // A custom adapter may still refuse despite advertising the capability;
+        // one that does must not cost the caller every other subscription.
+        try {
           unsubscribers.push(adapter.subscribe(effectiveCallback));
+        } catch (error) {
+          logger.debug(`subscribe: adapter "${adapter.name}" refused to attach:`, error);
         }
       }
     };
@@ -1419,6 +1482,31 @@ export class Strata {
    */
   registerAdapter(adapter: StorageAdapter): void {
     this.registry.register(adapter);
+    // 🔴 Apply the adapter's config NOW, not at initialize(). The synchronous
+    // API is usable before initialization completes (selectAdapterSync falls
+    // back to the registry), so a `prefix` applied only in the async
+    // initialize() is silently absent for every setSync/getSync issued in that
+    // window and the value lands at the bare key. That was ISSUE-08: the
+    // adapter honoured `initialize({ prefix })` all along, and the config path
+    // to it did not reach the sync path.
+    this.applyAdapterConfig(adapter);
+  }
+
+  /** The configured options for one adapter, or undefined when it has none. */
+  private adapterConfigFor(name: StorageType): Record<string, unknown> | undefined {
+    const raw = this.config.adapters?.[name as keyof NonNullable<StrataConfig['adapters']>];
+    return typeof raw === 'object' && raw !== null ? (raw as Record<string, unknown>) : undefined;
+  }
+
+  /** Push the configured options into an adapter synchronously. */
+  private applyAdapterConfig(adapter: StorageAdapter): void {
+    const config = this.adapterConfigFor(adapter.name);
+    if (!config || !adapter.configure) return;
+    try {
+      adapter.configure(config);
+    } catch (error) {
+      logger.warn(`Failed to configure ${adapter.name} adapter:`, error);
+    }
   }
 
   /**
@@ -1612,8 +1700,7 @@ export class Strata {
 
       try {
         if (!(await adapter.isAvailable())) continue;
-        const adapterConfig = typeof rawConfig === 'object' ? rawConfig : undefined;
-        await adapter.initialize(adapterConfig);
+        await adapter.initialize(this.adapterConfigFor(name));
         this.adapters.set(name, adapter);
       } catch (error) {
         logger.warn(`Failed to initialize ${name} adapter:`, error);
@@ -1835,7 +1922,9 @@ export class Strata {
     for (const s of storages) {
       const adapter = this.registry.get(s);
       if (adapter && (await adapter.isAvailable())) {
-        await adapter.initialize();
+        // Pass the adapter's configured options — initializing bare here dropped
+        // the prefix for any adapter first reached through this path.
+        await adapter.initialize(this.adapterConfigFor(s));
         this.adapters.set(s, adapter);
         return adapter;
       }

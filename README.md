@@ -32,7 +32,7 @@ integrity checksums and mirrored backups are opt-in per call or per instance.
 
 | | |
 |---|---|
-| **Version** | `2.8.5` |
+| **Version** | `2.9.0` |
 | **License** | MIT |
 | **Node** | `>=24.13.0` |
 | **Platforms** | Web · iOS · Android (via Capacitor) |
@@ -305,8 +305,8 @@ Passed to `defineStorage(config)` or `new Strata(config)`:
 
 | Option | Type | Default | What it does |
 |---|---|---|---|
-| `defaultStorages` | `StorageType[]` | `['localStorage', 'indexedDB', 'sessionStorage', 'memory']` | Preference order for picking the default adapter. |
-| `adapters` | `object` | `{}` | Per-adapter settings, or `false` to skip one. `localStorage`/`sessionStorage` take `{ prefix }`; `indexedDB` takes `{ dbName, version }`; `cookies` takes `{ secure, sameSite }`; `cache` takes `{ cacheName }`. |
+| `defaultStorages` | `StorageType[]` | `['localStorage', 'indexedDB', 'sessionStorage', 'memory']` | Preference order for picking the default adapter, and the fallback order when one is unusable. 🔴 **Not a registration list** — operations with no explicit `storage` (`keys`, `clear`, `size`, `subscribe`) span every *registered* adapter. To leave one out entirely use `adapters: { <name>: false }`. |
+| `adapters` | `object` | `{}` | Per-adapter settings, or `false` to leave that adapter unregistered entirely. `localStorage`/`sessionStorage` take `{ prefix }`; `indexedDB` takes `{ dbName, version }`; `cookies` takes `{ secure, sameSite }`; `cache` takes `{ cacheName }`. Settings apply immediately, so they hold for `setSync`/`getSync` issued before `initialize()` resolves. |
 | `encryption` | `{ enabled, password }` | disabled | AES-GCM encryption on every write. Async path only. |
 | `compression` | `{ enabled, threshold }` | disabled | Compress values above `threshold` bytes. Async path only. |
 | `sync` | `{ enabled }` | disabled | Cross-tab change notifications. |
@@ -465,12 +465,17 @@ More: [Troubleshooting](https://stratastorage-docs.aoneahsan.com/reference/troub
   client-side.
 - **Node support is minimal.** Only the `memory` adapter is available outside a browser, so values do not
   persist across processes.
-- **Known open defect — web adapters default to an empty key prefix.** With no prefix, `keys()` on
-  `localStorage`/`sessionStorage` returns every key on the origin, including keys written by other code, and
-  the TTL sweep reads them. In the worst case a foreign key whose value happens to be JSON with an expired
-  `expires` field can be removed. Until this is fixed, set an explicit prefix:
-  `defineStorage({ adapters: { localStorage: { prefix: 'myapp:' } } })`. Tracked as `ISSUE-01` in
-  [docs/REPORTED-ISSUES.md](https://github.com/aoneahsan/strata-storage/blob/main/docs/REPORTED-ISSUES.md).
+- **Web adapters share their storage area, and identify their own data by shape.** `localStorage`,
+  `sessionStorage` and cookies are shared with every other script on the origin, and the default key
+  prefix is empty — so a name test alone cannot tell our keys from theirs. Since `2.9.0` an adapter
+  treats a key as its own only when the stored value is a `StorageValue` envelope, so `keys()`, the TTL
+  sweep and `clear()` never touch another application's data, and a value we cannot read is skipped at
+  `debug` rather than reported as an error. **The consequence to know about:** a key written to the same
+  area by something other than this library is invisible to `keys()` by design. Call `setLogLevel('debug')`
+  to see what is being skipped and why. Setting a prefix or a namespace is still worth doing for a clean
+  keyspace — `defineStorage({ namespace: 'myapp' })`, or
+  `defineStorage({ adapters: { localStorage: { prefix: 'myapp:' } } })` — but it is no longer what keeps
+  the library off other people's keys.
 - **Firebase adapter names are not in the `StorageType` union.** `'firestore'` and `'realtime'` are runtime
   names, so strict TypeScript may need a cast on the options object.
 

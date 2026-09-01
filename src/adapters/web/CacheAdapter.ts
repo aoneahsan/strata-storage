@@ -53,9 +53,13 @@ export class CacheAdapter extends BaseAdapter {
   /**
    * Initialize the adapter
    */
-  async initialize(config?: { cacheName?: string; baseUrl?: string }): Promise<void> {
+  configure(config?: { cacheName?: string; baseUrl?: string }): void {
     if (config?.cacheName) this.cacheName = config.cacheName;
     if (config?.baseUrl) this.baseUrl = config.baseUrl;
+  }
+
+  async initialize(config?: { cacheName?: string; baseUrl?: string }): Promise<void> {
+    this.configure(config);
 
     await this.openCache();
     this.startTTLCleanup();

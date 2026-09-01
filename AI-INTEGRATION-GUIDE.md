@@ -73,6 +73,35 @@ export const storage = defineStorage({
 
 `defineStorage()` pre-registers memory, localStorage, sessionStorage, IndexedDB, cookies, and the Cache API. Use `new Strata(config)` + `registerWebAdapters(instance)` only when you need full control.
 
+🔴 **`defaultStorages` is the preference order for the DEFAULT adapter — not a registration list.** Operations with no explicit `storage` (`keys`, `clear`, `size`, `subscribe`) deliberately span every *registered* adapter. To leave one out entirely, say so:
+
+```typescript
+export const storage = defineStorage({
+  defaultStorages: ['localStorage'],
+  adapters: { sessionStorage: false, indexedDB: false, cookies: false, cache: false },
+});
+```
+
+## Shared storage areas — how this library identifies its own keys (2.9.0)
+
+`localStorage`, `sessionStorage` and cookies are shared with every other script on the origin, and the default key prefix is empty — so a name test cannot tell our keys from theirs. **A key counts as ours only when its stored value is a `StorageValue` envelope.**
+
+What follows from that:
+
+- `keys()` returns only keys this library wrote. A key put in the same area by anything else is invisible to it **by design** — that is the fix, not a bug.
+- The TTL sweep and `clear()` never read, parse, delete or log about another application's data.
+- A value we cannot read is **not an error**. It is skipped and reported at `debug`, because it is evidence the key belongs to somebody else. `logger.error` is reserved for a key carrying our envelope that still fails, and for a real storage-access fault.
+- Debug it with `setLogLevel('debug')` (exported), which names each skipped key and why.
+
+```typescript
+import { setLogLevel, isStorageEnvelope } from 'strata-storage';
+
+setLogLevel('debug');                              // see what is being skipped
+isStorageEnvelope(JSON.parse(raw));                // is this value one of ours?
+```
+
+Before 2.9.0 an empty prefix made the adapter claim every key on the origin: it error-logged about third-party values on every sweep, returned them from `keys()`, and could delete one whose JSON happened to carry a past `expires`. Prefixes and namespaces are still worth setting for a clean keyspace — they are no longer what keeps this library off other people's keys.
+
 ## Storage Options (per operation)
 
 ```typescript

@@ -61,10 +61,21 @@ export type {
   UnsubscribeFunction,
 } from './types';
 
+// Diagnostics.
+//
+// 🔴 The logger's own documentation names `setLogLevel('debug')` as the way to
+// raise verbosity, and it was never exported from this entry point — so the
+// documented control was unreachable. That matters as of 2.9.0: keys this
+// library does not own are now SKIPPED and reported at `debug`, which is below
+// the default `warn`. Raising the level is how a consumer answers "why is my
+// key missing from keys()?", so the control has to be reachable.
+export { setLogLevel, getLogLevel, type LogLevel } from './utils/logger';
+
 // Utils
 export {
   isValidKey,
   isValidValue,
+  isStorageEnvelope,
   serializeValue,
   deserializeValue,
   generateId,
@@ -91,14 +102,26 @@ import type { StrataConfig } from './types';
  * custom instance can opt into the same default set. Returns the same instance
  * for chaining.
  */
-export function registerWebAdapters(strata: Strata): Strata {
+export function registerWebAdapters(strata: Strata, config?: StrataConfig): Strata {
+  // `adapters: { <name>: false }` opts an adapter out of REGISTRATION, not just
+  // out of initialization. Registering one the instance will never use still
+  // costs a TTL sweep over a storage area it does not own.
+  //
+  // 🔴 `defaultStorages` is NOT this switch. It is the preference order for
+  // picking the DEFAULT adapter; multi-adapter operations (keys/clear/size/
+  // subscribe with no `storage`) deliberately span everything registered. That
+  // distinction was undocumented, and reading `defaultStorages` as a
+  // registration allow-list is what produced ISSUE-09.
+  const enabled = (name: keyof NonNullable<StrataConfig['adapters']>): boolean =>
+    config?.adapters?.[name] !== false;
+
   try {
     strata.registerAdapter(new MemoryAdapter()); // always-available fallback
-    strata.registerAdapter(new LocalStorageAdapter());
-    strata.registerAdapter(new SessionStorageAdapter());
-    strata.registerAdapter(new IndexedDBAdapter());
-    strata.registerAdapter(new CookieAdapter());
-    strata.registerAdapter(new CacheAdapter());
+    if (enabled('localStorage')) strata.registerAdapter(new LocalStorageAdapter());
+    if (enabled('sessionStorage')) strata.registerAdapter(new SessionStorageAdapter());
+    if (enabled('indexedDB')) strata.registerAdapter(new IndexedDBAdapter());
+    if (enabled('cookies')) strata.registerAdapter(new CookieAdapter());
+    if (enabled('cache')) strata.registerAdapter(new CacheAdapter());
   } catch (error) {
     logger.warn('Strata Storage adapter registration warning:', error);
   }
@@ -122,7 +145,7 @@ export function registerWebAdapters(strata: Strata): Strata {
  * ```
  */
 export function defineStorage(config?: StrataConfig): Strata {
-  return registerWebAdapters(new Strata(config));
+  return registerWebAdapters(new Strata(config), config);
 }
 
 // Default singleton — created via the same factory so behavior is identical.

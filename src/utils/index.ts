@@ -3,6 +3,7 @@
  * Zero dependencies - all utilities implemented from scratch
  */
 
+import type { StorageValue } from '@/types';
 import { ValidationError } from './errors';
 import { logger } from './logger';
 
@@ -387,6 +388,33 @@ export function deserialize(json: string): unknown {
     }
     return val;
   });
+}
+
+/**
+ * Whether a deserialized value is a StorageValue envelope this library wrote.
+ *
+ * 🔴 This is the definition of "a key this adapter owns", and it is the ONLY
+ * thing that can answer that question when the key prefix is empty. Web
+ * adapters share their storage area with every other script on the origin, and
+ * an empty prefix makes `startsWith(prefix)` true for every key there — so name
+ * alone cannot distinguish our data from a third-party script's. Shape can.
+ *
+ * A value failing this check is not an error: it is evidence the key belongs to
+ * somebody else, which is the ordinary case in a shared area. Callers skip it
+ * silently rather than reporting a failure about data they do not own.
+ *
+ * Deliberately strict — `created` and `updated` are written by every write path
+ * (`Strata.set`, `setSync`, import, restore) and are finite numbers, so a
+ * foreign object that merely happens to carry a `value` key does not qualify.
+ */
+export function isStorageEnvelope(value: unknown): value is StorageValue {
+  if (!isObject(value)) return false;
+  if (!('value' in value)) return false;
+  if (!Number.isFinite(value.created) || !Number.isFinite(value.updated)) return false;
+  if ('expires' in value && value.expires !== undefined && !Number.isFinite(value.expires)) {
+    return false;
+  }
+  return true;
 }
 
 /**

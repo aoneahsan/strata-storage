@@ -103,11 +103,32 @@ export class CookieAdapter extends BaseAdapter {
   /**
    * Initialize the adapter
    */
-  async initialize(config?: CookieOptions): Promise<void> {
-    if (config) {
-      this.cookieOptions = { ...this.cookieOptions, ...config };
+  configure(config?: CookieOptions & { prefix?: string }): void {
+    if (!config) return;
+    const { prefix, ...cookieOptions } = config;
+    if (prefix !== undefined) {
+      this.prefix = prefix;
     }
+    this.cookieOptions = { ...this.cookieOptions, ...cookieOptions };
+  }
+
+  async initialize(config?: CookieOptions & { prefix?: string }): Promise<void> {
+    this.configure(config);
     this.startTTLCleanup();
+  }
+
+  /** Whether the cookie jar is usable right now, without awaiting anything. */
+  isAvailableSync(): boolean {
+    try {
+      if (typeof document === 'undefined') return false;
+      const testKey = `${this.prefix}__test__`;
+      document.cookie = `${testKey}=test; path=/`;
+      const ok = document.cookie.includes(testKey);
+      this.deleteCookie(testKey);
+      return ok;
+    } catch {
+      return false;
+    }
   }
 
   /**
@@ -126,21 +147,27 @@ export class CookieAdapter extends BaseAdapter {
 
     if (!value) return null;
 
+    let decoded: string;
     try {
-      const decoded = decodeURIComponent(value);
-      const parsed = deserialize(decoded) as StorageValue<T>;
-
-      // Check TTL
-      if (this.isExpired(parsed)) {
-        this.removeSync(key);
-        return null;
-      }
-
-      return parsed;
-    } catch (error) {
-      logger.error(`Failed to parse cookie ${key}:`, error);
+      decoded = decodeURIComponent(value);
+    } catch {
+      // Not percent-encoded — so not written by this adapter.
+      logger.debug(`${this.name}: skipping cookie "${key}" — not written by this adapter.`);
       return null;
     }
+
+    // The cookie jar is shared with the server and every script on the origin.
+    // A cookie that is not our envelope belongs to somebody else; skip it
+    // silently rather than reporting a parse failure about their data.
+    const parsed = this.parseOwnValue<T>(decoded, key);
+    if (!parsed) return null;
+
+    if (this.isExpired(parsed)) {
+      this.removeSync(key);
+      return null;
+    }
+
+    return parsed;
   }
 
   /**
@@ -236,21 +263,20 @@ export class CookieAdapter extends BaseAdapter {
    */
   clearSync(options?: ClearOptions): void {
     if (!options || (!options.pattern && !options.tags && !options.expiredOnly)) {
-      // Clear all cookies with our prefix
-      const cookies = this.getAllCookies();
-
-      for (const [cookieKey] of cookies) {
-        if (cookieKey.startsWith(this.prefix)) {
-          this.deleteCookie(cookieKey);
-        }
+      // Delete only the cookies WE wrote. A name-only sweep deletes the
+      // server's session cookie too when the prefix is empty.
+      for (const { cookieKey } of this.ownCookies(true)) {
+        this.deleteCookie(cookieKey);
       }
 
       this.emitChange('*', undefined, undefined, 'local');
       return;
     }
 
-    // Synchronous filtered clear (mirrors BaseAdapter.clear logic)
-    for (const key of this.keysSync()) {
+    // Synchronous filtered clear (mirrors BaseAdapter.clear logic). Driven from
+    // owned entries INCLUDING expired ones, since `expiredOnly` filters on
+    // exactly what `keysSync()` leaves out.
+    for (const { key, value } of this.ownCookies(true)) {
       let shouldDelete = true;
 
       const pattern = options.pattern || options.prefix;
@@ -259,17 +285,13 @@ export class CookieAdapter extends BaseAdapter {
       }
 
       if (shouldDelete && options.tags) {
-        const value = this.getSync(key);
-        if (!value?.tags || !options.tags.some((tag) => value.tags?.includes(tag))) {
+        if (!value.tags || !options.tags.some((tag) => value.tags?.includes(tag))) {
           shouldDelete = false;
         }
       }
 
-      if (shouldDelete && options.expiredOnly) {
-        const value = this.getSync(key);
-        if (!value || !this.isExpired(value)) {
-          shouldDelete = false;
-        }
+      if (shouldDelete && options.expiredOnly && !this.isExpired(value)) {
+        shouldDelete = false;
       }
 
       if (shouldDelete) {
@@ -289,22 +311,53 @@ export class CookieAdapter extends BaseAdapter {
    * Get all keys (synchronous)
    */
   keysSync(pattern?: string | RegExp): string[] {
-    const cookies = this.getAllCookies();
-    const keys: string[] = [];
+    return this.filterKeys(
+      this.ownCookies().map((entry) => entry.key),
+      pattern,
+    );
+  }
 
-    for (const [cookieKey] of cookies) {
-      if (cookieKey.startsWith(this.prefix)) {
-        const key = cookieKey.substring(this.prefix.length);
+  /**
+   * Every cookie on this origin that this adapter actually owns, envelope
+   * already parsed. The cookie jar is shared with the server and with every
+   * script on the origin, so name alone cannot identify our data — shape can.
+   */
+  protected ownCookies(
+    includeExpired = false,
+  ): Array<{ key: string; cookieKey: string; value: StorageValue }> {
+    const owned: Array<{ key: string; cookieKey: string; value: StorageValue }> = [];
 
-        // Check if not expired
-        const value = this.getSync(key);
-        if (value) {
-          keys.push(key);
-        }
+    for (const [cookieKey, raw] of this.getAllCookies()) {
+      if (!cookieKey.startsWith(this.prefix)) continue;
+
+      const key = cookieKey.substring(this.prefix.length);
+      let decoded: string;
+      try {
+        decoded = decodeURIComponent(raw);
+      } catch {
+        continue;
       }
+
+      const value = this.parseOwnValue(decoded, key);
+      if (!value) continue;
+      if (!includeExpired && this.isExpired(value)) continue;
+
+      owned.push({ key, cookieKey, value });
     }
 
-    return this.filterKeys(keys, pattern);
+    return owned;
+  }
+
+  /** Reclaim expired cookies, reading each once and reporting a real count. */
+  async cleanupExpired(): Promise<number> {
+    let removed = 0;
+    for (const { key, value } of this.ownCookies(true)) {
+      if (this.isExpired(value)) {
+        this.removeSync(key);
+        removed++;
+      }
+    }
+    return removed;
   }
 
   /**

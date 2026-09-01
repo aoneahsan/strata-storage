@@ -603,6 +603,21 @@ export interface StorageAdapter {
   keys(pattern?: string | RegExp): Promise<string[]>;
 
   // --- Optional synchronous API ---------------------------------------------
+  /**
+   * Apply configuration synchronously, before any operation runs. Optional —
+   * an adapter with no configurable fields omits it. Implementations do pure
+   * assignment only: config that changes the physical key cannot wait for the
+   * async `initialize()`, because the synchronous API is usable before it.
+   */
+  configure?(config?: unknown): void;
+
+  /**
+   * Whether this backend can serve a SYNCHRONOUS operation right now, without
+   * awaiting anything. Optional; absence means "assume usable". Lets the sync
+   * path honour `defaultStorages` as the ordered fallback list it reads as.
+   */
+  isAvailableSync?(): boolean;
+
   // Implemented only by sync-capable adapters (memory, localStorage,
   // sessionStorage, cookies, url). Absent on async-only backends (indexedDB,
   // cache, sqlite, filesystem, secure, preferences). `capabilities.synchronous`
