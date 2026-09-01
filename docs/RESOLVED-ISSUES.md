@@ -18,7 +18,7 @@ added, original detail kept, never deleted. Fleet rule: `~/.claude/rules/project
 
 
 **Status:** 🔴 OPEN · **Reported:** 2026-07-15 from LabFlow (private repo `aoneahsan/lab-system`) ·
-**Affects:** `strata-storage@2.8.1`, `src/adapters/web/LocalStorageAdapter.ts` (and
+**Affects:** `strata-storage` **≤ 2.8.5 — fixed in 2.9.0** (first seen on 2.8.1), `src/adapters/web/LocalStorageAdapter.ts` (and
 `SessionStorageAdapter.ts`, same shape)
 
 #### Symptom (as seen in LabFlow)
@@ -141,14 +141,6 @@ worth shipping as a patch on its own, ahead of the data-migrating fix 1.
 **Downstream status (ClearHire):** not worked around. `console.*` is banned there and the noise comes from
 this package's own logger, so the fix belongs here. Recorded in that project's wave-3 tracker as `D-W3-05`.
 
-#### Resolution
-
-- [ ] Fixed in version: `______` · date: `__________` · approach: `__________`
-- [ ] Confirmed against the LabFlow repro above (foreign non-JSON key no longer produces an error log, and
-      `keys()` no longer returns keys the adapter never wrote)
-- [ ] Confirmed against the ClearHire case: with Microsoft Clarity active (`_cltk` in `sessionStorage`), a
-      page load produces no `strata-storage` error log
-
 #### ✅ Resolution — fixed in `2.9.0`, 2026-09-01
 
 **Approach: ownership by SHAPE, not by name.** An adapter now treats a key as its own only when the
@@ -229,12 +221,6 @@ bump from the wrong base.
 3. Consider making the version line in `CLAUDE.md` a pointer rather than a value; a hand-copied version
    number in a fourth place will drift again.
 
-#### Resolution
-
-- [ ] Fixed in version: `______` · date: `__________` · approach: `__________`
-- [ ] `CLAUDE.md`, `MANUAL-TASKS.md`, `CHANGELOG.md` and `package.json` agree; ISSUE-01's affected range is
-      current
-
 **Last updated:** 2026-07-29 (ISSUE-06 added — version-claim drift across `CLAUDE.md`, `MANUAL-TASKS.md` and
 `package.json`, plus ISSUE-01's stale `Affects:` range. Earlier, 2026-07-25: interim mitigation documented in
 the README; owner decision noted on the ISSUE-01 fix path. Resolved entries from that pass — ISSUE-02 …
@@ -255,6 +241,9 @@ trusted.
 
 - [x] Fixed in version: `2.9.0` · date: `2026-09-01` · approach: single source + a build gate
 - [x] `CLAUDE.md`, `MANUAL-TASKS.md`, `CHANGELOG.md` and `package.json` agree
+- [x] ISSUE-01's affected range is current — its `Affects:` line now reads `≤ 2.8.5 — fixed in 2.9.0`
+      rather than the first-sighting pin `2.8.1`, which is the second half of what this entry reported
+      and was still outstanding when the entry was first marked resolved
 
 ---
 
