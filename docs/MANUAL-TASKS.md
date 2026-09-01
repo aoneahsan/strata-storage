@@ -42,3 +42,4 @@ npm deprecate strata-storage@2.8.2 "Published in error from a stale tree; docs o
 | 1 | DNS `stratastorage-docs.aoneahsan.com` → `aoneahsan.github.io` (Hostinger) | 2026-07-25 |
 | 2 | Publish `2.8.3` to npm (now agent-automated; verified live from the registry) | 2026-07-25 |
 | 3 | Deprecate `2.8.2` on npm (now agent-automated; 2.8.1/2.8.0/2.8.3 verified untouched) | 2026-07-25 |
+| 4 | npm credentials restored — the token in `~/.npmrc` had expired (401), blocking every publish. Now on FilesHub `developer_accounts`; a reveal returns the finished `.npmrc` line. `2.9.0` and `3.0.0` published from it. | 2026-09-01 |
