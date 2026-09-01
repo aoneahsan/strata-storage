@@ -82,7 +82,21 @@ export const storage = defineStorage({
 });
 ```
 
-## Shared storage areas — how this library identifies its own keys (2.9.0)
+## Key prefix and the 3.0.0 migration
+
+`localStorage` and `sessionStorage` keys are written under **`strata:`** as of 3.0.0
+(`DEFAULT_WEB_KEY_PREFIX`, exported). Existing data migrates itself: a miss at `strata:<key>` falls back to the bare `<key>`, and if the value is one of ours it is moved under the prefix. Per key, on read — never a bulk sweep, never a value that is not our envelope, never overwriting an existing prefixed value.
+
+🔴 **Set `keyPrefix: false` when anything outside this library reads a physical key directly** — a pre-paint theme script, a logger reading its own level. Migration keeps the data reachable through this library; it cannot fix a hard-coded reader.
+
+```typescript
+export const storage = defineStorage({ keyPrefix: false });          // pre-3.0 keys
+export const storage = defineStorage({ migrateLegacyKeys: false });  // don't adopt 2.x entries
+```
+
+`cookies` (already `strata_`), `indexedDB`, `cache`, `memory` and `url` are unchanged. `namespace` is a separate mechanism: the physical key is `<keyPrefix><namespace>:<key>`.
+
+## Shared storage areas — how this library identifies its own keys
 
 `localStorage`, `sessionStorage` and cookies are shared with every other script on the origin, and the default key prefix is empty — so a name test cannot tell our keys from theirs. **A key counts as ours only when its stored value is a `StorageValue` envelope.**
 

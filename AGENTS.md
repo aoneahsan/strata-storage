@@ -6,8 +6,8 @@ Guidance for humans and AI coding agents working in this repository.
 here → MOVE the entry to `docs/RESOLVED-ISSUES.md` with date + fixing version). **The queue is currently
 empty** — all ten entries filed to date are resolved. Next id is `ISSUE-11`; numbers are never reused.
 
-**Agent-owed follow-ups → root [`PENDING-TASKS.md`](PENDING-TASKS.md)** (`TASK-001`: the 3.0.0 default
-key prefix). **Human-only tasks → [`docs/MANUAL-TASKS.md`](docs/MANUAL-TASKS.md)** (`npm publish` is
+**Agent-owed follow-ups → root [`PENDING-TASKS.md`](PENDING-TASKS.md)** — currently empty; history in
+[`docs/DONE-TASKS.md`](docs/DONE-TASKS.md). **Human-only tasks → [`docs/MANUAL-TASKS.md`](docs/MANUAL-TASKS.md)** (`npm publish` is
 agent-automated since 2026-07-25).
 
 🔴 **The current version lives in `package.json` and `CHANGELOG.md` — NOT here.** A hand-copied version in

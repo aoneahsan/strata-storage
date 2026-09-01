@@ -63,6 +63,14 @@ export abstract class BaseAdapter implements StorageAdapter {
         logger.error(`TTL cleanup error in ${this.name}:`, error);
       }
     }, this.ttlCheckInterval);
+
+    // 🔴 Do not hold a Node process open. An outstanding interval keeps the event
+    // loop alive, so a short-lived script — a build step, a CLI, an SSR warmup —
+    // that creates an instance and finishes its work never exits unless it also
+    // calls close(). `unref` does not exist in browsers (setInterval returns a
+    // number there), so the optional call is simply a no-op; in Node the timer
+    // keeps working for as long as the process does.
+    (this.ttlCleanupInterval as { unref?: () => void }).unref?.();
   }
 
   /**

@@ -20,6 +20,18 @@ import { logger } from '@/utils/logger';
 /**
  * Browser localStorage adapter
  */
+/**
+ * The key prefix web adapters use unless told otherwise, as of 3.0.0.
+ *
+ * 🔴 Before 3.0.0 this was the empty string, which meant this library's keys sat
+ * unprefixed among every other script's in a shared storage area. 2.9.0 made that
+ * safe (a key is ours only if its value is a `StorageValue` envelope); this makes
+ * it tidy as well, so our keys are identifiable by name too.
+ *
+ * Opt out with `defineStorage({ keyPrefix: false })` — see `StrataConfig`.
+ */
+export const DEFAULT_WEB_KEY_PREFIX = 'strata:';
+
 export class LocalStorageAdapter extends BaseAdapter {
   readonly name: StorageType = 'localStorage';
   readonly capabilities: StorageCapabilities = {
@@ -37,7 +49,18 @@ export class LocalStorageAdapter extends BaseAdapter {
   protected prefix: string;
   protected listeners: Map<SubscriptionCallback, (event: StorageEvent) => void> = new Map();
 
-  constructor(prefix = '') {
+  /**
+   * Whether to adopt pre-3.0 unprefixed entries on read.
+   *
+   * 🔴 Defaults to FALSE, and only `Strata` turns it on — for the adapters whose
+   * prefix it resolved. A directly constructed adapter must never adopt bare
+   * keys: `plugin/web.ts` builds a `strata_prefs_` instance beside the main one,
+   * and if that adopted every unprefixed entry it found, it would take them from
+   * the instance they belong to.
+   */
+  protected migrateLegacyKeys = false;
+
+  constructor(prefix = DEFAULT_WEB_KEY_PREFIX) {
     super();
     this.prefix = prefix;
   }
@@ -65,10 +88,77 @@ export class LocalStorageAdapter extends BaseAdapter {
    * Apply configuration synchronously. See `BaseAdapter.configure` for why the
    * prefix cannot wait for the async `initialize()`.
    */
-  configure(config?: { prefix?: string }): void {
+  configure(config?: { prefix?: string; migrateLegacyKeys?: boolean }): void {
     if (config?.prefix !== undefined) {
       this.prefix = config.prefix;
     }
+    if (config?.migrateLegacyKeys !== undefined) {
+      this.migrateLegacyKeys = config.migrateLegacyKeys;
+    }
+  }
+
+  /**
+   * Adopt a pre-3.0 unprefixed entry for `key`, moving it under the current
+   * prefix. Returns the adopted value, or null when there is nothing to adopt.
+   *
+   * This is the whole of the 3.0.0 migration, and it is deliberately **per key,
+   * on read** rather than a bulk sweep. A sweep would adopt every unprefixed
+   * envelope on the origin — including keys belonging to another instance that
+   * opted out of the prefix, or to a sibling application still on 2.x. Adopting
+   * only what the caller actually asks for keeps the blast radius to keys this
+   * instance already uses.
+   *
+   * Three conditions, all required:
+   *  1. migration is enabled and a prefix is actually in effect (nothing to move
+   *     data *into* otherwise);
+   *  2. the legacy value is **ours** — `parseOwnValue`, the 2.9.0 shape check. It
+   *     is what makes this safe at all: with no prefix to go on, shape is the only
+   *     way to tell our data from a third party's;
+   *  3. the prefixed slot is **empty**. A value already there is authoritative, so
+   *     the legacy entry is left alone rather than overwriting newer data.
+   *
+   * It MOVES rather than copies. A copy leaves a stale duplicate that diverges the
+   * moment anything writes — a silent wrong answer, worse than a clean break. A
+   * consumer that needs the bare key to keep existing (a pre-paint script, a
+   * logger reading its own level) takes `keyPrefix: false` instead.
+   */
+  protected adoptLegacyKey<T = unknown>(key: string): StorageValue<T> | null {
+    if (!this.migrateLegacyKeys || !this.prefix) return null;
+    // A key already carrying our prefix is not a legacy key.
+    if (key.startsWith(this.prefix)) return null;
+
+    let storage: Storage;
+    try {
+      storage = this.getStorage();
+    } catch {
+      return null;
+    }
+
+    const raw = storage.getItem(key);
+    if (raw === null) return null;
+
+    const value = this.parseOwnValue<T>(raw, key);
+    if (!value) return null;
+
+    if (storage.getItem(this.prefix + key) !== null) {
+      logger.debug(
+        `${this.name}: legacy key "${key}" not adopted — "${this.prefix}${key}" already exists and wins.`,
+      );
+      return null;
+    }
+
+    try {
+      storage.setItem(this.prefix + key, raw);
+      storage.removeItem(key);
+    } catch (error) {
+      // Out of quota, or the area turned read-only mid-flight. The legacy entry
+      // is still intact and still readable, so report and return it.
+      logger.warn(`${this.name}: could not migrate legacy key "${key}":`, error);
+      return value;
+    }
+
+    logger.debug(`${this.name}: migrated legacy key "${key}" to "${this.prefix}${key}".`);
+    return value;
   }
 
   /**
@@ -134,7 +224,8 @@ export class LocalStorageAdapter extends BaseAdapter {
 
     // A value that is not our envelope belongs to somebody else sharing this
     // area. parseOwnValue() logs it at debug and returns null — never an error.
-    const value = this.parseOwnValue<T>(item, key);
+    // A miss falls through to a pre-3.0 unprefixed entry, if there is one.
+    const value = this.parseOwnValue<T>(item, key) ?? this.adoptLegacyKey<T>(key);
     if (!value) return null;
 
     if (this.isExpired(value)) {
@@ -232,7 +323,8 @@ export class LocalStorageAdapter extends BaseAdapter {
     // Iterates owned entries INCLUDING expired ones: `expiredOnly` filters on
     // exactly the entries `keysSync()` leaves out, so driving this loop from
     // `keysSync()` made that option a guaranteed no-op.
-    for (const { key, value } of this.ownKeys(true)) {
+    for (const entry of this.ownKeys(true)) {
+      const { key, value } = entry;
       let shouldDelete = true;
 
       const pattern = options.pattern || options.prefix;
@@ -251,7 +343,7 @@ export class LocalStorageAdapter extends BaseAdapter {
       }
 
       if (shouldDelete) {
-        this.removeSync(key);
+        this.removeOwnedEntry(entry);
       }
     }
   }
@@ -287,6 +379,7 @@ export class LocalStorageAdapter extends BaseAdapter {
   ): Array<{ key: string; fullKey: string; value: StorageValue }> {
     const storage = this.getStorage();
     const owned: Array<{ key: string; fullKey: string; value: StorageValue }> = [];
+    const seen = new Set<string>();
 
     for (let i = 0; i < storage.length; i++) {
       const fullKey = storage.key(i);
@@ -297,10 +390,49 @@ export class LocalStorageAdapter extends BaseAdapter {
       if (!value) continue;
       if (!includeExpired && this.isExpired(value)) continue;
 
+      seen.add(key);
       owned.push({ key, fullKey, value });
     }
 
+    // Pre-3.0 unprefixed entries are still ours and must appear here, or `keys()`,
+    // `clear()` and `size()` would silently omit everything not yet read back
+    // (adoption is per-read, so a freshly upgraded app has migrated nothing yet).
+    //
+    // 🔴 Listing is NOT adopting. Enumerating must not move data — a `keys()` call
+    // is a question, not a write — so these are reported at their real physical
+    // key and migrate only when actually read. A prefixed entry for the same
+    // logical key always wins, so upgraded keys are never listed twice.
+    if (this.migrateLegacyKeys && this.prefix) {
+      for (let i = 0; i < storage.length; i++) {
+        const fullKey = storage.key(i);
+        if (!fullKey || fullKey.startsWith(this.prefix) || seen.has(fullKey)) continue;
+
+        const value = this.parseOwnValue(storage.getItem(fullKey), fullKey);
+        if (!value) continue;
+        if (!includeExpired && this.isExpired(value)) continue;
+
+        seen.add(fullKey);
+        owned.push({ key: fullKey, fullKey, value });
+      }
+    }
+
     return owned;
+  }
+
+  /**
+   * Remove an entry `ownKeys()` returned, by its PHYSICAL key.
+   *
+   * 🔴 Not `removeSync(key)`. That rebuilds the physical key as `prefix + key`,
+   * which is wrong for a pre-3.0 legacy entry — those live at the bare key, so
+   * `ownKeys()` reports `fullKey === key` for them. Rebuilding would delete
+   * `strata:<key>` instead and leave the legacy entry behind, so `clear()` and
+   * the expiry sweep would silently skip exactly the entries not yet migrated.
+   */
+  protected removeOwnedEntry(entry: { key: string; fullKey: string; value: StorageValue }): void {
+    this.getStorage().removeItem(entry.fullKey);
+    if (this.hasChangeListeners()) {
+      this.emitChange(entry.key, entry.value.value, undefined, 'local');
+    }
   }
 
   /**
@@ -315,9 +447,9 @@ export class LocalStorageAdapter extends BaseAdapter {
    */
   async cleanupExpired(): Promise<number> {
     let removed = 0;
-    for (const { key, value } of this.ownKeys(true)) {
-      if (this.isExpired(value)) {
-        this.removeSync(key);
+    for (const entry of this.ownKeys(true)) {
+      if (this.isExpired(entry.value)) {
+        this.removeOwnedEntry(entry);
         removed++;
       }
     }

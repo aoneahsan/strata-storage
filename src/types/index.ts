@@ -381,6 +381,40 @@ export interface StrataConfig {
   defaultStorages?: StorageType[];
 
   /**
+   * Key prefix for the web adapters that share a storage area with every other
+   * script on the origin (`localStorage`, `sessionStorage`).
+   *
+   * Defaults to `'strata:'` as of 3.0.0. Set `false` (or `''`) for the pre-3.0
+   * behaviour of writing to the bare key.
+   *
+   * 🔴 **Take the opt-out when anything outside this library reads a physical key
+   * directly** — a pre-paint theme script that runs before any module loads, or a
+   * logger reading its own level. Those readers know the exact key name, and a
+   * prefix changes it underneath them. `migrateLegacyKeys` keeps the *data*
+   * reachable through this library, but it cannot fix a hard-coded reader.
+   *
+   * Composes with `namespace`, which is a separate mechanism and unaffected:
+   * the physical key is `<keyPrefix><namespace>:<key>`. A per-adapter
+   * `adapters.localStorage.prefix` overrides this for that adapter.
+   */
+  keyPrefix?: string | false;
+
+  /**
+   * Whether the shared-area web adapters may adopt pre-3.0 unprefixed entries.
+   * Default `true`.
+   *
+   * Migration is per key and happens on read: a miss at the prefixed key falls
+   * back to the bare key, and if the value is one of ours it is moved under the
+   * prefix. It never overwrites an existing prefixed value, and it never adopts a
+   * value that is not a `StorageValue` envelope — which is what stops it taking
+   * another application's keys.
+   *
+   * Set `false` when two applications share an origin and one of them is still on
+   * 2.x, so that upgrading one does not move keys the other still reads.
+   */
+  migrateLegacyKeys?: boolean;
+
+  /**
    * Adapter configuration
    */
   adapters?: {

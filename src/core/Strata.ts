@@ -162,6 +162,9 @@ export class Strata {
       this._ttlCleanupTimer = setInterval(() => {
         void this.cleanupAllAdapters();
       }, interval);
+      // See BaseAdapter.startTTLCleanup — a live interval must not keep a Node
+      // process alive. No-op in browsers.
+      (this._ttlCleanupTimer as { unref?: () => void }).unref?.();
     }
 
     // Start periodic auto-backup if configured
@@ -1492,10 +1495,54 @@ export class Strata {
     this.applyAdapterConfig(adapter);
   }
 
-  /** The configured options for one adapter, or undefined when it has none. */
+  /**
+   * Web adapters that share their storage area with every other script on the
+   * origin, and therefore take the instance-wide `keyPrefix`.
+   *
+   * Cookies are excluded deliberately: they already default to `strata_`, so
+   * moving them would break existing cookies for no gain. IndexedDB and the Cache
+   * API own a named store, memory owns its own Map, and the URL adapter already
+   * prefixes its params — none of them can collide with another script's keys.
+   */
+  private static readonly PREFIXED_WEB_ADAPTERS: ReadonlySet<string> = new Set([
+    'localStorage',
+    'sessionStorage',
+  ]);
+
+  /**
+   * The configured options for one adapter, or undefined when it has none.
+   *
+   * For the shared-area web adapters this also resolves the 3.0.0 key prefix and
+   * decides whether that adapter may adopt pre-3.0 unprefixed entries. Precedence,
+   * and it lives only here:
+   *
+   *   1. `adapters.<name>.prefix` — the most specific thing the caller wrote
+   *   2. `keyPrefix` — the instance-wide switch (`false` restores 2.x behaviour)
+   *   3. the adapter's own constructor default (`DEFAULT_WEB_KEY_PREFIX`)
+   */
   private adapterConfigFor(name: StorageType): Record<string, unknown> | undefined {
     const raw = this.config.adapters?.[name as keyof NonNullable<StrataConfig['adapters']>];
-    return typeof raw === 'object' && raw !== null ? (raw as Record<string, unknown>) : undefined;
+    const explicit = typeof raw === 'object' && raw !== null ? { ...raw } : undefined;
+
+    if (!Strata.PREFIXED_WEB_ADAPTERS.has(name)) return explicit;
+
+    const resolved: Record<string, unknown> = explicit ?? {};
+
+    // Only fill in the prefix when the caller did not name one for this adapter.
+    if (resolved.prefix === undefined && this.config.keyPrefix !== undefined) {
+      resolved.prefix = this.config.keyPrefix === false ? '' : this.config.keyPrefix;
+    }
+
+    // 🔴 Migration is enabled HERE and nowhere else — only for an adapter whose
+    // prefix this instance resolved. A directly constructed adapter must never
+    // adopt bare keys: `plugin/web.ts` builds a `strata_prefs_` instance beside
+    // the main one, and if that adopted every unprefixed entry it found it would
+    // take them from the instance they belong to.
+    if (resolved.migrateLegacyKeys === undefined) {
+      resolved.migrateLegacyKeys = this.config.migrateLegacyKeys !== false;
+    }
+
+    return resolved;
   }
 
   /** Push the configured options into an adapter synchronously. */
@@ -1899,6 +1946,7 @@ export class Strata {
         }
       })();
     }, cfg.interval);
+    (this._autoBackupTimer as { unref?: () => void }).unref?.();
   }
 
   private async selectAdapter(storage?: StorageType | StorageType[]): Promise<StorageAdapter> {

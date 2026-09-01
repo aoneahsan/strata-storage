@@ -11,6 +11,7 @@ export { CookieAdapter } from './adapters/web/CookieAdapter';
 export { CacheAdapter } from './adapters/web/CacheAdapter';
 export { MemoryAdapter } from './adapters/web/MemoryAdapter';
 export { URLAdapter, type URLAdapterConfig } from './adapters/web/URLAdapter';
+export { DEFAULT_WEB_KEY_PREFIX } from './adapters/web/LocalStorageAdapter';
 
 // Core features
 export { EncryptionManager } from './features/encryption';
