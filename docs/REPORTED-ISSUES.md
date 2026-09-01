@@ -397,3 +397,51 @@ consider deprecating the per-adapter `prefix` so it cannot be written silently.
 **Consumer workaround (in use).** `defineStorage({ namespace: 'hf-dummy' })` — it does prefix the physical
 key (`hf-dummy:axis:theme`), and a second instance without the namespace reads `null` for the same logical
 key, so the partition is real.
+
+---
+
+### ISSUE-09 — With no namespace, TTL cleanup reads every other script's sessionStorage keys and logs an error for each
+
+**Reported by:** Trizlink (`trizlink/src/services/storage.ts`, live at trizlink.com) · 2026-09-01
+**Affected version:** 2.8.5 (current) · **Severity:** medium — no crash; a permanent error stream
+**Symptom (verbatim, from the browser console on every page):**
+
+```
+Failed to get key _cltk from sessionStorage: SyntaxError: Unexpected token 'j', "jkl9..." is not valid JSON
+```
+
+**Repro.** Build an instance with **no namespace** — which is the correct configuration for any app whose
+physical storage keys are frozen and cannot gain a prefix — then let the TTL sweep run on a page that also
+loads a third-party script writing to `sessionStorage` (Microsoft Clarity writes `_cltk`):
+
+```js
+const storage = defineStorage();          // no namespace, so prefix === ''
+// …anything that triggers the periodic sweep, or an explicit:
+await storage.cleanupExpired();
+```
+
+**Root cause.** `SessionStorageAdapter.keysSync` selects its own keys with
+`fullKey.startsWith(this.prefix)` (`src/adapters/web/SessionStorageAdapter.ts:226`). With no namespace the
+prefix is the empty string, and **every string starts with the empty string** — so the adapter claims every
+key in a storage area it shares with every other script on the page. `BaseAdapter.cleanupExpired`
+(`src/core/BaseAdapter.ts:69-82`) then calls `get()` on each, and `getSync` runs `deserialize` — a
+`JSON.parse` — over a value the library never wrote (`SessionStorageAdapter.ts:78`).
+
+**Consequence.** `getSync` catches the parse failure and returns `null`, so nothing breaks — but it reports
+it through `logger.error` first (`SessionStorageAdapter.ts:88`). Any consumer that routes its logger into an
+error tracker therefore receives one report per foreign key per sweep, forever. On Trizlink that is Sentry,
+and the noise is on every page a visitor loads.
+
+🔴 **The failure is in the classification, not the parse.** A value that is not a `StorageValue` envelope on
+a key this library never wrote is not an error — it is evidence the key belongs to somebody else, which is
+the ordinary case in a shared storage area. Reporting it as a failure asserts something untrue about the
+consumer's own data.
+
+**Suggested fix.** Where the prefix is empty the adapter cannot identify its own keys by name, so it must
+identify them by shape: treat a value that does not deserialize into a `StorageValue` envelope as *not ours*
+— skip it silently in `keysSync` and `cleanupExpired`, and reserve `logger.error` for a key that carries our
+envelope and still fails. A parse failure would then be a real defect again, which it currently cannot be.
+
+**Why the consumer cannot work around it.** Trizlink's nine device storage keys are frozen
+(`02-FROZEN-CONTRACTS.md`), so adding a namespace would change every physical key and sign every installed
+user out. The namespace workaround recorded under ISSUE-01 is unavailable here by design.
