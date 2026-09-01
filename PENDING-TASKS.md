@@ -52,4 +52,26 @@ consumers using it need no migration.
 
 ---
 
+### TASK-002 — the TTL interval keeps a Node process alive until `close()`
+
+**Found while working on:** the 2.9.0 publish gate (smoke-installing the tarball), 2026-09-01. Not a
+reported issue and not caused by that release — pre-existing behaviour, filed so it is not lost.
+
+**What.** `BaseAdapter.startTTLCleanup()` and `Strata`'s own cleanup timer both use `setInterval`. In Node
+an outstanding interval keeps the event loop alive, so a script that creates an instance and finishes its
+work **never exits** unless it calls `storage.close()`. Measured: a smoke script doing one `set`/`get`
+against the `memory` adapter hung until killed at 120s.
+
+**Why it is not urgent.** Browsers are unaffected (the page owns the lifetime), and `close()` already
+clears both timers, so there is a correct way to write it today. It bites short-lived Node processes: a
+build step, a CLI, a test runner, an SSR warmup script.
+
+**Fix.** Call `.unref()` on both timers where it exists — `const t = setInterval(...); t.unref?.()`. It is
+a no-op in browsers (`setInterval` returns a number there, so the optional call simply does nothing) and
+in Node it lets the process exit while leaving the timer working for as long as the process lives.
+
+**Also worth checking in the same pass:** `startAutoBackup()`'s timer, same shape.
+
+---
+
 **Last updated:** 2026-09-01 (created — TASK-001 recorded when 2.9.0 closed the reported-issue queue.)
