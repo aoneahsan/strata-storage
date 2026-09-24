@@ -162,6 +162,39 @@ export class LocalStorageAdapter extends BaseAdapter {
   }
 
   /**
+   * Adopt ONE named foreign entry — a raw value this library did not write, such
+   * as a pre-strata zustand store — into `key`, then delete the original.
+   *
+   * 🔴 Explicit by design. The implicit paths (`get`, `keys`, the 3.0.0 legacy
+   * migration) keep the 2.9.0 shape check and never touch a foreign value; this
+   * reads only the exact physical key the caller names. The raw string is kept
+   * as-is (never parsed), so a consumer that stored JSON text gets that text back.
+   *
+   * An existing value at `key` is authoritative: nothing is adopted and the
+   * foreign entry is left in place. Returns the adopted envelope, or null.
+   */
+  importRawSync(rawKey: string, key: string): StorageValue<string> | null {
+    let storage: Storage;
+    try {
+      storage = this.getStorage();
+    } catch {
+      return null;
+    }
+    const raw = storage.getItem(rawKey);
+    if (raw === null) return null;
+    if (this.getSync(key) !== null) {
+      logger.debug(`${this.name}: "${rawKey}" not imported — "${key}" already holds a value.`);
+      return null;
+    }
+    const now = Date.now();
+    const value: StorageValue<string> = { value: raw, created: now, updated: now };
+    this.setSync(key, value);
+    storage.removeItem(rawKey);
+    logger.debug(`${this.name}: imported foreign key "${rawKey}" as "${key}".`);
+    return value;
+  }
+
+  /**
    * Initialize the adapter
    */
   async initialize(config?: { prefix?: string }): Promise<void> {

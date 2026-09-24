@@ -663,6 +663,11 @@ export interface StorageAdapter {
   setSync?<T = unknown>(key: string, value: StorageValue<T>): void;
   /** Synchronous remove — sync-capable adapters only. */
   removeSync?(key: string): void;
+  /**
+   * Adopt ONE named foreign entry into `key` — localStorage/sessionStorage only.
+   * See `Strata.importRawSync`.
+   */
+  importRawSync?(rawKey: string, key: string): StorageValue<string> | null;
   /** Synchronous existence check — sync-capable adapters only. */
   hasSync?(key: string): boolean;
   /** Synchronous keys — sync-capable adapters only. */

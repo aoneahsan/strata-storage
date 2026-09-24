@@ -14,6 +14,19 @@ added, original detail kept, never deleted. Fleet rule: `~/.claude/rules/project
 > driving the reporter's own repro in a real browser against published `2.8.5` first, then against the
 > release. `docs/REPORTED-ISSUES.md` is now empty.
 
+### ISSUE-13 — `sessionStorage` keys were never prefixed, contradicting the 3.0.0 release notes
+
+**Status:** ✅ RESOLVED · **Reported + fixed:** 2026-09-24 · **Affected:** `3.0.0`, `3.0.1` ·
+**Fixed in:** `3.1.0` · **Reporter:** ZTools (strata adoption, run-to-verify in a real browser)
+
+- **Symptom:** a `defineStorage({ namespace: 'ztools' })` instance writing `{ storage: 'sessionStorage' }` produced
+  the physical key `ztools:<key>`, while localStorage produced `strata:ztools:<key>`.
+- **Where:** `src/adapters/web/SessionStorageAdapter.ts` — `constructor(prefix = '')` overrode
+  `LocalStorageAdapter`'s `DEFAULT_WEB_KEY_PREFIX` default. `adapterConfigFor` only fills a prefix when
+  `keyPrefix` is set explicitly, so the default path never reached it.
+- **Fix:** default to `DEFAULT_WEB_KEY_PREFIX`. Existing bare envelope keys are adopted by the 3.0.0 per-key
+  migration on read.
+
 ### ISSUE-12 — Android build fails configuring `:strata-storage`: `proguard-android.txt` is no longer supported
 
 **Status:** ✅ RESOLVED · **Reported + fixed:** 2026-09-24 · **Affected:** `3.0.0` and earlier ·

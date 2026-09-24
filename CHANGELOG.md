@@ -5,6 +5,22 @@ All notable changes to Strata Storage will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.0] - 2026-09-24
+
+### Added
+
+- **`importRawSync(rawKey, key, options)`** — adopt ONE foreign `localStorage` / `sessionStorage` entry,
+  named by its exact physical key, into a strata key, deleting the original. The migration path for data
+  written by something other than this library (a pre-strata zustand store, a raw `setItem`), which the
+  implicit paths deliberately never adopt. The raw string is kept as-is; an existing value at `key` wins and
+  nothing is moved. Found while moving ZTools' 22 zustand stores onto strata.
+
+### Fixed
+
+- **`sessionStorage` keys were not prefixed** (ISSUE-13). 3.0.0 documented both web areas as written under
+  `strata:`, but `SessionStorageAdapter`'s constructor defaulted its prefix to `''`, overriding the shared
+  default. It now uses `DEFAULT_WEB_KEY_PREFIX`; existing bare envelope keys migrate themselves on read.
+
 ## [3.0.1] - 2026-09-24
 
 ### Fixed

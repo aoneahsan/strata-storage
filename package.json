@@ -1,6 +1,6 @@
 {
   "name": "strata-storage",
-  "version": "3.0.1",
+  "version": "3.1.0",
   "description": "One storage API across web, iOS and Android — zero runtime dependencies.",
   "type": "module",
   "packageManager": "yarn@4.17.0",

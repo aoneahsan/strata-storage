@@ -678,6 +678,29 @@ export class Strata {
     return value.value;
   }
 
+  /**
+   * Adopt ONE foreign entry, named by its exact physical key, into `key` and
+   * delete the original — the migration path for data written by something other
+   * than this library (a raw `localStorage.setItem`, a pre-strata zustand store).
+   * `localStorage` / `sessionStorage` only; returns the adopted raw string, or
+   * null when there was nothing to adopt or `key` already holds a value.
+   *
+   * @example
+   * storage.importRawSync('app-theme', 'app-theme', { storage: 'localStorage' });
+   */
+  importRawSync(rawKey: string, key: string, options?: StorageOptions): string | null {
+    if (!isValidKey(key) || !isValidKey(rawKey)) {
+      throw new ValidationError('Invalid storage key', { key, rawKey });
+    }
+    const adapter = this.requireSyncAdapter(options?.storage);
+    if (!adapter.importRawSync) {
+      throw new StorageError(
+        `Storage "${adapter.name}" cannot import foreign keys. Use localStorage or sessionStorage.`,
+      );
+    }
+    return adapter.importRawSync(rawKey, this.resolveKey(key, options))?.value ?? null;
+  }
+
   /** Synchronous set. Cannot encrypt or compress (those operations are async). */
   setSync<T = unknown>(key: string, value: T, options?: StorageOptions): void {
     if (!isValidKey(key)) {

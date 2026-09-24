@@ -3,7 +3,7 @@
  * Provides session-scoped storage with 5-10MB limit
  */
 
-import { LocalStorageAdapter } from './LocalStorageAdapter';
+import { LocalStorageAdapter, DEFAULT_WEB_KEY_PREFIX } from './LocalStorageAdapter';
 import { StorageError } from '@/utils/errors';
 import type { StorageType, StorageCapabilities } from '@/types';
 
@@ -37,7 +37,9 @@ export class SessionStorageAdapter extends LocalStorageAdapter {
     crossTab: false, // Session storage is per-tab
   };
 
-  constructor(prefix = '') {
+  // Same default as localStorage — 3.0.0 documented both as prefixed but this
+  // override left sessionStorage bare (ISSUE-13).
+  constructor(prefix = DEFAULT_WEB_KEY_PREFIX) {
     super(prefix);
   }
 

@@ -169,6 +169,16 @@ storage.clearSync();
 
 Constraints: targeting an async-only adapter (indexedDB, cache, sqlite, filesystem, secure, preferences) throws; `setSync` with `encrypt`/`compress` throws; `getSync` on an encrypted/compressed value throws. Use the async API in those cases.
 
+### Importing foreign keys (3.1.0)
+
+Migrating from raw `localStorage` (a pre-strata zustand store, a hand-rolled `setItem`)? The implicit paths
+never adopt a value this library did not write — that is the 2.9.0 safety fix. Name the exact physical key
+instead; it is moved (original deleted) and returned as the raw string. An existing value at `key` wins.
+
+```typescript
+storage.importRawSync('app-theme', 'app-theme', { storage: 'localStorage' }); // string | null
+```
+
 ## URL Adapter (2.5.0)
 
 Persist small UI state (tab, filters, pagination) in the URL — survives reload, shareable.
@@ -342,6 +352,7 @@ const storage = defineStorage({
 | `query<T>(condition, options?)` | `Promise<Array<{ key, value }>>` |
 | `subscribe(cb, options?)` | `UnsubscribeFunction` |
 | `getSync`/`setSync`/`removeSync`/`hasSync`/`keysSync`/`clearSync` | sync equivalents (2.5.0) |
+| `importRawSync(rawKey, key, { storage })` | adopt ONE named foreign localStorage/sessionStorage key (3.1.0) |
 | `snapshot(options?)` / `restore(snapshot, options?)` | `Promise<string>` / `Promise<void>` (2.5.0) |
 | `getTTL`/`extendTTL`/`persist` | TTL management |
 | `registerAdapter(adapter)` | `void` |
