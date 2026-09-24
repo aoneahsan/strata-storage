@@ -14,6 +14,22 @@ added, original detail kept, never deleted. Fleet rule: `~/.claude/rules/project
 > driving the reporter's own repro in a real browser against published `2.8.5` first, then against the
 > release. `docs/REPORTED-ISSUES.md` is now empty.
 
+### ISSUE-12 — Android build fails configuring `:strata-storage`: `proguard-android.txt` is no longer supported
+
+**Status:** ✅ RESOLVED · **Reported + fixed:** 2026-09-24 · **Affected:** `3.0.0` and earlier ·
+**Fixed in:** `3.0.1` · **Reporter:** ZTools (`ztools-root/ztools`, Capacitor 8.5.2, Gradle 9.4.1)
+
+- **Symptom:** `./gradlew assembleDebug` in the consumer fails before compiling anything:
+  `A problem occurred evaluating project ':strata-storage'. > getDefaultProguardFile('proguard-android.txt')
+  is no longer supported since it includes -dontoptimize … Instead use
+  getDefaultProguardFile('proguard-android-optimize.txt)`.
+- **Where:** `android/build.gradle:37` (release buildType). `minifyEnabled false` does not help — the call is
+  evaluated at configuration time. ClearHire built on 3.0.0 on 2026-09-23 with an older AGP, so the
+  failure appears as soon as a consumer's AGP moves forward.
+- **Fix:** use `proguard-android-optimize.txt`, the file every official Capacitor plugin and native-update
+  (its own ISSUE-01) already use.
+- **Found while working on:** the ZTools package-upgrade + strata-storage adoption pass, 2026-09-24.
+
 ### ISSUE-01 — Empty-prefix adapters claim the entire `localStorage` namespace, then error-log on other apps' keys
 
 

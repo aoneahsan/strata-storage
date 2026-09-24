@@ -7,7 +7,7 @@ entry to `docs/RESOLVED-ISSUES.md` (add resolution date + the fixing npm version
 consumer-relevant guidance into the docs. External reporters may also use GitHub Issues; entries here are
 the authoritative fix queue. Fleet rule: `~/.claude/rules/project-issue-reporting.md` (owner machines).
 
-🔴 **The next issue is `ISSUE-12`.** Numbers are never reused, even after an entry is archived — the next
+🔴 **The next issue is `ISSUE-13`.** Numbers are never reused, even after an entry is archived — the next
 id is one past the highest that has ever existed in either file. `ISSUE-09` was briefly assigned twice
 (2026-08-25 LabFlow/ClearHire and 2026-09-01 Trizlink); the later filing was renumbered to `ISSUE-10`
 when both were resolved.
