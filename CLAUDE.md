@@ -5,8 +5,7 @@ that file for the project overview, structure, hard rules, and local-development
 commands.
 
 **Consumer-reported package issues → `docs/REPORTED-ISSUES.md`** (open queue, `### ISSUE-` sections; fix
-here → MOVE the entry to `docs/RESOLVED-ISSUES.md` with date + fixing version). **The queue is currently
-empty** — all ten entries filed to date are resolved. Next id is `ISSUE-11`; numbers are never reused.
+here → MOVE the entry to `docs/RESOLVED-ISSUES.md` with date + fixing version). Read both queues for current status and the next unused issue ID; numbers are never reused.
 
 **Agent-owed follow-ups → root `PENDING-TASKS.md`** — currently empty; history in `docs/DONE-TASKS.md`.
 **Human-only tasks → `docs/MANUAL-TASKS.md`** (`npm publish` is agent-automated since 2026-07-25).

@@ -7,7 +7,7 @@ entry to `docs/RESOLVED-ISSUES.md` (add resolution date + the fixing npm version
 consumer-relevant guidance into the docs. External reporters may also use GitHub Issues; entries here are
 the authoritative fix queue. Fleet rule: `~/.claude/rules/project-issue-reporting.md` (owner machines).
 
-🔴 **The next issue is `ISSUE-14`.** Numbers are never reused, even after an entry is archived — the next
+🔴 **The next issue is `ISSUE-15`.** Numbers are never reused, even after an entry is archived — the next
 id is one past the highest that has ever existed in either file. `ISSUE-09` was briefly assigned twice
 (2026-08-25 LabFlow/ClearHire and 2026-09-01 Trizlink); the later filing was renumbered to `ISSUE-10`
 when both were resolved.
@@ -15,6 +15,28 @@ when both were resolved.
 ---
 
 ## Open
+
+### ISSUE-14 — Same-key raw import deletes the migrated preference
+
+**Status:** OPEN · **Reported:** 2026-10-08 from an integration compatibility test · **Affects:** strata-storage@3.1.0, LocalStorageAdapter.importRawSync.
+
+**Symptom:** `importRawSync` returns the adopted string, but the following `getSync` returns `null`. Existing preferences disappear when an application preserves its physical keys with `keyPrefix: false`.
+
+**Repro:** In a browser with the published 3.1.0 package:
+
+```js
+localStorage.setItem('demo:theme', 'dark'); // pre-library data fixture
+const storage = defineStorage({ keyPrefix: false, namespace: 'demo' });
+storage.importRawSync('demo:theme', 'theme', { storage: 'localStorage' }); // 'dark'
+storage.getSync('theme', { storage: 'localStorage' }); // null, expected 'dark'
+```
+
+**Root cause:** `src/adapters/web/LocalStorageAdapter.ts:176`, `importRawSync` calls `this.setSync(key, value)` then unconditionally `storage.removeItem(rawKey)`. When `rawKey` equals the fully prefixed destination, removal deletes the newly written envelope. The published `dist/core/Strata.js` documentation includes a same-key example.
+
+**Suggested fix:** Remove the source only when its physical key differs from the destination. Verify namespace/keyPrefix combinations, existing-envelope precedence, localStorage and sessionStorage, and write failures.
+
+**Consumer mitigation:** Import to a separate persistent journal through supported APIs, validate, write/read-back the destination, then remove the journal. Resume the journal after a failed final write. Re-check on the next package upgrade; remove the workaround after same-key preservation and interrupted-migration checks pass. No raw storage access is needed in consumer code.
+
 
 ### ISSUE-11 — Android `EncryptedStorage.java` compiles against a deprecated Jetpack API
 

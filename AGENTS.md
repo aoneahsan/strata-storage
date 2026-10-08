@@ -3,8 +3,7 @@
 Guidance for humans and AI coding agents working in this repository.
 
 **Consumer-reported package issues → `docs/REPORTED-ISSUES.md`** (open queue, `### ISSUE-` sections; fix
-here → MOVE the entry to `docs/RESOLVED-ISSUES.md` with date + fixing version). **The queue is currently
-empty** — all ten entries filed to date are resolved. Next id is `ISSUE-11`; numbers are never reused.
+here → MOVE the entry to `docs/RESOLVED-ISSUES.md` with date + fixing version). Read both queues for current status and the next unused issue ID; numbers are never reused.
 
 **Agent-owed follow-ups → root [`PENDING-TASKS.md`](PENDING-TASKS.md)** — currently empty; history in
 [`docs/DONE-TASKS.md`](docs/DONE-TASKS.md). **Human-only tasks → [`docs/MANUAL-TASKS.md`](docs/MANUAL-TASKS.md)** (`npm publish` is
