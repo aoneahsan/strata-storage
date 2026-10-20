@@ -1,5 +1,7 @@
 # AGENTS.md
 
+**Last Updated:** 2026-10-20
+
 **Context verified:** 2026-10-14. **Next routine review:** 2026-11-13. Public package `main` inside `../strata-storage-root/`; sibling docs and private marketing site are separate Git repositories. Use Yarn; never add an owner-created client package. The private legacy combined checkout is read-only.
 
 
@@ -102,3 +104,9 @@ On **"update ORCID profile info"**: regenerate that file from this project's por
 `aoneahsan-cccs-orcid-profile` + `aoneahsan-cccs-bibtex` (agent: `aoneahsan-ccca-orcid`). Never invent a URL, a
 DOI or a release year — an unreachable channel is omitted, never claimed. Importing, and the work-type retype
 that BibTeX cannot perform, are owner-only steps recorded in that folder's `MANUAL-TASKS.md`.
+
+## Stop-work Git gate
+
+<!-- RULE:stop-work-git-gate v2026-10-20 -->
+
+Before stopping, commit every legitimate change and work-progress checkpoint in this repository and each independent nested repository, fetch and merge the designated upstream, push the documented working branch, then verify an empty worktree and `0 0` ahead/behind. Never stash, discard, reset, rebase, or force-push. If synchronization is blocked, report the exact repository, branch, blocker, and next action instead of calling the work complete. The full workflow remains authoritative in `~/.claude/rules/git-workflow.md`.
