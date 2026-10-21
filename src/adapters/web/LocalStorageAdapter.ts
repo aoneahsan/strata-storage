@@ -189,7 +189,10 @@ export class LocalStorageAdapter extends BaseAdapter {
     const now = Date.now();
     const value: StorageValue<string> = { value: raw, created: now, updated: now };
     this.setSync(key, value);
-    storage.removeItem(rawKey);
+    const destinationKey = this.prefix + key;
+    if (rawKey !== destinationKey) {
+      storage.removeItem(rawKey);
+    }
     logger.debug(`${this.name}: imported foreign key "${rawKey}" as "${key}".`);
     return value;
   }

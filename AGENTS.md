@@ -1,8 +1,8 @@
 # AGENTS.md
 
-**Last Updated:** 2026-10-20
+**Last Updated:** 2026-10-21
 
-**Context verified:** 2026-10-14. **Next routine review:** 2026-11-13. Public package `main` inside `../strata-storage-root/`; sibling docs and private marketing site are separate Git repositories. Use Yarn; never add an owner-created client package. The private legacy combined checkout is read-only.
+**Context verified:** 2026-10-21. **Next routine review:** 2026-11-20. Public package `main` inside `../strata-storage-root/`; sibling docs and private marketing site are separate Git repositories. Use Yarn; never add an owner-created client package. The private legacy combined checkout is read-only.
 
 
 Guidance for humans and AI coding agents working in this repository.
@@ -66,6 +66,8 @@ yarn build       # custom ESM build → dist/ (all six entry points)
 
 Quality gates are typecheck + lint + build — these are the project's checks (there
 is no separate test runner, by design).
+
+The 2026-10-21 maintenance pass fixed ISSUE-14 so same-key raw localStorage imports retain the migrated value. Immutable install, typecheck, lint, build, the package's 18-case ownership gate, README version gate, and focused raw-import regression checks passed for the 3.1.1 release.
 
 ## Contributing &amp; governance
 

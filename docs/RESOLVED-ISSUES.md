@@ -6,6 +6,31 @@ added, original detail kept, never deleted. Fleet rule: `~/.claude/rules/project
 
 ---
 
+### ISSUE-14 — Same-key raw import deletes the migrated preference
+
+**Status:** ✅ RESOLVED · **Reported:** 2026-10-08 · **Resolved:** 2026-10-21 · **Affects:** `3.1.0` · **Fixed in:** `3.1.1` · **Reporter:** integration compatibility test.
+
+**Symptom:** `importRawSync` returns the adopted string, but the following `getSync` returns `null`. Existing preferences disappear when an application preserves its physical keys with `keyPrefix: false`.
+
+**Repro:** In a browser with the published 3.1.0 package:
+
+```js
+localStorage.setItem('demo:theme', 'dark'); // pre-library data fixture
+const storage = defineStorage({ keyPrefix: false, namespace: 'demo' });
+storage.importRawSync('demo:theme', 'theme', { storage: 'localStorage' }); // 'dark'
+storage.getSync('theme', { storage: 'localStorage' }); // null, expected 'dark'
+```
+
+**Root cause:** `src/adapters/web/LocalStorageAdapter.ts:176`, `importRawSync` calls `this.setSync(key, value)` then unconditionally `storage.removeItem(rawKey)`. When `rawKey` equals the fully prefixed destination, removal deletes the newly written envelope. The published `dist/core/Strata.js` documentation includes a same-key example.
+
+**Suggested fix:** Remove the source only when its physical key differs from the destination. Verify namespace/keyPrefix combinations, existing-envelope precedence, localStorage and sessionStorage, and write failures.
+
+**Consumer mitigation:** Import to a separate persistent journal through supported APIs, validate, write/read-back the destination, then remove the journal. Resume the journal after a failed final write. Re-check on the next package upgrade; remove the workaround after same-key preservation and interrupted-migration checks pass. No raw storage access is needed in consumer code.
+
+
+**Fix:** Compare the exact source physical key with the fully resolved destination key after a successful envelope write. Skip removal only when they are identical; distinct-source migration semantics are unchanged. Verified through the built public API for localStorage/sessionStorage, existing-destination precedence, and write failure preservation.
+
+
 > **2026-09-01 — the entire open queue closed in `2.9.0`.** Six entries from five consumer projects
 > (LabFlow, ClearHire, HabitForge, LifeWell, Trizlink). Four of them were one root cause seen from four
 > angles: web adapters share a storage area with every other script on the origin, and the default empty

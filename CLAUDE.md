@@ -1,8 +1,8 @@
 # CLAUDE.md
 
-**Last Updated:** 2026-10-20
+**Last Updated:** 2026-10-21
 
-**Context verified:** 2026-10-14. **Next routine review:** 2026-11-13. Public package `main` inside `../strata-storage-root/`; sibling docs and private marketing site are separate Git repositories. Use Yarn; never add an owner-created client package. The private legacy combined checkout is read-only.
+**Context verified:** 2026-10-21. **Next routine review:** 2026-11-20. Public package `main` inside `../strata-storage-root/`; sibling docs and private marketing site are separate Git repositories. Use Yarn; never add an owner-created client package. The private legacy combined checkout is read-only.
 
 
 Repository guidance for AI coding agents lives in [AGENTS.md](./AGENTS.md). See
@@ -20,6 +20,8 @@ hand-copied version for two releases and was wrong about both the published `lat
 publish its own sibling file recorded as done (that was `ISSUE-06`). Read the version from those two
 files; a fourth copy will drift again. `yarn build` fails if the README's version row disagrees with
 `package.json`.
+
+The 2026-10-21 maintenance pass fixed ISSUE-14's same-key raw localStorage import deletion and passed immutable install, typecheck, lint, build, the 18-case ownership gate, README version gate, and focused raw-import regression checks.
 
 **Documentation site is a SEPARATE repo** (split out 2026-07-25):
 [aoneahsan/strata-storage-docs](https://github.com/aoneahsan/strata-storage-docs) →

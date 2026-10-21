@@ -5,6 +5,12 @@ All notable changes to Strata Storage will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.1] - 2026-10-21
+
+### Fixed
+
+- **Same-key raw imports preserve the migrated value** (ISSUE-14). When `keyPrefix: false` makes the named raw source and destination the same physical key, `importRawSync` now keeps the newly written Strata envelope instead of deleting it. Distinct-key imports still remove the source only after the destination write succeeds.
+
 ## [3.1.0] - 2026-09-24
 
 ### Added
