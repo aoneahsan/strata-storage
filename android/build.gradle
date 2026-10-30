@@ -19,14 +19,14 @@ apply plugin: 'com.android.library'
 
 android {
     namespace "com.stratastorage"
-    compileSdkVersion project.hasProperty('compileSdkVersion') ? rootProject.ext.compileSdkVersion : 34
+    compileSdkVersion project.hasProperty('compileSdkVersion') ? rootProject.ext.compileSdkVersion : 36
     defaultConfig {
         // minSdk 23 (Marshmallow): EncryptedSharedPreferences-backed secure
         // storage requires API 23+. Below it, "secure" storage would degrade to
         // plaintext, so 23 is the floor for the security guarantees this plugin
         // advertises.
         minSdkVersion project.hasProperty('minSdkVersion') ? rootProject.ext.minSdkVersion : 23
-        targetSdkVersion project.hasProperty('targetSdkVersion') ? rootProject.ext.targetSdkVersion : 34
+        targetSdkVersion project.hasProperty('targetSdkVersion') ? rootProject.ext.targetSdkVersion : 36
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

@@ -15,10 +15,8 @@ Fixes #(issue number)
 - [ ] Code refactoring
 
 ## Quality Gates
-<!-- This project has no automated test runner; these are the gates -->
-- [ ] `yarn typecheck` passes
-- [ ] `yarn build` passes
-- [ ] `yarn lint` passes
+<!-- `yarn gates` = typecheck, lint, build, then Vitest against dist/ -->
+- [ ] `yarn gates` passes
 - [ ] Verified on Web
 - [ ] Verified on iOS (if applicable)
 - [ ] Verified on Android (if applicable)

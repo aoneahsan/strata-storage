@@ -105,13 +105,11 @@ cd strata-storage
 yarn install
 
 # 3. Run the quality gates (these ARE the test suite — see below)
-yarn typecheck
-yarn build
-yarn lint
+yarn gates   # typecheck, lint, build, then Vitest against dist/
 ```
 
-> This project has **no automated test runner** — a deliberate decision. Quality is enforced
-> by `yarn typecheck` + `yarn build` + `yarn lint`. These three must pass locally and in CI.
+> `yarn gates` must pass locally and in CI. The Vitest suite is deliberately small: it checks the built
+> package's storage-ownership predicate and the README version row, the two things the other gates cannot see.
 
 To exercise a change in a real app, use the demo:
 
@@ -164,7 +162,7 @@ export class MyAdapter extends BaseAdapter {
 }
 ```
 
-Then verify with `yarn typecheck && yarn build && yarn lint` and document the adapter.
+Then verify with `yarn gates` and document the adapter.
 
 ## Commit conventions
 
@@ -185,7 +183,7 @@ docs(readme): document the npx cap sync step
 ## Pull request process
 
 1. **Sync with `main`** and rebase your branch on the latest `upstream/main`.
-2. **Run the gates** — `yarn typecheck && yarn build && yarn lint` must all pass. CI runs the
+2. **Run the gates** — `yarn gates` must pass. CI runs the
    same `Package` check and your PR cannot merge until it is green.
 3. **Use a Conventional-Commit PR title** and fill in the PR description: what changed, why,
    and `Fixes #123` for related issues. Flag any breaking change clearly.

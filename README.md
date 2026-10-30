@@ -32,7 +32,7 @@ integrity checksums and mirrored backups are opt-in per call or per instance.
 
 | | |
 |---|---|
-| **Version** | `3.1.1` |
+| **Version** | `3.1.2` |
 | **License** | MIT |
 | **Node** | `>=24.13.0` |
 | **Platforms** | Web · iOS · Android (via Capacitor) |
@@ -452,9 +452,9 @@ More: [Troubleshooting](https://stratastorage-docs.aoneahsan.com/reference/troub
 
 - **ESM only.** There is no CommonJS build. `engines.node` is `>=24.13.0`, where Node can `require()` an ESM
   graph; on older Node a `require('strata-storage')` will fail.
-- **No automated test suite.** This is a deliberate project decision — `yarn typecheck`, `yarn lint` and
-  `yarn build` are the gates, in local development and in CI. There is no unit or integration coverage to
-  point at.
+- **A small test suite, by design.** `yarn gates` runs typecheck, lint, build and then Vitest against the
+  built `dist/`: the storage-ownership predicate's 18 cases and the README version row. Everything else is
+  covered by the typecheck, lint and build gates, in local development and in CI.
 - **Native behaviour cannot be verified from web or Node.** The iOS and Android adapters depend on your
   Capacitor project's own configuration, so verify them on a real device using the
   [device-verification guide](https://stratastorage-docs.aoneahsan.com/guides/platforms/device-verification).
@@ -523,7 +523,8 @@ src/            TypeScript source — core, adapters, features, framework integr
 dist/           build output (published)
 ios/            native iOS plugin sources (published, for Capacitor)
 android/        native Android plugin sources (published, for Capacitor)
-scripts/        build script and the npx CLI (published)
+bin/            the npx CLI (published)
+tests/          Vitest checks against the built dist/
 docs/           internal project records — NOT the docs site
 example-apps/   runnable demo application
 ```

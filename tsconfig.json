@@ -38,6 +38,10 @@
     },
     "jsx": "react-jsx"
   },
+  "tsc-alias": {
+    "resolveFullPaths": true,
+    "resolveFullExtension": ".js"
+  },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "examples", "docs", "scripts"]
+  "exclude": ["node_modules", "dist", "examples", "docs", "tests"]
 }

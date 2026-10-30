@@ -5,6 +5,24 @@ All notable changes to Strata Storage will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.2] - 2026-10-30
+
+No JavaScript or API change: `dist/` is equivalent to 3.1.1's.
+
+### Removed
+
+- **The `postinstall` script.** Installing the package no longer runs anything in your project; the setup
+  steps it printed (including `npx cap sync` for Capacitor apps) are in the README's Quick Start.
+
+### Changed
+
+- **The `npx strata-storage` CLI moved from `scripts/` to `bin/`.** The command is unchanged.
+- **Android:** the fallback `compileSdkVersion` and `targetSdkVersion` (used only when your app does not set
+  them) are now 36. Your app's own values still win.
+- **Build and gates:** `tsc` + `tsc-alias` replace the custom build script, and `yarn gates` runs typecheck,
+  lint, build and a Vitest suite against the built `dist/` (the storage-ownership predicate and the README
+  version row).
+
 ## [3.1.1] - 2026-10-21
 
 ### Fixed

@@ -24,6 +24,4 @@ jobs:
       # which errors on this project's `packageManager: yarn@4`.
       - run: corepack enable
       - run: yarn install --immutable
-      - run: yarn typecheck
-      - run: yarn build
-      - run: yarn lint
+      - run: yarn gates
