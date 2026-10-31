@@ -5,8 +5,8 @@ project is governed, how to get the access you need, the coding standards your c
 meet, and how a change reaches `main`.
 
 > **TL;DR** — `main` is protected. Nobody pushes to it directly except the maintainer.
-> Every other change lands through a **pull request that needs one maintainer approval and
-> green CI** before it can merge. Want to help regularly? [Ask for contributor
+> Every other change lands through a **pull request**: the maintainer reviews it and runs
+> `yarn gates` locally before merging. Want to help regularly? [Ask for contributor
 > access](#becoming-a-contributor).
 
 ## Table of contents
@@ -27,11 +27,10 @@ Strata Storage is maintained by [Ahsan Mahmood](https://aoneahsan.com) (`@aoneah
 `main` branch is the single source of truth for releases and is protected by a GitHub
 **ruleset**:
 
-- **No direct pushes to `main`.** Every change arrives through a pull request — there is no
-  exception for collaborators.
-- **One approving review is required** before a pull request can merge.
-- **CI must be green.** The `Package` check (`yarn typecheck` + `yarn build` + `yarn lint`)
-  must pass on the pull request.
+- **No direct pushes to `main`.** Every outside change arrives through a pull request from a fork.
+- **The maintainer reviews every pull request** and merges it only after `yarn gates`
+  (typecheck, lint, build, then Vitest) passes locally. There is no hosted CI: releases are
+  built and verified by hand.
 - **Force-pushes and branch deletion on `main` are blocked.**
 - **The maintainer (`@aoneahsan`) is the only bypass.** Only the repository owner can push to
   `main` directly, so the release history stays clean and intentional. No one else — including
@@ -53,7 +52,7 @@ This is the standard open-source flow and works for everyone:
 3. Make your change and push it to your fork.
 4. Open a **pull request** against `aoneahsan/strata-storage:main`.
 
-The maintainer reviews it; once approved and CI is green, it is merged.
+The maintainer reviews it, runs `yarn gates`, and merges it.
 
 ### 2. Request collaborator (write) access — for regular contributors
 
@@ -108,7 +107,7 @@ yarn install
 yarn gates   # typecheck, lint, build, then Vitest against dist/
 ```
 
-> `yarn gates` must pass locally and in CI. The Vitest suite is deliberately small: it checks the built
+> `yarn gates` must pass locally. The Vitest suite is deliberately small: it checks the built
 > package's storage-ownership predicate and the README version row, the two things the other gates cannot see.
 
 To exercise a change in a real app, use the demo:
@@ -183,8 +182,8 @@ docs(readme): document the npx cap sync step
 ## Pull request process
 
 1. **Sync with `main`** and rebase your branch on the latest `upstream/main`.
-2. **Run the gates** — `yarn gates` must pass. CI runs the
-   same `Package` check and your PR cannot merge until it is green.
+2. **Run the gates** — `yarn gates` must pass. The maintainer runs the same command before
+   merging.
 3. **Use a Conventional-Commit PR title** and fill in the PR description: what changed, why,
    and `Fixes #123` for related issues. Flag any breaking change clearly.
 4. **Keep PRs focused.** One logical change per PR is easier to review and approve.
@@ -193,7 +192,7 @@ docs(readme): document the npx cap sync step
 
 ### What reviewers look for
 
-- The quality gates pass and CI is green.
+- `yarn gates` passes.
 - The change matches the [coding standards](#coding-standards) and keeps the six entry points
   consistent.
 - Public API changes are documented (JSDoc + docs) and don’t silently break the contract.

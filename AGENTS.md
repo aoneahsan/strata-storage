@@ -71,9 +71,10 @@ The 2026-10-21 maintenance pass fixed ISSUE-14 so same-key raw localStorage impo
 
 ## Contributing &amp; governance
 
-`main` is protected by a GitHub ruleset: **no direct pushes** — every change lands
-through a **pull request that needs one maintainer approval + green CI** (the
-`Package` check). Force-push and deletion of `main` are blocked. **Only the
+`main` is protected by a GitHub ruleset (no deletion, no force-push, admin-only
+bypass). Outside changes land through a **pull request** that the maintainer reviews
+and merges after a local `yarn gates`; there is no GitHub Actions CI (house rule
+2026-10-31). Force-push and deletion of `main` are blocked. **Only the
 maintainer (`@aoneahsan`) can push to `main` directly.** Contribute by forking and
 opening a PR, or [request contributor (write) access](./CONTRIBUTING.md#becoming-a-contributor)
 to work in-repo — write access still cannot bypass review on `main`.

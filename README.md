@@ -11,7 +11,6 @@
 [![license](https://img.shields.io/npm/l/strata-storage.svg)](https://github.com/aoneahsan/strata-storage/blob/main/LICENSE)
 [![types](https://img.shields.io/npm/types/strata-storage.svg)](https://www.npmjs.com/package/strata-storage)
 [![bundle size](https://img.shields.io/bundlephobia/minzip/strata-storage.svg)](https://bundlephobia.com/package/strata-storage)
-[![CI](https://github.com/aoneahsan/strata-storage/actions/workflows/ci.yml/badge.svg)](https://github.com/aoneahsan/strata-storage/actions/workflows/ci.yml)
 [![node](https://img.shields.io/node/v/strata-storage.svg)](https://nodejs.org)
 
 [Docs](https://stratastorage-docs.aoneahsan.com) · [npm](https://www.npmjs.com/package/strata-storage) · [GitHub](https://github.com/aoneahsan/strata-storage) · [Changelog](https://github.com/aoneahsan/strata-storage/blob/main/CHANGELOG.md) · [AI Guide](https://github.com/aoneahsan/strata-storage/blob/main/AI-INTEGRATION-GUIDE.md) · [Support](https://github.com/aoneahsan/strata-storage/issues)
@@ -454,7 +453,7 @@ More: [Troubleshooting](https://stratastorage-docs.aoneahsan.com/reference/troub
   graph; on older Node a `require('strata-storage')` will fail.
 - **A small test suite, by design.** `yarn gates` runs typecheck, lint, build and then Vitest against the
   built `dist/`: the storage-ownership predicate's 18 cases and the README version row. Everything else is
-  covered by the typecheck, lint and build gates, in local development and in CI.
+  covered by the typecheck, lint and build gates, run locally before every release.
 - **Native behaviour cannot be verified from web or Node.** The iOS and Android adapters depend on your
   Capacitor project's own configuration, so verify them on a real device using the
   [device-verification guide](https://stratastorage-docs.aoneahsan.com/guides/platforms/device-verification).
