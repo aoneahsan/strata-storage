@@ -36,7 +36,7 @@ integrity checksums and mirrored backups are opt-in per call or per instance.
 | **Node** | `>=24.13.0` |
 | **Platforms** | Web · iOS · Android (via Capacitor) |
 | **Module format** | ESM only — no CommonJS build |
-| **Install size** | 155 kB packed · 660 kB unpacked, of which 130 kB is iOS + Android native source |
+| **Install size** | About 177 kB packed · 723 kB unpacked, including 134 kB of iOS + Android native source (3.1.4 tarball) |
 | **Types** | Bundled `.d.ts` for every entry point |
 | **Status** | Stable · actively maintained |
 
