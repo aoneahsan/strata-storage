@@ -1,6 +1,6 @@
 // Optional Firebase integration - only import this if you need Firebase sync
 import type { Strata } from './core/Strata';
-import type { StorageAdapter, StorageChange, StorageType, StorageValue } from './types';
+import type { StorageAdapter, StorageChange, StorageValue } from './types';
 import { StorageError } from './utils/errors';
 
 /**
@@ -196,7 +196,7 @@ export async function enableFirebaseSync(
                   oldValue: change.type === 'removed' ? docData : undefined,
                   newValue: change.type !== 'removed' ? docData : undefined,
                   source: 'remote',
-                  storage: 'firestore' as unknown as StorageType,
+                  storage: 'firestore',
                   timestamp: Date.now(),
                 });
               });
@@ -289,7 +289,7 @@ export async function enableFirebaseSync(
                   oldValue,
                   newValue,
                   source: 'remote',
-                  storage: 'realtime' as unknown as StorageType,
+                  storage: 'realtime',
                   timestamp: Date.now(),
                 });
               }

@@ -6,6 +6,20 @@ added, original detail kept, never deleted. Fleet rule: `~/.claude/rules/project
 
 ---
 
+### ISSUE-15 — Firebase backend names absent from public StorageType
+
+**Status:** ✅ RESOLVED · **Reported and resolved:** 2026-10-31 · **Affects:** `3.1.3` and earlier · **Fixed in:** `3.1.4` · **Reporter:** Strata Storage docs finalization fact review.
+
+**Symptom:** `enableFirebaseSync(storage, config)` registers the optional `firestore` and `realtime` adapters, but consumer TypeScript rejects `storage.set('key', value, { storage: 'firestore' })` and the equivalent Realtime call. The public `StorageType` union omits both names.
+
+**Repro:** Configure the Firebase integration, then compile a consumer snippet selecting either backend through `StorageOptions.storage`. The adapter name is accepted at runtime but fails the public type check.
+
+**Root cause:** `src/firebase.ts` bypassed the narrow `StorageType` union with casts when emitting Firebase change records, while `src/types/index.ts` did not include the optional adapter names.
+
+**Fix:** Add both names to `StorageType` and remove the casts on Firebase change records. No adapter behavior changed. Verify the generated declaration, consumer typecheck, package gates and published tarball before closing the issue.
+
+---
+
 ### ISSUE-14 — Same-key raw import deletes the migrated preference
 
 **Status:** ✅ RESOLVED · **Reported:** 2026-10-08 · **Resolved:** 2026-10-21 · **Affects:** `3.1.0` · **Fixed in:** `3.1.1` · **Reporter:** integration compatibility test.

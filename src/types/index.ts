@@ -17,7 +17,9 @@ export type StorageType =
   | 'preferences'
   | 'sqlite'
   | 'filesystem'
-  | 'secure';
+  | 'secure'
+  | 'firestore'
+  | 'realtime';
 
 /**
  * Platform types

@@ -7,7 +7,7 @@ entry to `docs/RESOLVED-ISSUES.md` (add resolution date + the fixing npm version
 consumer-relevant guidance into the docs. External reporters may also use GitHub Issues; entries here are
 the authoritative fix queue. Fleet rule: `~/.claude/rules/project-issue-reporting.md` (owner machines).
 
-🔴 **The next issue is `ISSUE-15`.** Numbers are never reused, even after an entry is archived — the next
+🔴 **The next issue is `ISSUE-16`.** Numbers are never reused, even after an entry is archived — the next
 id is one past the highest that has ever existed in either file. `ISSUE-09` was briefly assigned twice
 (2026-08-25 LabFlow/ClearHire and 2026-09-01 Trizlink); the later filing was renumbered to `ISSUE-10`
 when both were resolved.
@@ -49,5 +49,5 @@ design. `setLogLevel('debug')` reports each skip with its key and reason. The re
 real default key prefix with migrate-on-read and an opt-out — is tracked in the root
 [`PENDING-TASKS.md`](../PENDING-TASKS.md) as `TASK-001`, not here: it is planned work, not a reported bug.
 
-**Last updated:** 2026-10-21 (ISSUE-14 resolved in 3.1.1). Earlier: 2026-09-23 (ISSUE-11 filed from the fleet package baseline). Earlier 2026-09-01 (queue emptied — all six open entries fixed in 2.9.0 and moved to
+**Last updated:** 2026-10-31 (ISSUE-15 resolved in 3.1.4). Earlier: 2026-10-21 (ISSUE-14 resolved in 3.1.1). Earlier: 2026-09-23 (ISSUE-11 filed from the fleet package baseline). Earlier 2026-09-01 (queue emptied — all six open entries fixed in 2.9.0 and moved to
 `docs/RESOLVED-ISSUES.md`; the duplicate `ISSUE-09` renumbered to `ISSUE-10` on the way out.)
