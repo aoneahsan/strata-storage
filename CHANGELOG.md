@@ -5,6 +5,15 @@ All notable changes to Strata Storage will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.3] - 2026-10-31
+
+Documentation only: no code, API or `dist/` change.
+
+### Changed
+
+- **README:** the CI badge is gone (releases are built and verified locally; there is no hosted CI), and the
+  Limitations section says the gates run before every release.
+
 ## [3.1.2] - 2026-10-30
 
 No JavaScript or API change: `dist/` is equivalent to 3.1.1's.
