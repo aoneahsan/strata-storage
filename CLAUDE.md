@@ -1,33 +1,123 @@
-# CLAUDE.md
+# Strata Storage — package guide
 
-**Last Updated:** 2026-10-21
+**Last Updated:** 2026-10-31
+
+| Context | Value |
+|---|---|
+| Last optimized | 2026-10-31 |
+| Next routine optimization eligible | 2026-11-30 |
+| Guide bytes | 8,505 B |
+| Covered subtree | `strata-storage/` (public package repo); the kit root and sibling repos keep their own pairs |
+| Method | CLAUDE.md and AGENTS.md merged as a union into one mirrored guide; changed facts edited in place (2026-10-31) |
+| Fleet record | /home/ahsan/Documents/01-code/docs/tracking/project-context-budget-tracker.json |
 
 **Context verified:** 2026-10-21. **Next routine review:** 2026-11-20. Public package `main` inside `../strata-storage-root/`; sibling docs and private marketing site are separate Git repositories. Use Yarn; never add an owner-created client package. The private legacy combined checkout is read-only.
 
 
-Repository guidance for AI coding agents lives in [AGENTS.md](./AGENTS.md). See
-that file for the project overview, structure, hard rules, and local-development
-commands.
+Guidance for humans and AI coding agents working in this repository. `CLAUDE.md` and `AGENTS.md` are one mirrored guide.
 
 **Consumer-reported package issues → `docs/REPORTED-ISSUES.md`** (open queue, `### ISSUE-` sections; fix
 here → MOVE the entry to `docs/RESOLVED-ISSUES.md` with date + fixing version). Read both queues for current status and the next unused issue ID; numbers are never reused.
 
-**Agent-owed follow-ups → root `PENDING-TASKS.md`** — currently empty; history in `docs/DONE-TASKS.md`.
 **Human-only tasks → `docs/MANUAL-TASKS.md`** (`npm publish` is agent-automated since 2026-07-25).
 
-🔴 **The current version lives in `package.json` and `CHANGELOG.md` — NOT here.** This file carried a
-hand-copied version for two releases and was wrong about both the published `latest` and a pending
-publish its own sibling file recorded as done (that was `ISSUE-06`). Read the version from those two
-files; a fourth copy will drift again. `yarn build` fails if the README's version row disagrees with
-`package.json`.
+**Agent-owed follow-ups → root `PENDING-TASKS.md`**, created only with an open entry (absent = nothing owed); history and the next id in
+[`docs/DONE-TASKS.md`](docs/DONE-TASKS.md). **Human-only tasks → [`docs/MANUAL-TASKS.md`](docs/MANUAL-TASKS.md)** (`npm publish` is
+agent-automated since 2026-07-25).
 
-The 2026-10-21 maintenance pass fixed ISSUE-14's same-key raw localStorage import deletion and passed immutable install, typecheck, lint, build, the 18-case ownership gate, README version gate, and focused raw-import regression checks.
+🔴 **The current version lives in `package.json` and `CHANGELOG.md` — NOT here.** A hand-copied version in
+a guidance file drifted across two releases and misreported both the published `latest` and a pending
+publish its sibling file recorded as done (that was `ISSUE-06`). `yarn test` fails if the README's
+version row disagrees with `package.json`. Read the version from those two
+files; a fourth copy will drift again.
+
+## What this is
+
+**Strata Storage** is a zero-dependency, universal storage library and Capacitor
+plugin. One unified API (`get` / `set` / `remove` / `query` / `subscribe`, both
+sync and async) across the web (localStorage, IndexedDB, cookies, Cache API, URL),
+Node/SSR, and native iOS/Android (Preferences, SQLite, Keychain/Keystore,
+filesystem) — with optional React, Vue, Angular, Capacitor, and Firebase bindings.
+
+> Every change is reviewed and gated by `yarn gates` (typecheck + lint + build + Vitest) before release.
+
+## Project shape
+
+- `src/` — the library. Six public entry points kept in sync: main, `capacitor`,
+  `firebase`, `react`, `vue`, `angular`.
+- `src/adapters/` — storage backends; every adapter implements `BaseAdapter`.
+- `src/features/` — encryption, compression, TTL, query, sync, migration, recovery.
+- `src/integrations/` — framework bindings (optional peer deps).
+- `ios/`, `android/` — native plugin sources. `bin/` — the `npx strata-storage` CLI. `tests/` — Vitest over `dist/`.
+- `docs/` — internal records only (the reported/resolved issue queue). **The public
+  documentation site lives in its own repo:** [aoneahsan/strata-storage-docs](https://github.com/aoneahsan/strata-storage-docs)
+  → https://stratastorage-docs.aoneahsan.com (split out 2026-07-25; local checkout at
+  `../strata-storage-docs`). Doc content changes go there, not here.
+- `example-apps/demo-app/` — a runnable feature demo.
+
+## Hard rules
+
+- **Zero runtime dependencies in the core.** React/Vue/Angular/Capacitor/Firebase
+  are *optional* peers — never add a hard `dependencies` entry.
+- **No install scripts and no `scripts/` folder.** The build is `tsc` + `tsc-alias` + an inline step.
+- **Don't break the public API.** All six entry points stay in sync; adapters must
+  implement the `BaseAdapter` contract.
+- **Sensitive data uses secure adapters** (Keychain/Keystore) — never store
+  credentials in plain text.
+
+## Local development
+
+Requires Node >= 24.13 and Yarn (Berry).
+
+```bash
+yarn install
+yarn typecheck   # TypeScript strict
+yarn lint        # ESLint (check only)
+yarn build       # tsc + tsc-alias ESM build → dist/ (all six entry points)
+yarn test        # Vitest over dist/ (ownership predicate, README version row)
+yarn gates       # all four, in that order
+```
+
+Quality gates are typecheck + lint + build + a deliberately small Vitest suite (`yarn gates`). There is no
+GitHub Actions CI (house rule 2026-10-31): releases are gated and verified by hand.
+
+The 2026-10-21 maintenance pass fixed ISSUE-14 so same-key raw localStorage imports retain the migrated value. Immutable install, typecheck, lint, build, the package's 18-case ownership gate, README version gate, and focused raw-import regression checks passed for the 3.1.1 release.
+
+## Contributing &amp; governance
+
+`main` is protected by a GitHub ruleset (no deletion, no force-push, admin-only
+bypass). Outside changes land through a **pull request** that the maintainer reviews
+and merges after a local `yarn gates`; there is no GitHub Actions CI (house rule
+2026-10-31). Force-push and deletion of `main` are blocked. **Only the
+maintainer (`@aoneahsan`) can push to `main` directly.** Contribute by forking and
+opening a PR, or [request contributor (write) access](./CONTRIBUTING.md#becoming-a-contributor)
+to work in-repo.
+
+See [`CONTRIBUTING.md`](./CONTRIBUTING.md) (full coding standards + PR process) and
+[`.github/CODE_OF_CONDUCT.md`](.github/CODE_OF_CONDUCT.md). Report security issues
+via [`.github/SECURITY.md`](.github/SECURITY.md).
+
+## Links
+
+- **Marketing site (live):** https://stratastorage.aoneahsan.com (being rebuilt on Supabase)
+- **Documentation site (live):** https://stratastorage-docs.aoneahsan.com (AI agents: `/ai` ·
+  `/llms.txt` · `/llms-full.txt`) — its own repo:
+  [aoneahsan/strata-storage-docs](https://github.com/aoneahsan/strata-storage-docs)
+- **npm:** https://www.npmjs.com/package/strata-storage
+- **Repo:** https://github.com/aoneahsan/strata-storage
+- AI integration quick reference: [`AI-INTEGRATION-GUIDE.md`](AI-INTEGRATION-GUIDE.md)
+- Human-only tasks: [`docs/MANUAL-TASKS.md`](docs/MANUAL-TASKS.md) · agent-owed follow-ups: `PENDING-TASKS.md` (when open)
+
+
+
+## History and the docs split
+
+The 2026-10-21 maintenance pass fixed ISSUE-14's same-key raw localStorage import deletion and passed immutable install, typecheck, lint, build, the 18-case ownership gate, README version gate, and focused raw-import regression checks. The 2026-10-30/31 pass shipped 3.1.2 (no postinstall, CLI in `bin/`, Vitest gates, Android SDK fallbacks 36) and 3.1.3 (README only).
 
 **Documentation site is a SEPARATE repo** (split out 2026-07-25):
 [aoneahsan/strata-storage-docs](https://github.com/aoneahsan/strata-storage-docs) →
 https://stratastorage-docs.aoneahsan.com · local checkout `../strata-storage-docs`. Doc content changes go
 there, not here — `docs/` in this repo is internal records only.
-
 
 <!-- RULE:orcid-bibtex v2026-07-25 -->
 ## ORCID / BibTeX record
