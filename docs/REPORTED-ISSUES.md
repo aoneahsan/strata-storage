@@ -59,3 +59,13 @@ real default key prefix with migrate-on-read and an opt-out — is tracked in th
   (3) `docs/RESOLVED-ISSUES.md` ISSUE-06 still carries an "OPEN" status line. (4) The docs site uses blue `#2563eb`,
   not the website's Signal Coral palette.
 - **Fix:** correct the README lines and the resolved entry; theme the docs site from the website tokens. **Priority:** low.
+
+### ISSUE-18 — the website writes around Strata and states sessionStorage history wrongly
+- **Found:** 2026-11-03, while capturing the LinkedIn cards (live stratastorage.aoneahsan.com).
+- **What:** (1) `strata-storage-website/src/stores/theme-store.ts:101` persists `strata-storage-theme` straight to localStorage
+  on every visit, outside Strata (the site's own rule is that nothing else touches storage); (2) the home migration
+  section and the 3.0.0 changelog say sessionStorage keys used `strata:` since 3.0, true only from 3.1.0 (ISSUE-13);
+  (3) `public/favicon.svg` and `public/strata-logo.svg` are the old indigo mark; (4) the site's "Not the right tool
+  when" list has 3 items, the README 4.
+- **Fix:** route the theme store through Strata (or remove it), correct the two texts, replace the old marks, align the
+  list. **Priority:** medium (1), low (2)–(4).
