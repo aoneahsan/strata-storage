@@ -51,3 +51,11 @@ real default key prefix with migrate-on-read and an opt-out — is tracked in th
 
 **Last updated:** 2026-10-31 (ISSUE-15 resolved in 3.1.4). Earlier: 2026-10-21 (ISSUE-14 resolved in 3.1.1). Earlier: 2026-09-23 (ISSUE-11 filed from the fleet package baseline). Earlier 2026-09-01 (queue emptied — all six open entries fixed in 2.9.0 and moved to
 `docs/RESOLVED-ISSUES.md`; the duplicate `ISSUE-09` renumbered to `ISSUE-10` on the way out.)
+
+### ISSUE-17 — README statements the code no longer supports
+- **Found:** 2026-11-03, while writing the LinkedIn series from the code (3.1.4).
+- **What:** (1) `README.md:444` still lists the foreign-key console errors as a "Known open defect"; 2.9.0 fixed it.
+  (2) `README.md:87` says "Automated test suite: none" while `README.md:455` and 2 Vitest files say otherwise.
+  (3) `docs/RESOLVED-ISSUES.md` ISSUE-06 still carries an "OPEN" status line. (4) The docs site uses blue `#2563eb`,
+  not the website's Signal Coral palette.
+- **Fix:** correct the README lines and the resolved entry; theme the docs site from the website tokens. **Priority:** low.
