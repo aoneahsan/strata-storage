@@ -4,7 +4,7 @@ The fixed-path record of every dependency this repository declares, what it is f
 version pin. Keep it accurate on **every** add, remove or upgrade — an inventory that lags the manifest is
 worse than none.
 
-**Last Updated:** 2026-10-30
+**Last Updated:** 2026-11-04 (dependency pass: `vitest` 5.1.0, `tsc-alias` 1.9.10; demo app to Capacitor 8.6, React 19.3, Vite 8.3, its dead `lint` script removed and `typescript` pinned to `~6.0.3`. No majors.)
 
 ---
 
@@ -63,8 +63,8 @@ one gates exactly one entry point.
 | `@angular/common`, `@angular/core`, `@angular/forms`, `@angular/platform-browser` | `^22.2.4` | Type-checking the Angular integration. |
 | `rxjs` | `^7.8.2` | Required by the Angular integration's Observable surface. |
 | `zone.js` | `~0.16.3` | Angular runtime peer needed for its type graph. |
-| `tsc-alias` | `^1.9.9` | Rewrites `@/` aliases in `dist/` to relative `.js` specifiers after `tsc`. |
-| `vitest` | `^5.0.5` | The `test` gate: runs `tests/` against the built `dist/`. |
+| `tsc-alias` | `^1.9.10` | Rewrites `@/` aliases in `dist/` to relative `.js` specifiers after `tsc`. |
+| `vitest` | `^5.1.0` | The `test` gate: runs `tests/` against the built `dist/`. |
 | `vite` | `^8.3.5` | Vitest's peer. |
 
 `yarn gates` (typecheck, lint, build, then Vitest against `dist/`) is the quality gate, locally and in CI. See

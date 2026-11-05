@@ -31,6 +31,16 @@ when both were resolved.
   migrate-on-read from the old `EncryptedSharedPreferences` file, so existing encrypted values survive. Keep
   the API 23+ refusal.
 - **Workaround:** none needed yet; the deprecated API still works.
+- **Rechecked 2026-11-04:** `security-crypto` 1.1.0 is still the newest release (Google Maven metadata, last
+  updated 2025-07-30), so there is no in-library upgrade that clears the note, and an
+  `@SuppressWarnings("deprecation")` would only hide it. The fix is a format migration, so it ships as its own
+  minor release: (1) a new `KeystoreCipher` holding an AES-256-GCM key in `AndroidKeyStore` under a new alias,
+  writing `base64(iv || ciphertext)` into a plain `SharedPreferences` file named `<name>.v2`; (2) on first open,
+  if the legacy `EncryptedSharedPreferences` file exists, read every entry through it, write each into the v2
+  store, verify the count, then delete the legacy file. A failed migration leaves the legacy file in place and
+  serves reads from it; (3) keep `security-crypto` as a dependency only for that read-once path, and drop it a
+  major later; (4) keep the API 23 refusal. Prove the change on a debug build that starts with legacy data and
+  keeps its values after the upgrade.
 - **Found while working on:** the 2026-09-23 fleet package baseline rollout
   (`~/Documents/ahsan-work/code/docs/tracking/package-baseline-rollout-2026-09-23-tracker.json`). Priority:
   low, but it must be done before security-crypto is removed.
