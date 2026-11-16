@@ -31,12 +31,12 @@ integrity checksums and mirrored backups are opt-in per call or per instance.
 
 | | |
 |---|---|
-| **Version** | `3.1.4` |
+| **Version** | `3.1.5` |
 | **License** | MIT |
 | **Node** | `>=24.13.0` |
 | **Platforms** | Web · iOS · Android (via Capacitor) |
 | **Module format** | ESM only — no CommonJS build |
-| **Install size** | About 177 kB packed · 723 kB unpacked, including 134 kB of iOS + Android native source (3.1.4 tarball) |
+| **Install size** | About 177 kB packed · 723 kB unpacked, including 134 kB of iOS + Android native source (3.1.5 tarball) |
 | **Types** | Bundled `.d.ts` for every entry point |
 | **Status** | Stable · actively maintained |
 
@@ -501,7 +501,7 @@ More: [Troubleshooting](https://stratastorage-docs.aoneahsan.com/reference/troub
 <a id="changelog"></a>
 ## 🔄 Changelog&nbsp;[#](#changelog)
 
-Latest release: **`3.1.4`** — the Firebase adapter names are now accepted by the public TypeScript storage option. Runtime behavior is unchanged.
+Latest release: **`3.1.5`** — maintenance: the README states the consumer Node floor accurately, and the build tools are current. Runtime behavior and `dist/` are unchanged.
 
 Full history: [CHANGELOG.md](https://github.com/aoneahsan/strata-storage/blob/main/CHANGELOG.md).
 

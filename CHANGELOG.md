@@ -5,6 +5,15 @@ All notable changes to Strata Storage will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.5] - 2026-11-16
+
+Maintenance release: no API or runtime change.
+
+### Changed
+
+- **README:** the Node requirement line no longer says the consumer floor "matches `.nvmrc`". Consumers still need Node 24.13 or newer (`engines`); the repository itself builds on Node 26.13.1 LTS.
+- **Tooling:** build, lint and test dependencies at latest stable on Node 26.13.1 LTS.
+
 ## [3.1.4] - 2026-10-31
 
 ### Fixed
