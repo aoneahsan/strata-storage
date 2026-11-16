@@ -67,7 +67,9 @@ filesystem) — with optional React, Vue, Angular, Capacitor, and Firebase bindi
 
 ## Local development
 
-Requires Node >= 24.13 and Yarn (Berry).
+Development uses Node 26.13.1 LTS (`.nvmrc`) and Yarn (Berry); consumers need Node >= 24.13 (`engines`).
+
+<!-- fleet:node-26-13-1 v1 --> Node 26.13.1 LTS (.nvmrc), packages latest — 2026-11-16
 
 ```bash
 yarn install

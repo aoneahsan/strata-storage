@@ -129,7 +129,7 @@ integrity feature specifically — its checksums are non-cryptographic, so use t
 
 | Requirement | Version | Why |
 |---|---|---|
-| Node | `>=24.13.0` | Matches `.nvmrc`; the package is ESM-only and relies on modern Node resolution. |
+| Node | `>=24.13.0` | The consumer floor; the package is ESM-only and relies on modern Node resolution. |
 | TypeScript | `moduleResolution: "bundler"` or `"nodenext"` | Older `node`/`node10` resolution cannot see the typed sub-path exports. |
 | `@capacitor/core` | `>=8.0.0` | Optional peer — only for the native iOS/Android adapters. |
 | `react` | `>=19.2.3` | Optional peer — only for `strata-storage/react`. |

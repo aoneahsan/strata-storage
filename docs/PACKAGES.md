@@ -4,7 +4,7 @@ The fixed-path record of every dependency this repository declares, what it is f
 version pin. Keep it accurate on **every** add, remove or upgrade — an inventory that lags the manifest is
 worse than none.
 
-**Last Updated:** 2026-11-04 (dependency pass: `vitest` 5.1.0, `tsc-alias` 1.9.10; demo app to Capacitor 8.6, React 19.3, Vite 8.3, its dead `lint` script removed and `typescript` pinned to `~6.0.3`. No majors.)
+**Last Updated:** 2026-11-16 (fleet Node 26.13.1 pass: dev `.nvmrc` 26.13.1; patch/minor moves only: Angular 22.2.6, Capacitor 8.6.2, typescript-eslint 8.72.2, ESLint 10.15.0, Prettier 3.10.1, Vite 8.3.8, Vue 3.5.45; demo app `@vitejs/plugin-react` 6.3.0. No majors. Consumer `engines.node` kept at `>=24.13.0`.)
 
 ---
 
@@ -48,24 +48,24 @@ one gates exactly one entry point.
 | Package | Range | Used for |
 |---|---|---|
 | `typescript` | `~6.0.3` | Compiler and declaration emit. **Pinned to the 6.x line — see below.** |
-| `typescript-eslint` | `^8.72.1` | The ESLint flat config's TypeScript plugin and parser. |
-| `@typescript-eslint/eslint-plugin` | `^8.72.1` | Rule set for TypeScript sources. |
-| `@typescript-eslint/parser` | `^8.72.1` | Parser for TypeScript sources. |
-| `eslint` | `^10.14.0` | The `lint` gate. |
+| `typescript-eslint` | `^8.72.2` | The ESLint flat config's TypeScript plugin and parser. |
+| `@typescript-eslint/eslint-plugin` | `^8.72.2` | Rule set for TypeScript sources. |
+| `@typescript-eslint/parser` | `^8.72.2` | Parser for TypeScript sources. |
+| `eslint` | `^10.15.0` | The `lint` gate. |
 | `eslint-config-prettier` | `^10.1.8` | Turns off formatting rules that fight Prettier. |
 | `eslint-plugin-prettier` | `^5.5.7` | Runs Prettier as an ESLint rule. |
-| `prettier` | `^3.9.10` | Formatting. |
+| `prettier` | `^3.10.1` | Formatting. |
 | `@types/node` | `^26.6.6` | Types for Node globals in the tests and the CLI. |
 | `@types/react` | `^19.3.0` | Types for the React integration source. |
-| `@capacitor/core` | `^8.6.0` | Type-checking the Capacitor integration. |
+| `@capacitor/core` | `^8.6.2` | Type-checking the Capacitor integration. |
 | `react` | `^19.3.1` | Type-checking the React integration. |
-| `vue` | `^3.5.44` | Type-checking the Vue integration. |
-| `@angular/common`, `@angular/core`, `@angular/forms`, `@angular/platform-browser` | `^22.2.4` | Type-checking the Angular integration. |
+| `vue` | `^3.5.45` | Type-checking the Vue integration. |
+| `@angular/common`, `@angular/core`, `@angular/forms`, `@angular/platform-browser` | `^22.2.6` | Type-checking the Angular integration. |
 | `rxjs` | `^7.8.2` | Required by the Angular integration's Observable surface. |
 | `zone.js` | `~0.16.3` | Angular runtime peer needed for its type graph. |
 | `tsc-alias` | `^1.9.10` | Rewrites `@/` aliases in `dist/` to relative `.js` specifiers after `tsc`. |
 | `vitest` | `^5.1.0` | The `test` gate: runs `tests/` against the built `dist/`. |
-| `vite` | `^8.3.5` | Vitest's peer. |
+| `vite` | `^8.3.8` | Vitest's peer. |
 
 `yarn gates` (typecheck, lint, build, then Vitest against `dist/`) is the quality gate, locally and in CI. See
 `CONTRIBUTING.md`.
@@ -76,7 +76,7 @@ one gates exactly one entry point.
 |---|---|---|
 | `typescript ~6.0.3` | TypeScript 7 is the native compiler and ships no JS API, which breaks `typescript-eslint` (its parser crashes at load) and any tool that calls the compiler API. The fleet-wide blocker is recorded in `~/.claude/rules/package-version-known-issues.md` on the owner's machines. | `@typescript-eslint/typescript-estree` publishes a peer range allowing `typescript >= 7`. |
 | `zone.js ~0.16.2` | Angular pins its own zone.js minor; a wider range resolves to a version Angular rejects. | The Angular dev dependency moves to a major that pins a different zone.js line. |
-| `engines.node >=24.13.0` | Matches `.nvmrc`. The package is ESM-only, and this is the Node line where `require()` of an ESM graph works. **Raising this is a major** — it can break installs for consumers who changed nothing. | Only alongside a major release. |
+| `engines.node >=24.13.0` | The consumer floor; development runs on Node 26.13.1 LTS (`.nvmrc`). The package is ESM-only, and this is the Node line where `require()` of an ESM graph works. **Raising this is a major** — it can break installs for consumers who changed nothing. | Only alongside a major release. |
 
 ## Packages deliberately absent
 
