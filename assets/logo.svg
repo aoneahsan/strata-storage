@@ -1,14 +1,1 @@
-<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Strata Storage logo">
-  <defs>
-    <linearGradient id="strata-logo-gradient" x1="0" y1="0" x2="200" y2="200" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#3b82f6" />
-      <stop offset="1" stop-color="#1e3a8a" />
-    </linearGradient>
-  </defs>
-  <rect width="200" height="200" rx="44" fill="url(#strata-logo-gradient)" />
-  <g fill="#ffffff">
-    <path d="M100 38 L162 70 L100 102 L38 70 Z" opacity="0.95" />
-    <path d="M100 84 L162 116 L100 148 L38 116 Z" opacity="0.7" />
-    <path d="M100 118 L162 150 L100 182 L38 150 Z" opacity="0.45" />
-  </g>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="#12171F"/><path fill="#E78290" d="M9.229 8.236L28.732 8.236C29.145 8.236 29.352 8.572 29.193 8.985L28.302 11.306C28.143 11.719 27.679 12.055 27.266 12.055L7.763 12.055C7.35 12.055 7.143 11.719 7.302 11.306L8.193 8.985C8.352 8.572 8.815 8.236 9.229 8.236Z"/><path fill="#F0F4F7" d="M9.081 14.091L24.384 14.091C24.798 14.091 25.004 14.426 24.845 14.84L23.955 17.16C23.796 17.574 23.332 17.909 22.919 17.909L7.616 17.909C7.202 17.909 6.996 17.574 7.155 17.16L8.045 14.84C8.204 14.426 8.668 14.091 9.081 14.091Z"/><path fill="#818A95" d="M9.144 19.945L19.827 19.945C20.24 19.945 20.447 20.281 20.288 20.694L19.397 23.015C19.238 23.428 18.775 23.764 18.361 23.764L7.678 23.764C7.265 23.764 7.058 23.428 7.217 23.015L8.108 20.694C8.267 20.281 8.731 19.945 9.144 19.945Z"/></svg>
