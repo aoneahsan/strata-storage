@@ -36,9 +36,11 @@ import {
 import { logger, setLogLevel, exposeLogLevelControls, type LogLevel } from '@/utils/logger';
 import { StorageError, EncryptionError, IntegrityError, ValidationError } from '@/utils/errors';
 import { computeChecksum, verifyChecksum } from '@/features/integrity';
-import { EncryptionManager, type EncryptedData } from '@/features/encryption';
-import { CompressionManager, type CompressedData } from '@/features/compression';
-import { SyncManager } from '@/features/sync';
+// Encryption, compression and sync are loaded in initialize() only when the config turns them on, so a store
+// that leaves them off does not carry their code in the consumer's bundle.
+import type { EncryptionManager, EncryptedData } from '@/features/encryption';
+import type { CompressionManager, CompressedData } from '@/features/compression';
+import type { SyncManager } from '@/features/sync';
 import { TTLManager } from '@/features/ttl';
 import { QueryEngine } from '@/features/query';
 
@@ -128,6 +130,7 @@ export class Strata {
 
     // Initialize encryption if enabled
     if (this.config.encryption?.enabled) {
+      const { EncryptionManager } = await import('@/features/encryption');
       this.encryptionManager = new EncryptionManager(this.config.encryption);
       if (!this.encryptionManager.isAvailable()) {
         logger.warn('Encryption enabled but Web Crypto API not available');
@@ -136,11 +139,13 @@ export class Strata {
 
     // Initialize compression if enabled
     if (this.config.compression?.enabled) {
+      const { CompressionManager } = await import('@/features/compression');
       this.compressionManager = new CompressionManager(this.config.compression);
     }
 
     // Initialize sync if enabled
     if (this.config.sync?.enabled) {
+      const { SyncManager } = await import('@/features/sync');
       this.syncManager = new SyncManager(this.config.sync);
       await this.syncManager.initialize();
 

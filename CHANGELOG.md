@@ -5,6 +5,12 @@ All notable changes to Strata Storage will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.6] - 2026-11-17
+
+### Changed
+
+- **Smaller bundles when encryption, compression or sync are off:** `Strata` now loads `EncryptionManager`, `CompressionManager` and `SyncManager` with a dynamic import inside `initialize()`, and only when the config enables that feature. A store that leaves them off no longer carries their code in the consumer's bundle (about 11 kB minified; in one consuming app the first load fell by 3.3 kB gzip). The API and runtime behaviour are unchanged: the managers already existed only after `initialize()`, and all three are still exported from the package root.
+
 ## [3.1.5] - 2026-11-16
 
 Maintenance release: no API or runtime change.

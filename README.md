@@ -31,7 +31,7 @@ integrity checksums and mirrored backups are opt-in per call or per instance.
 
 | | |
 |---|---|
-| **Version** | `3.1.5` |
+| **Version** | `3.1.6` |
 | **License** | MIT |
 | **Node** | `>=24.13.0` |
 | **Platforms** | Web · iOS · Android (via Capacitor) |
@@ -501,7 +501,7 @@ More: [Troubleshooting](https://stratastorage-docs.aoneahsan.com/reference/troub
 <a id="changelog"></a>
 ## 🔄 Changelog&nbsp;[#](#changelog)
 
-Latest release: **`3.1.5`** — maintenance: the README states the consumer Node floor accurately, and the build tools are current. Runtime behavior and `dist/` are unchanged.
+Latest release: **`3.1.6`** — encryption, compression and sync load on demand in `initialize()`, so a store that leaves them off no longer bundles their code. The API is unchanged.
 
 Full history: [CHANGELOG.md](https://github.com/aoneahsan/strata-storage/blob/main/CHANGELOG.md).
 
