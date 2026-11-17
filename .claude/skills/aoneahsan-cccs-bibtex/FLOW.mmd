@@ -1,0 +1,54 @@
+flowchart TD
+    A[Writing or regenerating a .bib file] --> B{Hand-editing an<br/>existing entry?}
+    B -->|Yes| B1[STOP — these are generated.<br/>Regenerate from source instead]
+    B1 --> C
+    B -->|No| C[Gather the source data]
+
+    C --> C1["Portfolio-info file:<br/>title wording, keywords"]
+    C1 --> C2["project-live-urls.json:<br/>candidate URLs"]
+    C2 --> C3["git log --reverse / npm registry:<br/>real first-release year"]
+    C3 --> D[Probe every candidate URL]
+
+    D --> D1{200 / 301?}
+    D1 -->|No| D2[Omit that channel.<br/>Probe beats the data file]
+    D1 -->|"403 on npmjs.com"| D3["Bot protection, not dead —<br/>confirm via registry.npmjs.org"]
+    D2 --> E
+    D3 --> E
+    D1 -->|Yes| E[Choose the entry type]
+
+    E --> E1{What is the work?}
+    E1 -->|"Software: app, package,<br/>CLI, extension"| E2["@misc<br/>(lands as ORCID 'Other')"]
+    E1 -->|Paper / book / thesis| E3[Use the matching real type]
+    E2 --> F
+    E3 --> F[Write the fields]
+
+    F --> F1["title = {{Name}}: descriptor<br/>inner braces protect the name"]
+    F1 --> F2["author = {Mahmood, Ahsan}<br/>Last, First"]
+    F2 --> F3["year = real first-release year"]
+    F3 --> F4["url = single main link"]
+    F4 --> F5["note = channels that are actually live"]
+    F5 --> G[Citation key]
+
+    G --> G1{Key already imported<br/>to ORCID?}
+    G1 -->|Yes| G2[Keep it byte-identical.<br/>Renaming creates a duplicate]
+    G1 -->|No| G3["aoneahsan-&lt;slug&gt;-&lt;year&gt;"]
+    G2 --> H
+    G3 --> H[Write files]
+
+    H --> H1["One &lt;slug&gt;.bib per project"]
+    H1 --> H2["Regenerate the combined file<br/>in the SAME edit"]
+    H2 --> V[Verify]
+
+    V --> V1[["🔴 ASCII check:<br/>decode('ascii') must not raise"]]
+    V1 --> V2[Braces balanced]
+    V2 --> V3[Keys unique across the corpus]
+    V3 --> V4[Entry count under ~50]
+    V4 --> I{Import succeeds?}
+
+    I -->|No| I1[Bisect: import the<br/>per-project files to find<br/>the offending entry]
+    I1 --> F
+    I -->|Yes| DONE([Done — then retype<br/>in the ORCID UI])
+
+    style B1 fill:#fff4d6,stroke:#c90
+    style V1 fill:#ffe0e0,stroke:#c00
+    style DONE fill:#e0f0e0,stroke:#0a0

@@ -1,0 +1,51 @@
+%% aoneahsan-cccs-strata-storage — full flow
+flowchart TD
+    trigger([Storage need in a project]) --> install[yarn add strata-storage<br/>peers only for what the host uses.<br/>Capacitor project: cap sync after —<br/>it IS a native plugin]
+    install --> instance[defineStorage with a project<br/>namespace — prefix paths are unsafe.<br/>Write and inspect one physical key<br/>to prove namespace:key]
+    instance --> backend{What is being stored?}
+
+    backend -->|web, small persistent| ls[localStorage]
+    backend -->|web, large / queryable| idb[indexedDB]
+    backend -->|offline assets / blobs| cache[cache]
+    backend -->|shareable UI state| url[url backend —<br/>compose with the URL-state skill]
+    backend -->|server-readable small| cookies[cookies]
+    backend -->|tests / throwaway| mem[memory]
+    backend -->|mobile SENSITIVE| secure[secure — Keychain/Keystore.<br/>Never preferences for secrets]
+    backend -->|mobile structured| sqlite[sqlite — isolated database+table]
+    backend -->|mobile documents| fs[filesystem]
+    backend -->|mobile settings| prefs[preferences]
+    backend -->|cross-device| fb[Firebase sync via<br/>strata-storage/firebase]
+
+    ls --> features
+    idb --> features
+    cache --> features
+    url --> features
+    cookies --> features
+    mem --> features
+    secure --> features
+    sqlite --> features
+    fs --> features
+    prefs --> features
+    fb --> features
+
+    features{Need encryption, TTL,<br/>query, cross-tab sync,<br/>integrity, mirror?}
+    features -->|yes| optin[Layer per call or per instance —<br/>ALL features are opt-in,<br/>off by default. Never assume one is on]
+    features -->|no| surface
+    optin --> surface{Framework surface?}
+    surface -->|react| hooks[createStrataHooks — provider-free,<br/>or StrataProvider if preferred]
+    surface -->|vue / angular| other[composables / provideStrata]
+    surface -->|plain TS| direct[Import the instance directly]
+
+    hooks --> verify
+    other --> verify
+    direct --> verify
+    verify[Verify: physical namespace key,<br/>subscriptions scoped to a supported backend,<br/>values survive reload,<br/>native adapters work on-device]
+    verify --> bug{Package bug found?}
+    bug -->|yes| report[File in the strata repo<br/>docs/REPORTED-ISSUES.md with full<br/>root cause — the empty-prefix<br/>entry is the model]
+    bug -->|no| done
+    report --> done([Storage layer in place])
+
+    classDef gateNode fill:#fff4e6,stroke:#d97706,color:#7c2d12
+    classDef terminal fill:#ecfdf5,stroke:#059669,color:#064e3b
+    class backend,features,surface,bug gateNode
+    class trigger,done terminal
