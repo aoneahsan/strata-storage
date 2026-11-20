@@ -5,6 +5,12 @@ All notable changes to Strata Storage will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.1.7] - 2026-11-20
+
+### Documentation
+
+- The README opens with an "Available on" table: npm, the website, the docs, and the docs page listing every place Strata Storage is published. No code change.
+
 ## [3.1.6] - 2026-11-17
 
 ### Changed

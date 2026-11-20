@@ -17,6 +17,16 @@
 
 </div>
 
+<a id="available-on"></a>
+## 📦 Available on&nbsp;[#](#available-on)
+
+| Where | Link |
+|---|---|
+| npm | [`strata-storage`](https://www.npmjs.com/package/strata-storage) |
+| Docs | [stratastorage-docs.aoneahsan.com](https://stratastorage-docs.aoneahsan.com) |
+| Website | [stratastorage.aoneahsan.com](https://stratastorage.aoneahsan.com) |
+| Everything | [All apps](https://stratastorage-docs.aoneahsan.com/apps) |
+
 > [!IMPORTANT]
 > In a Capacitor app, run **`npx cap sync`** after installing. Without it the native module is never
 > copied into your iOS/Android projects and the native adapters — `secure`, `sqlite`, `preferences`,
@@ -31,7 +41,7 @@ integrity checksums and mirrored backups are opt-in per call or per instance.
 
 | | |
 |---|---|
-| **Version** | `3.1.6` |
+| **Version** | `3.1.7` |
 | **License** | MIT |
 | **Node** | `>=24.13.0` |
 | **Platforms** | Web · iOS · Android (via Capacitor) |
@@ -43,6 +53,7 @@ integrity checksums and mirrored backups are opt-in per call or per instance.
 <a id="table-of-contents"></a>
 ## 🧭 Table of Contents&nbsp;[#](#table-of-contents)
 
+- [📦 Available on](#available-on)
 - [💡 Why strata-storage](#why-strata-storage)
 - [✨ Features](#features)
 - [📱 Platform Support](#platform-support)
@@ -501,7 +512,7 @@ More: [Troubleshooting](https://stratastorage-docs.aoneahsan.com/reference/troub
 <a id="changelog"></a>
 ## 🔄 Changelog&nbsp;[#](#changelog)
 
-Latest release: **`3.1.6`** — encryption, compression and sync load on demand in `initialize()`, so a store that leaves them off no longer bundles their code. The API is unchanged.
+Latest release: **`3.1.7`** — documentation only: an "Available on" table under the badges lists npm, the website, the docs and the page listing all of them. No code change.
 
 Full history: [CHANGELOG.md](https://github.com/aoneahsan/strata-storage/blob/main/CHANGELOG.md).
 
