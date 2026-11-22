@@ -79,3 +79,23 @@ real default key prefix with migrate-on-read and an opt-out — is tracked in th
   when" list has 3 items, the README 4.
 - **Fix:** route the theme store through Strata (or remove it), correct the two texts, replace the old marks, align the
   list. **Priority:** medium (1), low (2)–(4).
+
+### ISSUE-19 — importing the main entry builds a default singleton, so `defineStorage` alone carries every web adapter
+- **Found:** 2026-11-22, in a private Capacitor 8 consumer app (3.1.4 and 3.1.7).
+- **What:** `dist/index.js` creates `const storage = defineStorage({ defaultStorages: [`localStorage`, `indexedDB`, `sessionStorage`, `memory`] })` at module top level, so importing `defineStorage` also builds a `Strata` instance and registers every web adapter. A consumer that only calls `defineStorage` carries about 120 KB of library code it never uses, and `"sideEffects": false` in `package.json` tells bundlers the module is pure when it is not. The consumer loads the package lazily, off its first screen, to keep its first-load budget.
+- **Fix:** move the default singleton out of the main entry (a `strata-storage/default` subpath, or a lazy `getDefaultStorage()`), so the main entry is side-effect free and `sideEffects: false` becomes true. **Priority:** high (first-load size for every web consumer).
+
+### ISSUE-20 — the Android keep rules never reach consuming apps
+- **Found:** 2026-11-22, same consumer, release-health pass.
+- **What:** `android/build.gradle:40` lists `proguard-rules.pro` under `proguardFiles`, which applies only to the library's own minified build. Without `consumerProguardFiles`, an app that enables R8 strips classes Strata reaches by reflection, so each consumer has to copy the rules by hand.
+- **Fix:** add `consumerProguardFiles 'proguard-rules.pro'` (or a dedicated `consumer-rules.pro`) to `defaultConfig`. **Priority:** high (release builds).
+
+### ISSUE-21 — EncryptedStorage uses the deprecated androidx.security EncryptedSharedPreferences
+- **Found:** 2026-11-22, same consumer, Android build warnings.
+- **What:** `android/src/main/java/com/strata/storage/EncryptedStorage.java:7` and `:37` build on `androidx.security.crypto.EncryptedSharedPreferences`, which androidx has deprecated; every consumer build warns.
+- **Fix:** move the encrypted adapter to a supported store (Tink-backed keys with DataStore, or the Keystore directly), keeping the stored data readable across the upgrade. **Priority:** medium.
+
+### ISSUE-22 — the Android module still uses Groovy DSL syntax Gradle is retiring
+- **Found:** 2026-11-22, same consumer, Gradle 8.14.3 warnings.
+- **What:** the consumer's `./gradlew assembleDebug --warning-mode all` reports Groovy DSL deprecations from this module's `android/build.gradle` (property assignments without `=`), which Gradle 10 will reject.
+- **Fix:** switch to `propName = value` assignments throughout `android/build.gradle` and re-run with `--warning-mode all` until it is clean. **Priority:** low.
