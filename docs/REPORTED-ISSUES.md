@@ -7,7 +7,7 @@ entry to `docs/RESOLVED-ISSUES.md` (add resolution date + the fixing npm version
 consumer-relevant guidance into the docs. External reporters may also use GitHub Issues; entries here are
 the authoritative fix queue. Fleet rule: `~/.claude/rules/project-issue-reporting.md` (owner machines).
 
-🔴 **The next issue is `ISSUE-16`.** Numbers are never reused, even after an entry is archived — the next
+🔴 **The next issue is `ISSUE-27`.** Numbers are never reused, even after an entry is archived — the next
 id is one past the highest that has ever existed in either file. `ISSUE-09` was briefly assigned twice
 (2026-08-25 LabFlow/ClearHire and 2026-09-01 Trizlink); the later filing was renumbered to `ISSUE-10`
 when both were resolved.
@@ -15,6 +15,38 @@ when both were resolved.
 ---
 
 ## Open
+
+### ISSUE-26 — /about shows a different header menu, and the brand files have no public download
+
+**Status:** OPEN · **Reported:** 2026-11-27 from the product PDF series (point-of-view batches 2–11) · **Affects:** `strata-storage-website` (`/about` header), the brand kit
+
+**Symptom.** `https://stratastorage.aoneahsan.com/about` shows a different header menu from the home page. The brand files have no public download, so a writer or partner can't get the mark.
+
+**Suggested fix.** Use the shared header on `/about`; publish a brand download (SVG and PNG lockups) on the website or the docs.
+
+### ISSUE-25 — This queue says the next is ISSUE-16, but ISSUE-17 to ISSUE-22 exist and ISSUE-16 is in neither file
+
+**Status:** OPEN · **Reported:** 2026-11-27 from the product PDF series · **Affects:** `docs/REPORTED-ISSUES.md`, `docs/RESOLVED-ISSUES.md`
+
+**Symptom.** The "next issue" line said `ISSUE-16` while ISSUE-17 to ISSUE-22 were already filed, and no file holds an ISSUE-16. (Filing ISSUE-23 to ISSUE-26 moved the line to ISSUE-27.)
+
+**Suggested fix.** Find what ISSUE-16 was (git log of both files) and restore it to the right file, or record that the number was skipped.
+
+### ISSUE-24 — The brand kit README still calls older marks live
+
+**Status:** OPEN · **Reported:** 2026-11-27 from the product PDF series · **Affects:** `brand-kit/README.md`
+
+**Symptom.** The kit README still lists older marks as the ones in use; they were replaced on 10 Nov (favicon, docs logo) and by 16 Nov (package README).
+
+**Suggested fix.** Update the "live marks" list in the kit README to what ships now.
+
+### ISSUE-23 — The README says query() matches tags; the source and docs say tags can't be queried
+
+**Status:** OPEN · **Reported:** 2026-11-27 from the product PDF series · **Affects:** `README.md` (query section); `Strata.query`
+
+**Symptom.** The README says `query()` matches tags. `Strata.query` decodes each value and matches only its fields, and the docs say tags cannot be queried. A developer following the README gets no results for a tag query.
+
+**Suggested fix.** Correct the README (or add tag matching to `query()` and document it).
 
 ### ISSUE-11 — Android `EncryptedStorage.java` compiles against a deprecated Jetpack API
 
